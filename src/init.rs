@@ -2,8 +2,9 @@ use std::path::PathBuf;
 use crate::utils;
 use mdbook::MDBook;
 use mdbook::Config;
+use failure::{Error, err_msg};
 
-pub fn init(dir: Option<PathBuf>) -> Result<(), String> {
+pub fn init(dir: Option<PathBuf>) -> Result<(), Error> {
     let path = match dir {
         Some(path) => path,
         None => PathBuf::from("."),
@@ -22,6 +23,6 @@ pub fn init(dir: Option<PathBuf>) -> Result<(), String> {
     builder.with_config(config);
     match builder.build() {
         Ok(_) => Ok(()),
-        Err(e) => Err(e.to_string()),
+        Err(e) => Err(err_msg(e.to_string())),
     }
 }

@@ -24,13 +24,11 @@ enum Command {
     }
 }
 
-fn main() -> CliResult {
+fn main() -> Result<(), Error> {
     let args = MDZK::from_args();
 
     match args.cmd {
         Command::Build{dir} => build(dir),
         Command::Init{dir} => init(dir),
-    };
-
-    Ok(())
+    }
 }
