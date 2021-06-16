@@ -7,7 +7,7 @@ use std::{
     env,
 };
 
-/// Search up the filesystem to find a mdzk.toml file and return it's parent directory.
+/// Search up the filesystem to find a book.toml file and return it's parent directory.
 pub fn find_zk_root() -> Option<PathBuf> {
     let mut path: PathBuf = env::current_dir().unwrap().into();
     let file = Path::new("book.toml");
