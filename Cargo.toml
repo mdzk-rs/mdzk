@@ -17,3 +17,4 @@ failure = "0.1.8"
 futures-util = "0.3.4"
 tokio = { version = "0.2.18", features = ["macros"] }
 warp = { version = "0.2.2", default-features = false, features = ["websocket"] }
+toml = "0.5.8"
