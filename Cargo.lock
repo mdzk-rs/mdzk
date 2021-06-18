@@ -1131,12 +1131,16 @@ name = "mdzk"
 version = "0.1.0"
 dependencies = [
  "failure",
+ "futures-util",
  "mdbook",
  "mdbook-backlinks",
  "mdbook-katex",
  "mdbook-wikilink",
  "quicli",
  "structopt",
+ "tokio",
+ "toml",
+ "warp",
 ]
 
 [[package]]
