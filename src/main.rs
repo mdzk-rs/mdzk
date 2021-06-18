@@ -1,4 +1,4 @@
-use mdzk::{build, init};
+use mdzk::{build, init, serve};
 use std::path::PathBuf;
 use quicli::prelude::*;
 use structopt::StructOpt;
@@ -21,7 +21,10 @@ enum Command {
     #[structopt(name = "init")]
     Init {
         dir: Option<PathBuf>,
-    }
+    },
+
+    #[structopt(name = "serve")]
+    Serve
 }
 
 fn main() -> Result<(), Error> {
@@ -30,5 +33,6 @@ fn main() -> Result<(), Error> {
     match args.cmd {
         Command::Build{dir} => build(dir),
         Command::Init{dir} => init(dir),
+        Command::Serve => serve(),
     }
 }
