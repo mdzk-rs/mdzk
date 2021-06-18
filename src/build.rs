@@ -12,15 +12,15 @@ pub fn build(dir: Option<PathBuf>) -> Result<(), Error> {
         None => find_zk_root().ok_or(err_msg("Could not find the root of your Zettelkasten"))?,
     };
 
-    let mut md = match MDBook::load(path) {
+    let mut zk = match MDBook::load(path) {
         Ok(val) => val,
         Err(e) => return Err(err_msg(e.to_string())),
     };
 
-    md.with_preprocessor(KatexProcessor);
-    md.with_preprocessor(AutoTitle::new());
-    md.with_preprocessor(Backlinks);
-    md.build().expect("Builing failed");
+    zk.with_preprocessor(KatexProcessor);
+    zk.with_preprocessor(AutoTitle::new());
+    zk.with_preprocessor(Backlinks);
+    zk.build().expect("Builing failed");
 
     Ok(())
 }
