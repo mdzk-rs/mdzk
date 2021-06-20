@@ -1,4 +1,7 @@
-use crate::utils::find_zk_root;
+use crate::{
+    utils::find_zk_root,
+    watch,
+};
 use mdbook::MDBook;
 use mdbook_katex::KatexProcessor;
 use mdbook_backlinks::Backlinks;
