@@ -1132,10 +1132,12 @@ version = "0.1.0"
 dependencies = [
  "failure",
  "futures-util",
+ "gitignore",
  "mdbook",
  "mdbook-backlinks",
  "mdbook-katex",
  "mdbook-wikilink",
+ "notify",
  "quicli",
  "structopt",
  "tokio",
