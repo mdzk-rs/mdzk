@@ -1,14 +1,15 @@
 /* Base styles and content styles */
 
+@import '../fonts/inter.css'
 @import 'variables.css';
 
 :root {
     /* Browser default font-size is 16px, this way 1 rem = 10px */
-    font-size: 68.75%;
+    font-size: 62.5%;
 }
 
 html {
-    font-family: "Open Sans", sans-serif;
+    font-family: "Inter", sans-serif;
     color: var(--fg);
     background-color: var(--bg);
     text-size-adjust: none;
