@@ -10,7 +10,7 @@ edition = "2018"
 mdbook = "0.4.10"
 mdbook-katex = "0.2.10"
 mdbook-wikilink = { git = "https://github.com/ratsclub/mdbook-wikilink" }
-mdbook-backlinks = { git = "https://github.com/kmaasrud/mdbook-backlinks" }
+mdbook-backlinks = { git = "https://github.com/kmaasrud/mdbook-backlinks", branch = "main" }
 quicli = "0.4"
 structopt = "0.2"
 failure = "0.1.8"
