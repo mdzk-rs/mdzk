@@ -36,7 +36,7 @@ pub fn serve() -> Result<(), Error> {
 
     let port = "3000";
     let hostname = "localhost";
-    let open_browser = false;
+    // let open_browser = false;
 
     let address = format!("{}:{}", hostname, port);
 
