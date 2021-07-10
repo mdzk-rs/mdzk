@@ -1,0 +1,28 @@
+name: Build
+
+on: [push]
+
+jobs:
+  linux-x86_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          default: true
+
+      - name: Build binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target x86_64-unknown-linux-musl
+          use-cross: true
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: rust binaries
+          path: target/release/mdzk

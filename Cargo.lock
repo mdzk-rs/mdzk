@@ -1092,7 +1092,7 @@ dependencies = [
 [[package]]
 name = "mdbook-backlinks"
 version = "0.1.1"
-source = "git+https://github.com/kmaasrud/mdbook-backlinks#23ff4e3ebed78aca37cd1367547acde34a01f9fa"
+source = "git+https://github.com/kmaasrud/mdbook-backlinks?branch=main#23ff4e3ebed78aca37cd1367547acde34a01f9fa"
 dependencies = [
  "clap",
  "mdbook",
