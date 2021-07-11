@@ -9,7 +9,10 @@ edition = "2018"
 [dependencies]
 mdbook = "0.4.10"
 mdbook-katex = "0.2.10"
-mdbook-wikilink = { git = "https://github.com/ratsclub/mdbook-wikilink" }
+mdbook-wikilink = { 
+    git = "https://github.com/ratsclub/mdbook-wikilink", 
+    rev = "2b599815b60f1565aadc822d03aee742d4ce362a" 
+}
 mdbook-backlinks = { git = "https://github.com/kmaasrud/mdbook-backlinks", branch = "main" }
 quicli = "0.4"
 structopt = "0.2"
