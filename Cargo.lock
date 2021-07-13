@@ -1118,7 +1118,7 @@ dependencies = [
 [[package]]
 name = "mdbook-wikilink"
 version = "0.1.4"
-source = "git+https://github.com/ratsclub/mdbook-wikilink#497039eeb8088c5a21b1b3bdbf8076bbbdf526f9"
+source = "git+https://github.com/ratsclub/mdbook-wikilink?rev=497039eeb8088c5a21b1b3bdbf8076bbbdf526f9#497039eeb8088c5a21b1b3bdbf8076bbbdf526f9"
 dependencies = [
  "clap",
  "mdbook",
