@@ -31,8 +31,8 @@ pub fn serve() -> Result<(), Error> {
     };
 
     zk.with_preprocessor(KatexProcessor);
-    zk.with_preprocessor(WikiLinks);
     zk.with_preprocessor(Backlinks);
+    zk.with_preprocessor(WikiLinks);
 
     let port = "3000";
     let hostname = "localhost";
