@@ -18,8 +18,8 @@ pub fn build(dir: Option<PathBuf>) -> Result<(), Error> {
     };
 
     zk.with_preprocessor(KatexProcessor);
-    zk.with_preprocessor(WikiLinks);
     zk.with_preprocessor(Backlinks);
+    zk.with_preprocessor(WikiLinks);
     zk.build().expect("Builing failed");
 
     Ok(())
