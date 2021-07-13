@@ -5,7 +5,7 @@ use crate::{
 use mdbook::MDBook;
 use mdbook_katex::KatexProcessor;
 use mdbook_backlinks::Backlinks;
-use wikilink::AutoTitle;
+use mdbook_wikilink::WikiLinks;
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::errors::*;
@@ -31,7 +31,7 @@ pub fn serve() -> Result<(), Error> {
     };
 
     zk.with_preprocessor(KatexProcessor);
-    zk.with_preprocessor(AutoTitle::new());
+    zk.with_preprocessor(WikiLinks);
     zk.with_preprocessor(Backlinks);
 
     let port = "3000";

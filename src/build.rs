@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use mdbook::MDBook;
 use mdbook_katex::KatexProcessor;
 use mdbook_backlinks::Backlinks;
-use wikilink::AutoTitle;
+use mdbook_wikilink::WikiLinks;
 use failure::{Error, err_msg};
 
 pub fn build(dir: Option<PathBuf>) -> Result<(), Error> {
@@ -18,7 +18,7 @@ pub fn build(dir: Option<PathBuf>) -> Result<(), Error> {
     };
 
     zk.with_preprocessor(KatexProcessor);
-    zk.with_preprocessor(AutoTitle::new());
+    zk.with_preprocessor(WikiLinks);
     zk.with_preprocessor(Backlinks);
     zk.build().expect("Builing failed");
 
