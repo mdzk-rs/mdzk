@@ -1118,7 +1118,8 @@ dependencies = [
 [[package]]
 name = "mdbook-wikilink"
 version = "0.2.0"
-source = "git+https://github.com/ratsclub/mdbook-wikilink#9c6d17c28913a7d063a46bd0d199f974ce6c9a73"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "686eb11fbf297e79f9647e89f8a0fd3b8b9f6893d19838de98c6c618df8086ea"
 dependencies = [
  "clap",
  "mdbook",
