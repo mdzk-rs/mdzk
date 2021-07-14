@@ -20,7 +20,7 @@
 
           mdzk-pkg = naersk-lib.buildPackage {
             pname = name;
-            root = ./.;
+            root = pkgs.lib.cleanSource ./.;
           };
         in
         rec {
