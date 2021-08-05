@@ -24,7 +24,10 @@ enum Command {
     },
 
     #[structopt(name = "serve")]
-    Serve
+    Serve {
+        #[structopt(parse(from_os_str))]
+        dir: Option<PathBuf>
+    },
 }
 
 fn main() -> Result<(), Error> {
@@ -33,6 +36,6 @@ fn main() -> Result<(), Error> {
     match args.cmd {
         Command::Build{dir} => build(dir),
         Command::Init{dir} => init(dir),
-        Command::Serve => serve(),
+        Command::Serve{dir} => serve(dir),
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    utils::find_zk_root,
+    build::init_zk,
     watch,
 };
 use mdbook::MDBook;
@@ -21,10 +21,8 @@ use toml;
 /// The HTTP endpoint for the websocket used to trigger reloads when a file changes.
 const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 
-pub fn serve() -> Result<(), Error> {
-    let root = find_zk_root().ok_or(Error::msg("Could not find the root of your Zettelkasten"))?;
-
-    let mut zk = MDBook::load(root)?;
+pub fn serve(dir: Option<PathBuf>) -> Result<(), Error> {
+    let mut zk = init_zk(dir)?;
 
     zk.with_preprocessor(KatexProcessor);
     zk.with_preprocessor(Backlinks);
