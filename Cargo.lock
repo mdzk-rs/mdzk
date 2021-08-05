@@ -1091,9 +1091,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-backlinks"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d2377a50cd3cbf7b446336ac12ff4079638e4daae0d3ec9b743c186ab501392"
+checksum = "1924a8dfda8e38e5dbaf466c5e31c0943119ff4025bfb3504e80939789083375"
 dependencies = [
  "clap",
  "mdbook",
@@ -1101,7 +1101,6 @@ dependencies = [
  "semver",
  "serde_json",
  "toml",
- "urlencoding 2.1.0",
 ]
 
 [[package]]
@@ -1119,9 +1118,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-wikilink"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "686eb11fbf297e79f9647e89f8a0fd3b8b9f6893d19838de98c6c618df8086ea"
+checksum = "00a02a489843b503adc89f80def313fd23e6258ca97595a458f95fd8f2d701cb"
 dependencies = [
  "clap",
  "mdbook",
