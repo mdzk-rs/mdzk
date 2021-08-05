@@ -1146,7 +1146,6 @@ dependencies = [
  "structopt",
  "tokio",
  "toml",
- "urlencoding 2.1.0",
  "walkdir 2.3.2",
  "warp",
 ]
