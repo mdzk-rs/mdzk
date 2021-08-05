@@ -59,7 +59,15 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
                 return Some(format!("{1:>0$}- [{2}]()\n", depth, "", file_stem));
             }
 
-            let file_ext = e.path().extension().unwrap().to_str().unwrap();
+            let file_ext = match e.path().extension() {
+                Some(ext) => ext.to_str()?,
+                None => {
+                    // one example being .gitkeep files
+                    println!("Warning: File '{}' has no extension.", e.path().to_str()?);
+                    return None;
+                }
+            };
+
             if file_ext == "md" {
                 return Some(format!(
                     "{1:>0$}- [{2}](<{3}>)\n",
@@ -68,9 +76,9 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
                     file_stem,
                     stripped_path.to_str().unwrap()
                 ));
-            } else {
-                None
             }
+
+            return None;
         })
         .filter_map(|e| e)
         .fold(String::new(), |acc, curr| acc + &curr);
