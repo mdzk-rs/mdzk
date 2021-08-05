@@ -62,8 +62,6 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
             let file_ext = match e.path().extension() {
                 Some(ext) => ext.to_str()?,
                 None => {
-                    // one example being .gitkeep files
-                    println!("Warning: File '{}' has no extension.", e.path().to_str()?);
                     return None;
                 }
             };
