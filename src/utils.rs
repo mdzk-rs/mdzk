@@ -6,6 +6,7 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
+use urlencoding::encode;
 use walkdir::WalkDir;
 
 const PAD_SIZE: usize = 4;
@@ -74,7 +75,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
                     depth,
                     "",
                     file_stem,
-                    stripped_path.to_str().unwrap()
+                    encode(stripped_path.to_str().unwrap())
                 ));
             }
 

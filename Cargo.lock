@@ -1101,7 +1101,7 @@ dependencies = [
  "semver",
  "serde_json",
  "toml",
- "urlencoding 2.0.0",
+ "urlencoding 2.1.0",
 ]
 
 [[package]]
@@ -1128,7 +1128,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "urlencoding 2.0.0",
+ "urlencoding 2.1.0",
 ]
 
 [[package]]
@@ -1146,6 +1146,7 @@ dependencies = [
  "structopt",
  "tokio",
  "toml",
+ "urlencoding 2.1.0",
  "walkdir 2.3.2",
  "warp",
 ]
@@ -2294,9 +2295,9 @@ checksum = "5a1f0175e03a0973cf4afd476bef05c26e228520400eb1fd473ad417b1c00ffb"
 
 [[package]]
 name = "urlencoding"
-version = "2.0.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d95bbc99edfcbbd61cc6e43dab325bbff0aa481fec3996051ada8409d506d528"
+checksum = "68b90931029ab9b034b300b797048cf23723400aa757e8a2bfb9d748102f9821"
 
 [[package]]
 name = "utf-8"
