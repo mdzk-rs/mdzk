@@ -48,6 +48,13 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
     let summary = WalkDir::new(book_source)
         .sort_by_file_name()
         .into_iter()
+        // remove hidden files
+        .filter_entry(|e| {
+            !e.file_name()
+                .to_str()
+                .map(|s| s.starts_with("."))
+                .unwrap_or(false)
+        })
         .filter_map(|e| e.ok())
         .filter(|e| e.path() != book_source)
         .map(|e| {
