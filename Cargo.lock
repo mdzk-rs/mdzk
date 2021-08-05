@@ -1091,7 +1091,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-backlinks"
-version = "0.2.0"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f16c1d922fdf843fe598848d4b0e1e371ffe2dda0c48dad8f7fc88d4b561036f"
 dependencies = [
  "clap",
  "mdbook",
