@@ -13,7 +13,6 @@ use mdbook::utils;
 use mdbook::utils::fs::get_404_output_file;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::PathBuf;
-use failure::{Error, err_msg};
 use tokio::sync::broadcast;
 use warp::ws::Message;
 use warp::Filter;
@@ -23,12 +22,9 @@ use toml;
 const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 
 pub fn serve() -> Result<(), Error> {
-    let root = find_zk_root().ok_or(err_msg("Could not find the root of your Zettelkasten"))?;
+    let root = find_zk_root().ok_or(Error::msg("Could not find the root of your Zettelkasten"))?;
 
-    let mut zk = match MDBook::load(root) {
-        Ok(val) => val,
-        Err(e) => return Err(err_msg(e.to_string())),
-    };
+    let mut zk = MDBook::load(root)?;
 
     zk.with_preprocessor(KatexProcessor);
     zk.with_preprocessor(Backlinks);
@@ -50,15 +46,12 @@ pub fn serve() -> Result<(), Error> {
     };
     update_config(&mut zk);
 
-    match zk.build() {
-        Ok(_) => {},
-        Err(e) => return Err(err_msg(e.to_string())),
-    }
+    zk.build()?;
 
     let sockaddr: SocketAddr = address
         .to_socket_addrs()?
         .next()
-        .ok_or_else(|| err_msg("no address found for ".to_string() + &address))?;
+        .ok_or_else(|| Error::msg("no address found for ".to_string() + &address))?;
     let build_dir = zk.build_dir_for("html");
     let input_404 = zk
         .config
