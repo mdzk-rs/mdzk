@@ -1135,7 +1135,6 @@ dependencies = [
 name = "mdzk"
 version = "0.1.0"
 dependencies = [
- "failure",
  "futures-util",
  "gitignore",
  "mdbook",

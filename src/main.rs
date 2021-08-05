@@ -1,6 +1,6 @@
 use mdzk::{build, init, serve};
+use mdbook::errors::Error;
 use std::path::PathBuf;
-use quicli::prelude::*;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
