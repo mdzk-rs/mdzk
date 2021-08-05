@@ -1,15 +1,12 @@
+use mdbook::errors::Error;
+use std::fs::File;
+use std::io::Write;
 use std::{
-    path::{
-        Path,
-        PathBuf,
-    },
-    process::Command,
     env,
+    path::{Path, PathBuf},
+    process::Command,
 };
 use walkdir::WalkDir;
-use std::fs::File;
-use std::io::prelude::*;
-use mdbook::errors::Error;
 
 const PAD_SIZE: usize = 4;
 
@@ -78,7 +75,12 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
         .filter_map(|e| e)
         .fold(String::new(), |acc, curr| acc + &curr);
 
-    let mut summary_file = File::create([book_source, &PathBuf::from("SUMMARY.md")].iter().collect::<PathBuf>())?;
-    summary_file.write_all(summary.as_bytes())?;
+    let mut summary_file = File::create(
+        [book_source, &PathBuf::from("SUMMARY.md")]
+            .iter()
+            .collect::<PathBuf>(),
+    )?;
+
+    write!(summary_file, "# Summary\n{}", summary)?;
     Ok(())
 }
