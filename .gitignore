@@ -2,3 +2,4 @@
 .envrc
 .direnv/
 result/
+.vscode
