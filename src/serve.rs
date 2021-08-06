@@ -21,18 +21,16 @@ use toml;
 /// The HTTP endpoint for the websocket used to trigger reloads when a file changes.
 const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 
-pub fn serve(dir: Option<PathBuf>) -> Result<(), Error> {
+pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error> {
     let mut zk = init_zk(dir)?;
 
     zk.with_preprocessor(KatexProcessor);
     zk.with_preprocessor(Backlinks);
     zk.with_preprocessor(WikiLinks);
 
-    let port = "3000";
-    let hostname = "localhost";
     // let open_browser = false;
 
-    let address = format!("{}:{}", hostname, port);
+    let address = format!("{}:{}", bind, port.to_string());
 
     let livereload_url = format!("ws://{}/{}", address, LIVE_RELOAD_ENDPOINT);
     let update_config = |book: &mut MDBook| {
