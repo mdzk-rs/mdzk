@@ -20,9 +20,9 @@ jobs:
           command: build
           args: --release --target x86_64-unknown-linux-musl
           use-cross: true
-          
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
-        with: 
+        with:
           name: rust binaries
-          path: target/release/mdzk
+          path: target/x86_64-unknown-linux-musl/release/mdzk
