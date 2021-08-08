@@ -1,4 +1,9 @@
-use mdzk::{build, init, serve};
+mod preprocessors;
+
+use mdzk::{
+    build, init, serve,
+};
+use preprocessors::FrontMatter;
 use mdbook::errors::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
