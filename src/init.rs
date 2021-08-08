@@ -1,9 +1,9 @@
-use std::path::PathBuf;
-use std::fs;
 use crate::utils;
-use mdbook::MDBook;
-use mdbook::Config;
 use mdbook::errors::Error;
+use mdbook::Config;
+use mdbook::MDBook;
+use std::fs;
+use std::path::PathBuf;
 
 pub fn init(dir: Option<PathBuf>) -> Result<(), Error> {
     let path = match dir {
@@ -11,7 +11,7 @@ pub fn init(dir: Option<PathBuf>) -> Result<(), Error> {
         None => PathBuf::from("."),
     };
 
-    let mut builder = MDBook::init(&path); 
+    let mut builder = MDBook::init(&path);
     let mut config = Config::default();
 
     config.book.title = Some("Zettelkasten".to_string());
@@ -24,8 +24,12 @@ pub fn init(dir: Option<PathBuf>) -> Result<(), Error> {
     builder.with_config(config);
     builder.build()?;
     fs::rename(
-        [&path, &PathBuf::from("book.toml")].iter().collect::<PathBuf>(),
-        [&path, &PathBuf::from("zk.toml")].iter().collect::<PathBuf>(),
+        [&path, &PathBuf::from("book.toml")]
+            .iter()
+            .collect::<PathBuf>(),
+        [&path, &PathBuf::from("zk.toml")]
+            .iter()
+            .collect::<PathBuf>(),
     )?;
     Ok(())
 }
