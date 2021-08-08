@@ -1169,6 +1169,7 @@ dependencies = [
  "mdbook-wikilink",
  "notify",
  "quicli",
+ "serde",
  "structopt",
  "tokio",
  "toml",
