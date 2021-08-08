@@ -1,22 +1,19 @@
-use crate::{
-    build::init_zk,
-    watch,
-};
-use mdbook::MDBook;
-use mdbook_katex::KatexProcessor;
-use mdbook_backlinks::Backlinks;
-use mdbook_wikilink::WikiLinks;
+use crate::{build::init_zk, preprocessors::FrontMatter, watch};
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::errors::*;
 use mdbook::utils;
 use mdbook::utils::fs::get_404_output_file;
+use mdbook::MDBook;
+use mdbook_backlinks::Backlinks;
+use mdbook_katex::KatexProcessor;
+use mdbook_wikilink::WikiLinks;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::PathBuf;
 use tokio::sync::broadcast;
+use toml;
 use warp::ws::Message;
 use warp::Filter;
-use toml;
 
 /// The HTTP endpoint for the websocket used to trigger reloads when a file changes.
 const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
@@ -24,6 +21,7 @@ const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error> {
     let mut zk = init_zk(dir)?;
 
+    zk.with_preprocessor(FrontMatter);
     zk.with_preprocessor(KatexProcessor);
     zk.with_preprocessor(Backlinks);
     zk.with_preprocessor(WikiLinks);
