@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use mdbook::book::Book;
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
