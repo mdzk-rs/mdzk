@@ -1,7 +1,11 @@
 [package]
 name = "mdzk"
 version = "0.2.2"
-authors = ["Knut Magnus Aasrud <km@aasrud.com>", "Victor Freire <victor@freire.dev.br>", "Leo Silva Souza <leovano@protonmail.com>"]
+authors = [
+    "Knut Magnus Aasrud <km@aasrud.com>",
+    "Victor Freire <victor@freire.dev.br>",
+    "Leo Silva Souza <leovano@protonmail.com>",
+]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -20,3 +24,4 @@ toml = "0.5.8"
 notify = "4.0.17"
 gitignore = "1.0.7"
 walkdir = "2.3.2"
+gray_matter = "0.1.0"
