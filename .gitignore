@@ -3,3 +3,7 @@
 .direnv/
 .vscode
 result
+
+# docs
+.obsidian
+out
