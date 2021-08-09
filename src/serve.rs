@@ -1,17 +1,10 @@
-use crate::{
-    build::init_zk,
-    preprocessors::FrontMatter, watch,
-    utils::update_summary,
-};
+use crate::{build::init_zk, watch};
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::errors::*;
 use mdbook::utils;
 use mdbook::utils::fs::get_404_output_file;
-use mdbook::{MDBook, Config};
-use mdbook_backlinks::Backlinks;
-use mdbook_katex::KatexProcessor;
-use mdbook_wikilink::WikiLinks;
+use mdbook::MDBook;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::path::PathBuf;
 use tokio::sync::broadcast;
@@ -24,11 +17,6 @@ const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 
 pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error> {
     let mut zk = init_zk(dir)?;
-
-    zk.with_preprocessor(FrontMatter);
-    zk.with_preprocessor(KatexProcessor);
-    zk.with_preprocessor(Backlinks);
-    zk.with_preprocessor(WikiLinks);
 
     // let open_browser = false;
 
@@ -71,17 +59,19 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
         println!("Files changed: {:?}", paths);
         println!("Building book...");
 
-        let conf: Config = Config::from_disk(book_dir.join("zk.toml")).unwrap();
+        // let conf: Config = Config::from_disk(book_dir.join("zk.toml")).unwrap();
 
-        let result = MDBook::load_with_config(&book_dir, conf).and_then(|mut b| {
+        let mut new_zk = init_zk(Some(book_dir.to_path_buf())).unwrap();
+        update_config(&mut new_zk, &livereload_url).unwrap();
+        let result = new_zk.build();
+        /* let result = MDBook::load_with_config(&book_dir, conf).and_then(|mut b| {
             update_summary(&b.source_dir())?;
             update_config(&mut b, &livereload_url)?;
             b.build()
-        });
+        }); */
 
         if let Err(e) = result {
             println!("Unable to load the book");
-            println!("{:?}", e);
             utils::log_backtrace(&e);
         } else {
             let _ = tx.send(Message::text("reload"));
@@ -96,7 +86,8 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
 fn update_config(book: &mut MDBook, livereload_url: &str) -> Result<()> {
     // Override site-url for local serving of the 404 file
     book.config.set("output.html.site-url", "/")?;
-    book.config.set("output.html.livereload-url", &livereload_url)?;
+    book.config
+        .set("output.html.livereload-url", &livereload_url)?;
     Ok(())
 }
 
