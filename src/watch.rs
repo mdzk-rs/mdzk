@@ -81,7 +81,7 @@ where
     let _ = watcher.watch(book.theme_dir(), Recursive);
 
     // Add the book.toml file to the watcher if it exists
-    let _ = watcher.watch(book.root.join("book.toml"), NonRecursive);
+    let _ = watcher.watch(book.root.join("zk.toml"), NonRecursive);
 
     println!("Listening for changes...");
 
