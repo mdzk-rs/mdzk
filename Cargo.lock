@@ -1066,6 +1066,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "lazy-regex"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17d198f91272f6e788a5c0bd5d741cf778da4e5bc761ec67b32d5d3b0db34a54"
+dependencies = [
+ "lazy-regex-proc_macros",
+ "once_cell",
+ "regex",
+]
+
+[[package]]
+name = "lazy-regex-proc_macros"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c12938b1b92cf5be22940527e15b79fd0c7e706e34bc70816f6a72b3484f84e"
+dependencies = [
+ "proc-macro2 1.0.27",
+ "quote 1.0.9",
+ "regex",
+ "syn 1.0.73",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1213,11 +1236,12 @@ dependencies = [
 
 [[package]]
 name = "mdbook-wikilink"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00a02a489843b503adc89f80def313fd23e6258ca97595a458f95fd8f2d701cb"
+checksum = "2a7d38ec5ee9cd76b6199f99c09a8e659f33141ae300a87a0d7725307e074318"
 dependencies = [
  "clap",
+ "lazy-regex",
  "mdbook",
  "regex",
  "serde",
