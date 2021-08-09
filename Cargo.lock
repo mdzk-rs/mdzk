@@ -1236,9 +1236,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-wikilink"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a7d38ec5ee9cd76b6199f99c09a8e659f33141ae300a87a0d7725307e074318"
+checksum = "46132221b9b67f3a139ca69f69248cfc0f4894fe78ab5673bfd47bf74039ebd2"
 dependencies = [
  "clap",
  "lazy-regex",
@@ -1251,7 +1251,7 @@ dependencies = [
 
 [[package]]
 name = "mdzk"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "futures-util",
  "gitignore",
