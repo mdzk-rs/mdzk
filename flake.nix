@@ -4,20 +4,32 @@
   inputs = {
     utils.url = "github:numtide/flake-utils";
     naersk.url = "github:nmattia/naersk";
+    rust.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { self, nixpkgs, utils, naersk }:
+  outputs = { self, nixpkgs, utils, naersk, rust }:
     utils.lib.eachDefaultSystem
       (
         system:
           let
             name = "mdzk";
 
+            rust-overlay = import rust;
+
             pkgs = import nixpkgs {
               inherit system;
+              overlays = [ rust-overlay ];
             };
 
-            naersk-lib = naersk.lib."${system}";
+            rust-pkg = pkgs.rust-bin.stable."1.54.0".default.override {
+              extensions = [
+                "rust-std"
+              ];
+            };
+
+            naersk-lib = naersk.lib."${system}".override {
+              rustc = rust-pkg;
+            };
 
             mdzk-pkg = naersk-lib.buildPackage {
               pname = name;
@@ -38,9 +50,7 @@
               # `nix develop`
               devShell = pkgs.mkShell {
                 nativeBuildInputs = with pkgs; [
-                  rustc
-                  rustfmt
-                  cargo
+                  rust-pkg
                   rust-analyzer
                 ];
               };
