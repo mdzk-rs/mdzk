@@ -1,6 +1,7 @@
 // This is simply a modified version of https://github.com/rust-lang/mdBook/blob/master/src/cmd/watch.rs
 use mdbook::MDBook;
 use notify::Watcher;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::thread::sleep;
@@ -10,6 +11,11 @@ fn remove_ignored_files(book_root: &Path, paths: &[PathBuf]) -> Vec<PathBuf> {
     if paths.is_empty() {
         return vec![];
     }
+
+    let paths: Vec<&PathBuf> = paths
+        .iter()
+        .filter(|x| x.file_name() != Some(OsStr::new("SUMMARY.md")))
+        .collect();
 
     match find_gitignore(book_root) {
         Some(gitignore_path) => {
@@ -36,7 +42,7 @@ fn find_gitignore(book_root: &Path) -> Option<PathBuf> {
         .find(|p| p.exists())
 }
 
-fn filter_ignored_files(exclusion_checker: gitignore::File, paths: &[PathBuf]) -> Vec<PathBuf> {
+fn filter_ignored_files(exclusion_checker: gitignore::File, paths: Vec<&PathBuf>) -> Vec<PathBuf> {
     paths
         .iter()
         .filter(|path| match exclusion_checker.is_excluded(path) {
