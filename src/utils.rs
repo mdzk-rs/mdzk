@@ -56,7 +56,8 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
                 .unwrap_or(false)
         })
         .filter_map(|e| e.ok())
-        .filter(|e| e.path() != book_source)
+        // Don't include the book source directory or the SUMMARY.md file
+        .filter(|e| e.path() != book_source && e.path() != book_source.join("SUMMARY.md"))
         .map(|e| {
             let stripped_path = e.path().strip_prefix(&book_source).unwrap();
             let file_stem = stripped_path.file_stem().unwrap().to_str().unwrap();
@@ -68,9 +69,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
 
             let file_ext = match e.path().extension() {
                 Some(ext) => ext.to_str()?,
-                None => {
-                    return None;
-                }
+                None => return None,
             };
 
             if file_ext == "md" {
@@ -93,12 +92,8 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
         .filter_map(|e| e)
         .fold(String::new(), |acc, curr| acc + &curr);
 
-    let mut summary_file = File::create(
-        [book_source, &PathBuf::from("SUMMARY.md")]
-            .iter()
-            .collect::<PathBuf>(),
-    )?;
+    let mut summary_file = File::create(book_source.join("SUMMARY.md"))?;
+    write!(summary_file, "# Summary\n\n{}", summary)?;
 
-    write!(summary_file, "# Summary\n{}", summary)?;
     Ok(())
 }
