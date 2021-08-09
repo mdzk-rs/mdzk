@@ -1,10 +1,14 @@
-use crate::{build::init_zk, preprocessors::FrontMatter, watch};
+use crate::{
+    build::init_zk,
+    preprocessors::FrontMatter, watch,
+    utils::update_summary,
+};
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::errors::*;
 use mdbook::utils;
 use mdbook::utils::fs::get_404_output_file;
-use mdbook::MDBook;
+use mdbook::{MDBook, Config};
 use mdbook_backlinks::Backlinks;
 use mdbook_katex::KatexProcessor;
 use mdbook_wikilink::WikiLinks;
@@ -31,14 +35,7 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
     let address = format!("{}:{}", bind, port.to_string());
 
     let livereload_url = format!("ws://{}/{}", address, LIVE_RELOAD_ENDPOINT);
-    let update_config = |book: &mut MDBook| {
-        book.config
-            .set("output.html.livereload-url", &livereload_url)
-            .expect("livereload-url update failed");
-        // Override site-url for local serving of the 404 file
-        book.config.set("output.html.site-url", "/").unwrap();
-    };
-    update_config(&mut zk);
+    update_config(&mut zk, &livereload_url)?;
 
     zk.build()?;
 
@@ -74,14 +71,17 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
         println!("Files changed: {:?}", paths);
         println!("Building book...");
 
-        // FIXME: This area is really ugly because we need to re-set livereload :(
-        let result = MDBook::load(&book_dir).and_then(|mut b| {
-            update_config(&mut b);
+        let conf: Config = Config::from_disk(book_dir.join("zk.toml")).unwrap();
+
+        let result = MDBook::load_with_config(&book_dir, conf).and_then(|mut b| {
+            update_summary(&b.source_dir())?;
+            update_config(&mut b, &livereload_url)?;
             b.build()
         });
 
         if let Err(e) = result {
             println!("Unable to load the book");
+            println!("{:?}", e);
             utils::log_backtrace(&e);
         } else {
             let _ = tx.send(Message::text("reload"));
@@ -90,6 +90,13 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
 
     let _ = thread_handle.join();
 
+    Ok(())
+}
+
+fn update_config(book: &mut MDBook, livereload_url: &str) -> Result<()> {
+    // Override site-url for local serving of the 404 file
+    book.config.set("output.html.site-url", "/")?;
+    book.config.set("output.html.livereload-url", &livereload_url)?;
     Ok(())
 }
 

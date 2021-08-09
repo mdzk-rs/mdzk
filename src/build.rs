@@ -26,7 +26,7 @@ pub fn init_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         None => find_zk_root().ok_or(Error::msg("Could not find the root of your Zettelkasten"))?,
     };
 
-    let config_path: PathBuf = [path.to_str().unwrap(), "zk.toml"].iter().collect();
+    let config_path: PathBuf = path.join("zk.toml");
     let config: Config = Config::from_disk(config_path)?;
 
     let book_source = &config.book.src;
