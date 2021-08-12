@@ -1,3 +1,8 @@
+use crate::{
+    CONFIG_FILE,
+    SUMMARY_FILE,
+};
+
 use mdbook::errors::Error;
 use std::fs::File;
 use std::io::Write;
@@ -13,7 +18,7 @@ const PAD_SIZE: usize = 4;
 /// Search up the filesystem to find a zk.toml file and return it's parent directory.
 pub fn find_zk_root() -> Option<PathBuf> {
     let mut path: PathBuf = env::current_dir().unwrap().into();
-    let file = Path::new("zk.toml");
+    let file = Path::new(CONFIG_FILE);
 
     loop {
         path.push(file);
@@ -57,7 +62,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
         })
         .filter_map(|e| e.ok())
         // Don't include the book source directory or the SUMMARY.md file
-        .filter(|e| e.path() != book_source && e.path() != book_source.join("SUMMARY.md"))
+        .filter(|e| e.path() != book_source && e.path() != book_source.join(SUMMARY_FILE))
         .map(|e| {
             let stripped_path = e.path().strip_prefix(&book_source).unwrap();
             let file_stem = stripped_path.file_stem().unwrap().to_str().unwrap();
@@ -87,7 +92,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
         .filter_map(|e| e)
         .fold(String::new(), |acc, curr| acc + &curr);
 
-    let mut summary_file = File::create(book_source.join("SUMMARY.md"))?;
+    let mut summary_file = File::create(book_source.join(SUMMARY_FILE))?;
     write!(summary_file, "# Summary\n\n{}", summary)?;
 
     Ok(())
