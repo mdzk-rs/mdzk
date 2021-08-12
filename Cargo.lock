@@ -1285,10 +1285,12 @@ dependencies = [
 name = "mdzk"
 version = "0.2.4"
 dependencies = [
+ "anyhow",
  "futures-util",
  "gitignore",
  "gray_matter",
  "handlebars",
+ "log",
  "mdbook",
  "mdbook-backlinks",
  "mdbook-katex",
