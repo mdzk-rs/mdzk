@@ -78,12 +78,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
                     depth,
                     "",
                     file_stem,
-                    stripped_path
-                        .to_str()
-                        .unwrap()
-                        .replace(" ", "%20")
-                        .replace("<", "&lt;")
-                        .replace(">", "&gt;")
+                    escape_special_chars(stripped_path.to_str().unwrap())
                 ));
             }
 
@@ -96,4 +91,13 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
     write!(summary_file, "# Summary\n\n{}", summary)?;
 
     Ok(())
+}
+
+fn escape_special_chars(text: &str) -> String {
+    text.replace(" ", "%20")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("'", "&apos;")
+        .replace("\"", "&quot;")
+        .replace("&", "&amp;")
 }
