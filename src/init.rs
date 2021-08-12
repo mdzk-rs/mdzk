@@ -1,18 +1,11 @@
-use crate::{
-    utils,
-    CONFIG_FILE,
-    SRC_DIR,
-    BUILD_DIR,
-    DEFAULT_ZK_TITLE,
-    SUMMARY_FILE,
-};
+use crate::{utils, BUILD_DIR, CONFIG_FILE, DEFAULT_ZK_TITLE, SRC_DIR, SUMMARY_FILE};
 
+use anyhow::Context;
 use mdbook::errors::*;
 use mdbook::Config;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::PathBuf;
-use anyhow::Context;
 
 // Initialize an mdzk vault
 pub fn init(dir: Option<PathBuf>) -> Result<()> {
@@ -33,8 +26,10 @@ pub fn init(dir: Option<PathBuf>) -> Result<()> {
     // Create directory structure
     debug!("Creating directory tree");
     fs::create_dir_all(&root)?;
-    fs::create_dir_all(&root.join(&config.book.src)).context("Could not create source directory.")?;
-    fs::create_dir_all(&root.join(&config.build.build_dir)).context("Could not create output directory.")?;
+    fs::create_dir_all(&root.join(&config.book.src))
+        .context("Could not create source directory.")?;
+    fs::create_dir_all(&root.join(&config.build.build_dir))
+        .context("Could not create output directory.")?;
 
     // Create gitignore
     debug!("Creating .gitignore");

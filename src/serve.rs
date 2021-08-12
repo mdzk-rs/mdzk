@@ -49,22 +49,22 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
     });
 
     let serving_url = format!("http://{}", address);
-    println!("Serving on: {}", serving_url);
+    info!("Serving on: {}", serving_url);
 
     /* if open_browser {
         open(serving_url);
     } */
 
     watch::trigger_on_change(&zk, move |paths, book_dir| {
-        println!("Files changed: {:?}", paths);
-        println!("Building book...");
+        info!("Files changed: {:?}", paths);
+        info!("Building book...");
 
         let mut new_zk = load_zk(Some(book_dir.to_path_buf())).unwrap();
         update_config(&mut new_zk, &livereload_url).unwrap();
         let result = new_zk.build();
 
         if let Err(e) = result {
-            println!("Unable to load the book");
+            error!("Unable to load the book");
             utils::log_backtrace(&e);
         } else {
             let _ = tx.send(Message::text("reload"));
@@ -104,9 +104,9 @@ async fn serve_zk(
         .map(|ws: warp::ws::Ws, mut rx: broadcast::Receiver<Message>| {
             ws.on_upgrade(move |ws| async move {
                 let (mut user_ws_tx, _user_ws_rx) = ws.split();
-                println!("websocket got connection");
+                trace!("websocket got connection");
                 if let Ok(m) = rx.recv().await {
-                    println!("notify of reload");
+                    trace!("notify of reload");
                     let _ = user_ws_tx.send(m).await;
                 }
             })
@@ -120,7 +120,7 @@ async fn serve_zk(
 
     std::panic::set_hook(Box::new(move |panic_info| {
         // exit if serve panics
-        println!("Unable to serve: {}", panic_info);
+        error!("Unable to serve: {}", panic_info);
         std::process::exit(1);
     }));
 

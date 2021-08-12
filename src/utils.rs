@@ -1,7 +1,4 @@
-use crate::{
-    CONFIG_FILE,
-    SUMMARY_FILE,
-};
+use crate::{CONFIG_FILE, SUMMARY_FILE};
 
 use mdbook::errors::Error;
 use std::fs::File;
@@ -94,6 +91,8 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
 
     let mut summary_file = File::create(book_source.join(SUMMARY_FILE))?;
     write!(summary_file, "# Summary\n\n{}", summary)?;
+
+    debug!("Updated summary file.");
 
     Ok(())
 }
