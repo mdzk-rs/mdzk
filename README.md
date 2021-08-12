@@ -6,13 +6,13 @@ mdzk is a plain text Zettelkasten system that is based on the mdBook API. It con
 
 ## Installation
 
-You can install with Cargo by running
+You can install mdzk with Cargo by running
 
 ```
-cargo install --git https://github.com/mdzk-rs/mdzk
+cargo install mdzk
 ```
 
-mdzk will soon be available on [crates.io](https://crates.io) and we are working on pre-built binaries for quicker installation.
+mdzk will soon also be available as a pre-built binaries for quicker installation.
 
 ## Getting started
 
