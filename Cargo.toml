@@ -23,8 +23,8 @@ include = [
 [dependencies]
 mdbook = "0.4.12"
 mdbook-katex = "0.2.10"
-mdbook-wikilink = "0.3.2"
-mdbook-backlinks = "0.2.1"
+mdbook-wikilink = "0.3.3"
+mdbook-backlinks = "0.2.2"
 quicli = "0.4"
 structopt = "0.2"
 futures-util = "0.3.4"
