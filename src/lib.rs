@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 pub mod build;
 pub mod init;
 pub mod preprocessors;
@@ -6,3 +9,9 @@ pub mod utils;
 pub mod watch;
 
 pub use crate::{build::build, init::init, serve::serve};
+
+pub const SRC_DIR: &str = "zettels";
+pub const BUILD_DIR: &str = "out";
+pub const CONFIG_FILE: &str = "mdzk.toml";
+pub const SUMMARY_FILE: &str = ".mdzk_summary.md";
+pub const DEFAULT_ZK_TITLE: &str = "My mdzk";
