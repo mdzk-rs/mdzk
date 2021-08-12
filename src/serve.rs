@@ -1,4 +1,4 @@
-use crate::{build::init_zk, watch};
+use crate::{build::load_zk, watch};
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::errors::*;
@@ -16,7 +16,7 @@ use warp::Filter;
 const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 
 pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error> {
-    let mut zk = init_zk(dir)?;
+    let mut zk = load_zk(dir)?;
 
     // let open_browser = false;
 
@@ -59,7 +59,7 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
         println!("Files changed: {:?}", paths);
         println!("Building book...");
 
-        let mut new_zk = init_zk(Some(book_dir.to_path_buf())).unwrap();
+        let mut new_zk = load_zk(Some(book_dir.to_path_buf())).unwrap();
         update_config(&mut new_zk, &livereload_url).unwrap();
         let result = new_zk.build();
 
