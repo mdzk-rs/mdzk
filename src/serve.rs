@@ -59,16 +59,9 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String) -> Result<(), Error>
         println!("Files changed: {:?}", paths);
         println!("Building book...");
 
-        // let conf: Config = Config::from_disk(book_dir.join("zk.toml")).unwrap();
-
         let mut new_zk = init_zk(Some(book_dir.to_path_buf())).unwrap();
         update_config(&mut new_zk, &livereload_url).unwrap();
         let result = new_zk.build();
-        /* let result = MDBook::load_with_config(&book_dir, conf).and_then(|mut b| {
-            update_summary(&b.source_dir())?;
-            update_config(&mut b, &livereload_url)?;
-            b.build()
-        }); */
 
         if let Err(e) = result {
             println!("Unable to load the book");
