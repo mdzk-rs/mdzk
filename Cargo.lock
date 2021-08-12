@@ -1283,7 +1283,7 @@ dependencies = [
 
 [[package]]
 name = "mdzk"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "futures-util",
