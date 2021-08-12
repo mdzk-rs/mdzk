@@ -1,18 +1,19 @@
 [package]
 name = "mdzk"
+version = "0.2.4"
 authors = [
     "Knut Magnus Aasrud <km@aasrud.com>",
     "Victor Freire <victor@freire.dev.br>",
     "Leo Silva Souza <leovano@protonmail.com>",
     "Xiangru Lian <admin@mail.xrlian.com>",
 ]
+edition = "2018"
 description = "Plain text Zettelkasten based on mdBook"
 homepage = "https://github.com/mdzk-rs/mdzk"
 repository = "https://github.com/mdzk-rs/mdzk"
 readme = "README.md"
-version = "0.2.4"
-edition = "2018"
 license = "MPL-2.0"
+license-file = "LICENSE"
 include = [
     "**/*.rs",
     "Cargo.toml"

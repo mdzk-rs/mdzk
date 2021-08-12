@@ -30,8 +30,15 @@ pub fn init_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     update_summary(&book_source)?;
 
     let mut zk = MDBook::load_with_config(path, config)?;
-    if !zk.config.get("disable_default_preprocessors").unwrap_or(&Value::Boolean(false))
-        .as_bool().ok_or(Error::msg("disable_default_preprocessors should be a boolean"))? {
+    if !zk
+        .config
+        .get("disable_default_preprocessors")
+        .unwrap_or(&Value::Boolean(false))
+        .as_bool()
+        .ok_or(Error::msg(
+            "disable_default_preprocessors should be a boolean",
+        ))?
+    {
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(KatexProcessor);
         zk.with_preprocessor(Backlinks);
