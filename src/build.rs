@@ -54,19 +54,19 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let mut zk = MDBook::load_with_config_and_summary(root, config, summary)?;
     info!("Successfully loaded mdzk: {:?}", zk.root);
 
-    if zk
+    if !zk
         .config
-        .get("use_mdzk_preprocessors")
-        .unwrap_or(&Value::Boolean(true))
+        .get("disable_default_preprocessors")
+        .unwrap_or(&Value::Boolean(false))
         .as_bool()
-        .ok_or(Error::msg("use_mdzk_preprocessors should be a boolean"))?
+        .ok_or(Error::msg("use-mdzk-preprocessors should be a boolean"))?
     {
-        info!("Running without default mdzk preprocessors.")
-    } else {
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(KatexProcessor);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(WikiLinks);
+    } else {
+        info!("Running without default mdzk preprocessors.")
     }
 
     Ok(zk)
