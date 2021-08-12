@@ -1,5 +1,8 @@
+use env_logger::Builder;
+
 use mdbook::errors::Error;
 use mdzk::{build, init, serve};
+use std::io::Write;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -35,6 +38,8 @@ enum Command {
 }
 
 fn main() -> Result<(), Error> {
+    init_logger();
+
     let args = MDZK::from_args();
 
     match args.cmd {
@@ -42,4 +47,14 @@ fn main() -> Result<(), Error> {
         Command::Init { dir } => init(dir),
         Command::Serve { dir, port, bind } => serve(dir, port, bind),
     }
+}
+
+fn init_logger() {
+    let mut builder = Builder::new();
+    builder.filter(None, log::LevelFilter::Info);
+    builder.format(|formatter, record| {
+        writeln!(formatter, "{:8>} - {}", record.level(), record.args())
+    });
+
+    builder.init();
 }

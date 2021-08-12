@@ -48,7 +48,7 @@ fn filter_ignored_files(exclusion_checker: gitignore::File, paths: Vec<&PathBuf>
         .filter(|path| match exclusion_checker.is_excluded(path) {
             Ok(exclude) => !exclude,
             Err(error) => {
-                println!(
+                error!(
                     "Unable to determine if {:?} is excluded: {:?}. Including it.",
                     &path, error
                 );
@@ -73,14 +73,14 @@ where
     let mut watcher = match notify::watcher(tx, Duration::from_secs(1)) {
         Ok(w) => w,
         Err(e) => {
-            println!("Error while trying to watch the files:\n\n\t{:?}", e);
+            error!("Error while trying to watch the files:\n\n\t{:?}", e);
             std::process::exit(1)
         }
     };
 
     // Add the source directory to the watcher
     if let Err(e) = watcher.watch(book.source_dir(), Recursive) {
-        println!("Error while watching {:?}:\n    {:?}", book.source_dir(), e);
+        error!("Error while watching {:?}:\n    {:?}", book.source_dir(), e);
         std::process::exit(1);
     };
 
@@ -89,7 +89,7 @@ where
     // Add the book.toml file to the watcher if it exists
     let _ = watcher.watch(book.root.join("zk.toml"), NonRecursive);
 
-    println!("Listening for changes...");
+    info!("Listening for changes...");
 
     loop {
         let first_event = rx.recv().unwrap();
@@ -100,7 +100,7 @@ where
 
         let paths = all_events
             .filter_map(|event| {
-                println!("Received filesystem event: {:?}", event);
+                debug!("Received filesystem event: {:?}", event);
 
                 match event {
                     Create(path) | Write(path) | Remove(path) | Rename(_, path) => Some(path),
