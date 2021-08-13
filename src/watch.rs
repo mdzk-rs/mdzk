@@ -1,4 +1,8 @@
 // This is simply a modified version of https://github.com/rust-lang/mdBook/blob/master/src/cmd/watch.rs
+use crate::{
+    SUMMARY_FILE,
+};
+
 use mdbook::MDBook;
 use notify::Watcher;
 use std::ffi::OsStr;
@@ -14,7 +18,7 @@ fn remove_ignored_files(book_root: &Path, paths: &[PathBuf]) -> Vec<PathBuf> {
 
     let paths: Vec<&PathBuf> = paths
         .iter()
-        .filter(|x| x.file_name() != Some(OsStr::new("SUMMARY.md")))
+        .filter(|x| x.file_name() != Some(OsStr::new(SUMMARY_FILE)))
         .collect();
 
     match find_gitignore(book_root) {
