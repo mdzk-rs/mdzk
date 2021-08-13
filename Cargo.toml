@@ -1,6 +1,6 @@
 [package]
 name = "mdzk"
-version = "0.3.0"
+version = "0.3.1"
 authors = [
     "Knut Magnus Aasrud <km@aasrud.com>",
     "Victor Freire <victor@freire.dev.br>",
@@ -12,7 +12,6 @@ description = "Plain text Zettelkasten based on mdBook"
 homepage = "https://github.com/mdzk-rs/mdzk"
 repository = "https://github.com/mdzk-rs/mdzk"
 readme = "README.md"
-license = "MPL-2.0"
 license-file = "LICENSE"
 include = [
     "**/*.rs",
@@ -37,8 +36,13 @@ gitignore = "1.0.7"
 walkdir = "2.3.2"
 gray_matter = "0.1.0"
 serde = "1.0.117"
+serde_json = "1.0.59"
 regex = "1.4.3"
 handlebars = "4.1.2"
 log = "0.4.14"
 anyhow = "1.0.42"
 env_logger = "0.9.0"
+lazy_static = "1.4.0"
+elasticlunr-rs = "2.3.13"
+pulldown-cmark = "0.7.0"
+ammonia = "3.1.2"
