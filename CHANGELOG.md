@@ -1,5 +1,13 @@
 # Changelog
 
+
+## 0.3.1 (2021-08-13)
+
+### Enhancements
+
+- Prettier log messages. There should be a lot less verbosity when running mdzk now.
+
+
 ## 0.3.0 (2021-08-12)
 
 ### Breaking changes
@@ -24,6 +32,7 @@
 
 - Both wikilinks and backlinks now use relative paths, which means they should be completely functional regardless of how nested your notes are or how the vault is published.
 
+
 ## 0.2.4 (2021-08-10)
 
 Sporting the newest additions to `mdbook-wikilink` and `mdbook-backlinks`.
@@ -32,11 +41,13 @@ Sporting the newest additions to `mdbook-wikilink` and `mdbook-backlinks`.
 
 - Disable default processors with the `disable_default_processors` option.
 
+
 ## 0.2.3 (2021-08-09)
 
 ### Bug fixes
 
 - `mdzk serve` did not load the correct config, nor update the `SUMMARY.md` file on file changes. This is now fixed.
+
 
 ## 0.2.2 (2021-08-06)
 
