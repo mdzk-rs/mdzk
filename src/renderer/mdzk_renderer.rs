@@ -1,19 +1,31 @@
-use self::helpers;
+use crate::renderer::helpers;
 
-use std::borrow::Cow;
-use std::collections::BTreeMap;
-use std::collections::HashMap;
-use std::fs::{self, File};
-use std::path::{Path, PathBuf};
-
-use mdbook::book::{Book, BookItem};
-use mdbook::config::{BookConfig, Config, HtmlConfig, Playground, RustEdition};
-use mdbook::errors::*;
-use mdbook::renderer::{RenderContext, Renderer};
-use mdbook::theme::{self, playground_editor, Theme};
-use mdbook::utils::{self, fs::get_404_output_file};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, HashMap},
+    fs::{self, File},
+    path::{Path, PathBuf}
+};
+use mdbook::{
+    book::{Book, BookItem},
+    config::{
+        BookConfig,
+        Config,
+        HtmlConfig,
+        Playground,
+        RustEdition
+    },
+    errors::*,
+    renderer::{RenderContext, Renderer},
+    theme::{self, playground_editor, Theme},
+    utils::{self, fs::get_404_output_file},
+};
 use handlebars::Handlebars;
 use regex::{Captures, Regex};
+use::lazy_static::lazy_static;
+use::serde_json::json;
+use::anyhow::{bail, Context};
+
 
 #[derive(Default)]
 pub struct HtmlMdzk;
@@ -70,7 +82,7 @@ impl HtmlMdzk {
         // Update the context with data for this file
         let ctx_path = path
             .to_str()
-            .with_context(|| "Could not convert path to str")?;
+            .context("Could not convert path to str")?;
         let filepath = Path::new(&ctx_path).with_extension("html");
 
         // "print.html" is used for the print page.
@@ -202,7 +214,7 @@ impl HtmlMdzk {
         theme: &Theme,
         html_config: &HtmlConfig,
     ) -> Result<()> {
-        use crate::utils::fs::write_file;
+        use mdbook::utils::fs::write_file;
 
         write_file(
             destination,
@@ -469,7 +481,7 @@ impl Renderer for HtmlMdzk {
 
         if destination.exists() {
             utils::fs::remove_dir_content(destination)
-                .with_context(|| "Unable to remove stale HTML output")?;
+                .context("Unable to remove stale HTML output")?;
         }
 
         trace!("render");
@@ -514,7 +526,7 @@ impl Renderer for HtmlMdzk {
         let mut print_content = String::new();
 
         fs::create_dir_all(&destination)
-            .with_context(|| "Unexpected error when constructing destination path")?;
+            .context("Unexpected error when constructing destination path")?;
 
         let mut is_index = true;
         for item in book.iter() {
@@ -526,7 +538,7 @@ impl Renderer for HtmlMdzk {
                 book_config: book_config.clone(),
                 html_config: html_config.clone(),
                 edition: ctx.config.rust.edition,
-                chapter_titles: &ctx.chapter_titles,
+                chapter_titles: &HashMap::new(),
             };
             self.render_item(item, ctx, &mut print_content)?;
             is_index = false;
@@ -557,17 +569,14 @@ impl Renderer for HtmlMdzk {
 
         debug!("Copy static files");
         self.copy_static_files(&destination, &theme, &html_config)
-            .with_context(|| "Unable to copy across static files")?;
+            .context("Unable to copy across static files")?;
         self.copy_additional_css_and_js(&html_config, &ctx.root, &destination)
-            .with_context(|| "Unable to copy across additional CSS and JS")?;
+            .context("Unable to copy across additional CSS and JS")?;
 
         // Render search index
-        #[cfg(feature = "search")]
-        {
-            let search = html_config.search.unwrap_or_default();
-            if search.enable {
-                super::search::create_files(&search, &destination, &book)?;
-            }
+        let search = html_config.search.unwrap_or_default();
+        if search.enable {
+            super::search::create_files(&search, &destination, &book)?;
         }
 
         self.emit_redirects(&ctx.destination, &handlebars, &html_config.redirect)
@@ -972,8 +981,8 @@ mod tests {
                 r##"<h4 id=""><a class="header" href="#"></a></h4>"##,
             ),
             (
-                "<h4><em>H•</em></h4>",
-                r##"<h4 id="h•"><a class="header" href="#h•"><em>H•</em></a></h4>"##,
+                "<h4><em>HÃ¯</em></h4>",
+                r##"<h4 id="hÃ¯"><a class="header" href="#hÃ¯"><em>HÃ¯</em></a></h4>"##,
             ),
             (
                 "<h1>Foo</h1><h3>Foo</h3>",

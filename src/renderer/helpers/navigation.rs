@@ -1,9 +1,10 @@
-use std::collections::BTreeMap;
-use std::path::Path;
-
+use std::{
+    collections::BTreeMap,
+    path::Path,
+};
 use handlebars::{Context, Handlebars, Helper, Output, RenderContext, RenderError, Renderable};
-
 use mdbook::utils;
+use serde_json::json;
 
 type StringMap = BTreeMap<String, String>;
 

@@ -1,15 +1,21 @@
-use std::borrow::Cow;
-use std::collections::{HashMap, HashSet};
-use std::path::Path;
-
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+    path::Path,
+};
+use mdbook::{
+    book::{Book, BookItem},
+    config::Search,
+    errors::*,
+    theme::searcher,
+    utils
+};
 use elasticlunr::Index;
 use pulldown_cmark::*;
+use lazy_static::lazy_static;
+use anyhow::Context;
+use serde::Serialize;
 
-use mdbook::book::{Book, BookItem};
-use mdbook::config::Search;
-use mdbook::errors::*;
-use mdbook::theme::searcher;
-use mdbook::utils;
 
 /// Creates all files required for search.
 pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> Result<()> {
@@ -21,7 +27,7 @@ pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> 
     }
 
     let index = write_to_json(index, &search_config, doc_urls)?;
-    debug!("Writing search index ?");
+    debug!("Writing search index");
     if index.len() > 10_000_000 {
         warn!("searchindex.json is very large ({} bytes)", index.len());
     }
@@ -36,7 +42,7 @@ pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> 
         utils::fs::write_file(destination, "searcher.js", searcher::JS)?;
         utils::fs::write_file(destination, "mark.min.js", searcher::MARK_JS)?;
         utils::fs::write_file(destination, "elasticlunr.min.js", searcher::ELASTICLUNR_JS)?;
-        debug!("Copying search files ?");
+        debug!("Copying search files");
     }
 
     Ok(())
@@ -108,7 +114,7 @@ fn render_item(
                         doc_urls,
                         &anchor_base,
                         &section_id,
-                        &[&heading, &body, &breadcrumbs.join(" È ")],
+                        &[&heading, &body, &breadcrumbs.join(" > ")],
                     );
                     section_id = None;
                     heading.clear();
@@ -172,7 +178,7 @@ fn render_item(
             doc_urls,
             &anchor_base,
             &section_id,
-            &[&heading, &body, &breadcrumbs.join(" È ")],
+            &[&heading, &body, &breadcrumbs.join(" > ")],
         );
     }
 
