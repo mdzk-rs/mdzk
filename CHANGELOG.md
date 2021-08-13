@@ -7,6 +7,10 @@
 
 - Prettier log messages. There should be a lot less verbosity when running mdzk now.
 
+### Bug fixes
+
+- Once again fixed a hot-reloading loop caused by tracking changes on the summmary file.
+
 
 ## 0.3.0 (2021-08-12)
 
