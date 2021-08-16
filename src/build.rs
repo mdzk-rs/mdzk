@@ -25,7 +25,7 @@ pub fn build(dir: Option<PathBuf>) -> Result<()> {
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let root = match dir {
         Some(path) => path,
-        None => find_zk_root().ok_or(Error::msg("Could not find the root of your Zettelkasten"))?,
+        None => find_zk_root().ok_or_else(|| Error::msg("Could not find the root of your Zettelkasten"))?,
     };
     debug!("Found root: {:?}", root);
 
@@ -36,7 +36,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     debug!("Successfully loaded config.");
 
     let book_source = &config.book.src;
-    update_summary(&book_source)?;
+    update_summary(book_source)?;
 
     let summary_file = book_source.join(SUMMARY_FILE);
     let mut summary_content = String::new();
@@ -60,7 +60,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         .get("disable_default_preprocessors")
         .unwrap_or(&Value::Boolean(false))
         .as_bool()
-        .ok_or(Error::msg("use-mdzk-preprocessors should be a boolean"))?
+        .ok_or_else(|| Error::msg("use-mdzk-preprocessors should be a boolean"))?
     {
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(KatexProcessor);

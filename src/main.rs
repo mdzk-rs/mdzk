@@ -8,7 +8,7 @@ use structopt::StructOpt;
 
 #[derive(StructOpt)]
 #[structopt(name = "mdzk", about = "A Zettelkasten tool based on mdBook.")]
-struct MDZK {
+struct Mdzk {
     #[structopt(subcommand)]
     cmd: Command,
 }
@@ -40,7 +40,7 @@ enum Command {
 fn main() -> Result<(), Error> {
     init_logger();
 
-    let args = MDZK::from_args();
+    let args = Mdzk::from_args();
 
     match args.cmd {
         Command::Build { dir } => build(dir),

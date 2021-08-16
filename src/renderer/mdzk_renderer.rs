@@ -68,7 +68,7 @@ impl HtmlMdzk {
         let fixed_content = utils::render_markdown_with_path(
             &ch.content,
             ctx.html_config.curly_quotes,
-            Some(&path),
+            Some(path),
         );
         if !ctx.is_index {
             // Add page break between chapters
@@ -189,7 +189,7 @@ impl HtmlMdzk {
         let rendered =
             self.post_process(rendered, &html_config.playground, ctx.config.rust.edition);
         let output_file = get_404_output_file(&html_config.input_404);
-        utils::fs::write_file(&destination, output_file, rendered.as_bytes())?;
+        utils::fs::write_file(destination, output_file, rendered.as_bytes())?;
         debug!("Creating 404.html ?");
         Ok(())
     }
@@ -234,10 +234,10 @@ impl HtmlMdzk {
         }
         write_file(destination, "css/variables.css", &theme.variables_css)?;
         if let Some(contents) = &theme.favicon_png {
-            write_file(destination, "favicon.png", &contents)?;
+            write_file(destination, "favicon.png", contents)?;
         }
         if let Some(contents) = &theme.favicon_svg {
-            write_file(destination, "favicon.svg", &contents)?;
+            write_file(destination, "favicon.svg", contents)?;
         }
         write_file(destination, "highlight.css", &theme.highlight_css)?;
         write_file(destination, "tomorrow-night.css", &theme.tomorrow_night_css)?;
@@ -520,12 +520,12 @@ impl Renderer for HtmlMdzk {
         debug!("Register handlebars helpers");
         self.register_hbs_helpers(&mut handlebars, &html_config);
 
-        let mut data = make_data(&ctx.root, &book, &ctx.config, &html_config, &theme)?;
+        let mut data = make_data(&ctx.root, book, &ctx.config, &html_config, &theme)?;
 
         // Print version
         let mut print_content = String::new();
 
-        fs::create_dir_all(&destination)
+        fs::create_dir_all(destination)
             .context("Unexpected error when constructing destination path")?;
 
         let mut is_index = true;
@@ -563,27 +563,27 @@ impl Renderer for HtmlMdzk {
             let rendered =
                 self.post_process(rendered, &html_config.playground, ctx.config.rust.edition);
 
-            utils::fs::write_file(&destination, "print.html", rendered.as_bytes())?;
+            utils::fs::write_file(destination, "print.html", rendered.as_bytes())?;
             debug!("Creating print.html ?");
         }
 
         debug!("Copy static files");
-        self.copy_static_files(&destination, &theme, &html_config)
+        self.copy_static_files(destination, &theme, &html_config)
             .context("Unable to copy across static files")?;
-        self.copy_additional_css_and_js(&html_config, &ctx.root, &destination)
+        self.copy_additional_css_and_js(&html_config, &ctx.root, destination)
             .context("Unable to copy across additional CSS and JS")?;
 
         // Render search index
         let search = html_config.search.unwrap_or_default();
         if search.enable {
-            super::search::create_files(&search, &destination, &book)?;
+            super::search::create_files(&search, destination, book)?;
         }
 
         self.emit_redirects(&ctx.destination, &handlebars, &html_config.redirect)
             .context("Unable to emit redirects")?;
 
         // Copy all remaining files, avoid a recursive copy from/to the book build dir
-        utils::fs::copy_files_except_ext(&src_dir, &destination, true, Some(&build_dir), &["md"])?;
+        utils::fs::copy_files_except_ext(&src_dir, destination, true, Some(&build_dir), &["md"])?;
 
         Ok(())
     }

@@ -14,7 +14,7 @@ const PAD_SIZE: usize = 4;
 
 /// Search up the filesystem to find a zk.toml file and return it's parent directory.
 pub fn find_zk_root() -> Option<PathBuf> {
-    let mut path: PathBuf = env::current_dir().unwrap().into();
+    let mut path: PathBuf = env::current_dir().unwrap();
     let file = Path::new(CONFIG_FILE);
 
     loop {
@@ -46,7 +46,7 @@ pub fn get_author_name() -> Option<String> {
     }
 }
 
-pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
+pub fn update_summary(book_source: &Path) -> Result<(), Error> {
     let summary = WalkDir::new(book_source)
         .sort_by_file_name()
         .into_iter()
@@ -54,7 +54,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
         .filter_entry(|e| {
             !e.file_name()
                 .to_str()
-                .map(|s| s.starts_with("."))
+                .map(|s| s.starts_with('.'))
                 .unwrap_or(false)
         })
         .filter_map(|e| e.ok())
@@ -84,7 +84,7 @@ pub fn update_summary(book_source: &PathBuf) -> Result<(), Error> {
                 ));
             }
 
-            return None;
+            None
         })
         .filter_map(|e| e)
         .fold(String::new(), |acc, curr| acc + &curr);
