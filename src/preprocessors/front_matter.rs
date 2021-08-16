@@ -23,16 +23,22 @@ impl Preprocessor for FrontMatter {
                 // adding more fields, we need to find a workaround for this.
                 #[derive(Deserialize, Debug)]
                 struct Config {
-                    title: String,
+                    title: Option<String>,
+                    date: Option<String>
                 }
 
                 let yaml_matter: Matter<YAML> = Matter::new();
                 let result = yaml_matter.matter(ch.content.clone());
 
                 if let Ok(parsed) = result.data.deserialize::<Config>() {
+                    // Remove metadata from content
                     let re = Regex::new(YAML_RE).unwrap();
-                    ch.name = parsed.title;
                     ch.content = re.replace_all(&ch.content, "").to_string();
+
+                    // Set title
+                    if let Some(title) = parsed.title {
+                        ch.name = title;
+                    }
                 }
             }
         });
