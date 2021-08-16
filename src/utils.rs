@@ -12,8 +12,9 @@ use walkdir::WalkDir;
 
 const PAD_SIZE: usize = 4;
 
-/// Search up the filesystem to find a zk.toml file and return it's parent directory.
-pub fn find_zk_root() -> Option<PathBuf> {
+/// Search up the filesystem to find a `mdzk.toml` file, and return it's parent directory.
+/// This is simply used to find the root of any mdzk vault.
+pub fn find_mdzk_root() -> Option<PathBuf> {
     let mut path: PathBuf = env::current_dir().unwrap();
     let file = Path::new(CONFIG_FILE);
 
@@ -46,6 +47,8 @@ pub fn get_author_name() -> Option<String> {
     }
 }
 
+/// Searches for Markdown-files in the source directory, and updates the summary file
+/// correspondingly. Ignores the summary file itself.
 pub fn update_summary(book_source: &Path) -> Result<(), Error> {
     let summary = WalkDir::new(book_source)
         .sort_by_file_name()
@@ -58,7 +61,7 @@ pub fn update_summary(book_source: &Path) -> Result<(), Error> {
                 .unwrap_or(false)
         })
         .filter_map(|e| e.ok())
-        // Don't include the book source directory or the SUMMARY.md file
+        // Don't include the book source directory or the summary file
         .filter(|e| e.path() != book_source && e.path() != book_source.join(SUMMARY_FILE))
         .map(|e| {
             let stripped_path = e.path().strip_prefix(&book_source).unwrap();
@@ -97,6 +100,7 @@ pub fn update_summary(book_source: &Path) -> Result<(), Error> {
     Ok(())
 }
 
+/// String escapes for URLs.
 fn escape_special_chars(text: &str) -> String {
     text.replace(" ", "%20")
         .replace("<", "&lt;")

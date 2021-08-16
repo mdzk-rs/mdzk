@@ -1,6 +1,6 @@
 use crate::{
     preprocessors::FrontMatter,
-    utils::{find_zk_root, update_summary},
+    utils::{find_mdzk_root, update_summary},
     // HtmlMdzk, 
     CONFIG_FILE, SUMMARY_FILE,
 };
@@ -25,7 +25,7 @@ pub fn build(dir: Option<PathBuf>) -> Result<()> {
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let root = match dir {
         Some(path) => path,
-        None => find_zk_root().ok_or_else(|| Error::msg("Could not find the root of your Zettelkasten"))?,
+        None => find_mdzk_root().ok_or_else(|| Error::msg("Could not find the root of your Zettelkasten"))?,
     };
     debug!("Found root: {:?}", root);
 
