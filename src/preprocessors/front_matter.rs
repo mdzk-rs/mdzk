@@ -5,6 +5,7 @@ use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use regex::Regex;
 use serde::Deserialize;
+use chrono::prelude::*;
 
 pub struct FrontMatter;
 
@@ -38,6 +39,34 @@ impl Preprocessor for FrontMatter {
                     // Set title
                     if let Some(title) = parsed.title {
                         ch.name = title;
+                    }
+
+                    // Set date
+                    if let Some(datestring) = parsed.date {
+                        let format = "%H:%M %A %d %B %Y";
+
+                        // Parse the supplied datestring (NOTE: Very verbose. There should be a more elegant way)
+                        let formatted_date = if let Ok(datetime) = datestring.parse::<DateTime<FixedOffset>>() {
+                            // Timezone is specified in datestring. Use that timezone
+                            datetime.format(format).to_string()
+                        } else if let Ok(naive_datetime) = datestring.parse::<NaiveDateTime>() {
+                            // Timezone is not specified, use local timezone
+                            let datetime = Local.from_local_datetime(&naive_datetime).unwrap();
+                            datetime.format(format).to_string()
+                        } else if let Ok(naive_datetime) = NaiveDateTime::parse_from_str(&datestring, "%Y-%m-%dT%H:%M") {
+                            // Timezone and seconds are not specified.
+                            let datetime = Local.from_local_datetime(&naive_datetime).unwrap();
+                            datetime.format(format).to_string()
+                        } else {
+                            // Could not parse date
+                            "Unknown date format".to_string()
+                        };
+
+                        ch.content = format!(
+                            "\n\n<div class=\"datetime\" style=\"text-align: center; color: gray; font-style: italic; font-size: 90%;\">{}</div>\n\n{}",
+                            &formatted_date,
+                            ch.content
+                        );
                     }
                 }
             }
