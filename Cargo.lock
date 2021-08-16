@@ -1491,6 +1491,7 @@ version = "0.3.2"
 dependencies = [
  "ammonia",
  "anyhow",
+ "chrono",
  "elasticlunr-rs",
  "env_logger 0.9.0",
  "futures-util",
