@@ -27,10 +27,12 @@ use::serde_json::json;
 use::anyhow::{bail, Context};
 
 
+/// The HTML backend for mdzk, implementing [`Renderer`](https://docs.rs/mdbook/0.4.12/mdbook/renderer/trait.Renderer.html).
 #[derive(Default)]
 pub struct HtmlMdzk;
 
 impl HtmlMdzk {
+    /// Creates a new instance of `HtmlMdzk`.
     pub fn new() -> Self {
         HtmlMdzk
     }

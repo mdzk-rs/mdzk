@@ -9,6 +9,7 @@ pub mod serve;
 pub mod utils;
 pub mod watch;
 
+#[doc(inline)]
 pub use crate::{
     build::build,
     init::init, 
