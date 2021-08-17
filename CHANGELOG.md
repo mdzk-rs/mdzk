@@ -7,6 +7,10 @@
 
 - New front matter field: Use the `date` (string) field to add a date to the note. The datestring must comply with [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601), with seconds and timezone being optional. If no timezone is specified, the local timezone will be used, though the timezone information is not utilized at the moment.
 
+### Enhancements
+
+- You are now able to use [TOML](https://toml.io/en/) in the front matter, if that suits your fancy.
+
 
 ## 0.3.2 (2021-08-13)
 
