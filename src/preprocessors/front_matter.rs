@@ -1,15 +1,25 @@
-use gray_matter::engine::yaml::YAML;
-use gray_matter::matter::Matter;
-use mdbook::book::{Book, BookItem};
-use mdbook::errors::Error;
-use mdbook::preprocess::{Preprocessor, PreprocessorContext};
+use chrono::prelude::*;
+use gray_matter::{
+    engine::{toml::TOML, yaml::YAML, Engine},
+    matter::Matter,
+};
+use mdbook::{
+    book::{Book, BookItem},
+    errors::*,
+    preprocess::{Preprocessor, PreprocessorContext},
+};
 use regex::Regex;
 use serde::Deserialize;
-use chrono::prelude::*;
+
+#[derive(Deserialize, Debug)]
+struct Config {
+    title: Option<String>,
+    date: Option<String>,
+}
 
 pub struct FrontMatter;
 
-const YAML_RE: &str = r"(?sm)^\s*---(.*)---\s*$";
+const FRONT_MATTER_RE: &str = r"(?sm)^\s*---(.*)---\s*$";
 
 impl Preprocessor for FrontMatter {
     fn name(&self) -> &str {
@@ -19,30 +29,20 @@ impl Preprocessor for FrontMatter {
     fn run(&self, _: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
-                // TODO: The deserializer is strict, which means all fields have to be present for
-                // the YAML to be parsed. Since we only have one field now, this is fine, but when
-                // adding more fields, we need to find a workaround for this.
-                #[derive(Deserialize, Debug)]
-                struct Config {
-                    title: Option<String>,
-                    date: Option<String>
-                }
+                let content = ch.content.clone();
 
-                let yaml_matter: Matter<YAML> = Matter::new();
-                let result = yaml_matter.matter(ch.content.clone());
-
-                if let Ok(parsed) = result.data.deserialize::<Config>() {
+                let mut handle_front_matter = |config: Config| {
                     // Remove metadata from content
-                    let re = Regex::new(YAML_RE).unwrap();
+                    let re = Regex::new(FRONT_MATTER_RE).unwrap();
                     ch.content = re.replace_all(&ch.content, "").to_string();
 
                     // Set title
-                    if let Some(title) = parsed.title {
+                    if let Some(title) = config.title {
                         ch.name = title;
                     }
 
                     // Set date
-                    if let Some(datestring) = parsed.date {
+                    if let Some(datestring) = config.date {
                         let format = "%H:%M %A %d %B %Y";
 
                         // Parse the supplied datestring (NOTE: Very verbose. There should be a more elegant way)
@@ -68,10 +68,69 @@ impl Preprocessor for FrontMatter {
                             ch.content
                         );
                     }
+                };
+
+                if let Some(config) = parse_matter::<YAML>(&content) {
+                    handle_front_matter(config);
+                } else if let Some(config) = parse_matter::<TOML>(&content) {
+                    handle_front_matter(config);
                 }
             }
         });
 
         Ok(book)
+    }
+}
+
+fn parse_matter<T: Engine>(content: &str) -> Option<Config> {
+    let matter: Matter<T> = Matter::new();
+    let result = matter.matter(content.to_string());
+    result.data.deserialize::<Config>().ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_yaml() {
+        let yaml_parsable_content = r#"---
+title: Title
+date: 2001-01-01T01:01
+---
+
+Markdown content."#;
+
+        let yaml_unparsable_content = r#"---
+title = "Title"
+wrong_key: 42
+---
+
+Markdown content."#;
+
+        let parsed = parse_matter::<YAML>(&yaml_parsable_content).unwrap();
+        assert_eq!(parsed.title.unwrap(), "Title");
+        assert!(parse_matter::<YAML>(&yaml_unparsable_content).is_none())
+    }
+
+    #[test]
+    fn test_parse_toml() {
+        let toml_parsable_content = r#"---
+title = "Title"
+date = "2001-01-01T01:01"
+---
+
+Markdown content."#;
+
+        let toml_unparsable_content = r#"---
+title: Title
+wrong_key = 42
+---
+
+Markdown content."#;
+
+        let parsed = parse_matter::<TOML>(&toml_parsable_content).unwrap();
+        assert_eq!(parsed.title.unwrap(), "Title");
+        assert!(parse_matter::<TOML>(&toml_unparsable_content).is_none())
     }
 }
