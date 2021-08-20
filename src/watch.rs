@@ -1,5 +1,5 @@
 // This is simply a modified version of https://github.com/rust-lang/mdBook/blob/master/src/cmd/watch.rs
-use crate::SUMMARY_FILE;
+use crate::{SUMMARY_FILE, CONFIG_FILE};
 
 use mdbook::MDBook;
 use notify::Watcher;
@@ -89,7 +89,7 @@ where
     let _ = watcher.watch(book.theme_dir(), Recursive);
 
     // Add the book.toml file to the watcher if it exists
-    let _ = watcher.watch(book.root.join("zk.toml"), NonRecursive);
+    let _ = watcher.watch(book.root.join(CONFIG_FILE), NonRecursive);
 
     info!("Listening for changes...");
 
