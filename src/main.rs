@@ -19,6 +19,9 @@ enum Command {
     Build {
         #[structopt(parse(from_os_str))]
         dir: Option<PathBuf>,
+
+        #[structopt(long = "renderer", short = "r", default_value = "mdbook")]
+        renderer: String,
     },
 
     #[structopt(name = "init")]
@@ -43,7 +46,7 @@ fn main() -> Result<(), Error> {
     let args = Mdzk::from_args();
 
     match args.cmd {
-        Command::Build { dir } => build(dir),
+        Command::Build { dir, renderer } => build(dir, renderer),
         Command::Init { dir } => init(dir),
         Command::Serve { dir, port, bind } => serve(dir, port, bind),
     }
