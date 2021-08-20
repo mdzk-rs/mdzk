@@ -1,5 +1,3 @@
-mod helpers;
 mod mdzk_renderer;
-mod search;
 
-pub use self::mdzk_renderer::HtmlMdzk;
+pub use mdzk_renderer::HtmlMdzk;

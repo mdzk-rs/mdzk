@@ -1,19 +1,19 @@
 #[macro_use]
 extern crate log;
 
-pub mod build;
-pub mod init;
+pub mod cmd;
 pub mod preprocessors;
 pub mod renderer;
-pub mod serve;
 pub mod utils;
-pub mod watch;
+pub mod zk;
 
 #[doc(inline)]
-pub use crate::{build::build, init::init, serve::serve};
+pub use crate::{cmd::build, cmd::init, cmd::serve, zk::load_zk};
 
 pub const SRC_DIR: &str = "notes";
 pub const BUILD_DIR: &str = "html";
 pub const CONFIG_FILE: &str = "mdzk.toml";
 pub const SUMMARY_FILE: &str = ".mdzk_summary.md";
 pub const DEFAULT_ZK_TITLE: &str = "My mdzk";
+
+

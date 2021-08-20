@@ -5,6 +5,7 @@ use crate::{
     CONFIG_FILE,
     SUMMARY_FILE,
 };
+
 use anyhow::Context;
 use mdbook::{book::parse_summary, errors::*, Config, MDBook};
 use mdbook_backlinks::Backlinks;
@@ -14,14 +15,6 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use toml::Value;
-
-pub fn build(dir: Option<PathBuf>) -> Result<()> {
-    let zk = load_zk(dir)?;
-
-    zk.build()?;
-
-    Ok(())
-}
 
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let root = match dir {

@@ -1,4 +1,4 @@
-use crate::{build::load_zk, watch};
+use crate::{load_zk, cmd::watch};
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::errors::*;
