@@ -1,21 +1,20 @@
-use std::{
-    borrow::Cow,
-    collections::{HashMap, HashSet},
-    path::Path,
-};
+use anyhow::Context;
+use elasticlunr::Index;
+use lazy_static::lazy_static;
 use mdbook::{
     book::{Book, BookItem},
     config::Search,
     errors::*,
     theme::searcher,
-    utils
+    utils,
 };
-use elasticlunr::Index;
 use pulldown_cmark::*;
-use lazy_static::lazy_static;
-use anyhow::Context;
 use serde::Serialize;
-
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
 /// Creates all files required for search.
 pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> Result<()> {

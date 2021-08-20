@@ -10,12 +10,7 @@ pub mod utils;
 pub mod watch;
 
 #[doc(inline)]
-pub use crate::{
-    build::build,
-    init::init, 
-    serve::serve,
-    renderer::HtmlMdzk,
-};
+pub use crate::{build::build, init::init, renderer::HtmlMdzk, serve::serve};
 
 pub const SRC_DIR: &str = "notes";
 pub const BUILD_DIR: &str = "html";
