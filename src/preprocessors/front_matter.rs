@@ -9,6 +9,7 @@ use mdbook::{
     preprocess::{Preprocessor, PreprocessorContext},
 };
 use regex::Regex;
+use lazy_static::lazy_static;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -27,14 +28,16 @@ impl Preprocessor for FrontMatter {
     }
 
     fn run(&self, _: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(FRONT_MATTER_RE).unwrap();
+        }
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
                 let content = ch.content.clone();
 
                 let mut handle_front_matter = |config: Config| {
                     // Remove metadata from content
-                    let re = Regex::new(FRONT_MATTER_RE).unwrap();
-                    ch.content = re.replace_all(&ch.content, "").to_string();
+                    ch.content = RE.replace_all(&ch.content, "").to_string();
 
                     // Set title
                     if let Some(title) = config.title {
