@@ -1,8 +1,4 @@
-use std::{
-    collections::BTreeMap,
-    io,
-    path::Path,
-};
+use std::{collections::BTreeMap, io, path::Path};
 
 use mdbook::utils;
 

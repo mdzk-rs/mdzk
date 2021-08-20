@@ -1,31 +1,24 @@
 use crate::renderer::helpers;
 
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, HashMap},
-    fs::{self, File},
-    path::{Path, PathBuf}
-};
+use ::anyhow::{bail, Context};
+use ::lazy_static::lazy_static;
+use ::serde_json::json;
+use handlebars::Handlebars;
 use mdbook::{
     book::{Book, BookItem},
-    config::{
-        BookConfig,
-        Config,
-        HtmlConfig,
-        Playground,
-        RustEdition
-    },
+    config::{BookConfig, Config, HtmlConfig, Playground, RustEdition},
     errors::*,
     renderer::{RenderContext, Renderer},
     theme::{self, playground_editor, Theme},
     utils::{self, fs::get_404_output_file},
 };
-use handlebars::Handlebars;
 use regex::{Captures, Regex};
-use::lazy_static::lazy_static;
-use::serde_json::json;
-use::anyhow::{bail, Context};
-
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, HashMap},
+    fs::{self, File},
+    path::{Path, PathBuf},
+};
 
 /// The HTML backend for mdzk, implementing [`Renderer`](https://docs.rs/mdbook/0.4.12/mdbook/renderer/trait.Renderer.html).
 #[derive(Default)]
@@ -43,8 +36,6 @@ impl HtmlMdzk {
         mut ctx: RenderItemContext<'_>,
         print_content: &mut String,
     ) -> Result<()> {
-        // FIXME: This should be made DRY-er and rely less on mutable state
-
         let (ch, path) = match item {
             BookItem::Chapter(ch) if !ch.is_draft_chapter() => (ch, ch.path.as_ref().unwrap()),
             _ => return Ok(()),
@@ -67,11 +58,8 @@ impl HtmlMdzk {
         let content = ch.content.clone();
         let content = utils::render_markdown(&content, ctx.html_config.curly_quotes);
 
-        let fixed_content = utils::render_markdown_with_path(
-            &ch.content,
-            ctx.html_config.curly_quotes,
-            Some(path),
-        );
+        let fixed_content =
+            utils::render_markdown_with_path(&ch.content, ctx.html_config.curly_quotes, Some(path));
         if !ctx.is_index {
             // Add page break between chapters
             // See https://developer.mozilla.org/en-US/docs/Web/CSS/break-before and https://developer.mozilla.org/en-US/docs/Web/CSS/page-break-before
@@ -82,9 +70,7 @@ impl HtmlMdzk {
         print_content.push_str(&fixed_content);
 
         // Update the context with data for this file
-        let ctx_path = path
-            .to_str()
-            .context("Could not convert path to str")?;
+        let ctx_path = path.to_str().context("Could not convert path to str")?;
         let filepath = Path::new(&ctx_path).with_extension("html");
 
         // "print.html" is used for the print page.
