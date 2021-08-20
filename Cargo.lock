@@ -809,9 +809,9 @@ dependencies = [
 
 [[package]]
 name = "gray_matter"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "deed89f803cf559d60ec5cf204f35a9a803dbdf39182b431791b3f0a36a2b9f2"
+checksum = "bbe4e5d3deddf3e8ed33124c1846a57aadf1c0b80b237738311852fab96e48ea"
 dependencies = [
  "json",
  "regex",

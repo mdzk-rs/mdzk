@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use gray_matter::{
-    engine::{toml::TOML, yaml::YAML, Engine},
-    matter::Matter,
+    engine::{Engine, TOML, YAML},
+    Matter,
 };
 use mdbook::{
     book::{Book, BookItem},
@@ -84,8 +84,7 @@ impl Preprocessor for FrontMatter {
 
 fn parse_matter<T: Engine>(content: &str) -> Option<Config> {
     let matter: Matter<T> = Matter::new();
-    let result = matter.matter(content.to_string());
-    result.data.deserialize::<Config>().ok()
+    Some(matter.parse_with_struct::<Config>(content)?.data)
 }
 
 #[cfg(test)]
