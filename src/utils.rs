@@ -1,7 +1,7 @@
 use crate::{CONFIG_FILE, SUMMARY_FILE};
 
-use mdbook::errors::Error;
-use std::fs::File;
+use mdbook::errors::*;
+use std::fs::{self, File};
 use std::io::Write;
 use std::{
     env,
@@ -102,10 +102,24 @@ pub fn update_summary(book_source: &Path) -> Result<(), Error> {
 
 /// String escapes for URLs.
 fn escape_special_chars(text: &str) -> String {
-    text.replace(" ", "%20")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
+    text.replace(' ', "%20")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
         .replace("'", "&apos;")
-        .replace("\"", "&quot;")
-        .replace("&", "&amp;")
+        .replace('"', "&quot;")
+        .replace('&', "&amp;")
+}
+
+/// Ease-of-use function for creating a file and writing bytes to it
+pub fn write_file(path: &PathBuf, bytes: &[u8]) -> Result<()> {
+    // Create file
+    if let Some(p) = path.parent() {
+        fs::create_dir_all(p)?;
+    }
+    let mut f = File::create(path)?;
+
+    // Write bytes
+    f.write_all(bytes)?;
+
+    Ok(())
 }
