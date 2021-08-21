@@ -6,7 +6,7 @@ use crate::{
 };
 
 use anyhow::Context;
-use mdbook::{book::parse_summary, errors::*, Config, MDBook};
+use mdbook::{book::parse_summary, errors::*, Config, MDBook, preprocess::IndexPreprocessor};
 use mdbook_backlinks::Backlinks;
 use mdbook_katex::KatexProcessor;
 use mdbook_wikilink::WikiLinks;
@@ -23,11 +23,14 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     };
     debug!("Found root: {:?}", root);
 
-    let config: Config = Config::from_disk(root.join(CONFIG_FILE)).context(format!(
+    let mut config: Config = Config::from_disk(root.join(CONFIG_FILE)).context(format!(
         "Could not load config file {:?}",
         root.join(CONFIG_FILE)
     ))?;
     debug!("Successfully loaded config.");
+    // Override use_default_preprocessors config option. We are using
+    // 'disable_default_preprocessors' instead.
+    config.build.use_default_preprocessors = false;
 
     let book_source = &config.book.src;
     update_summary(book_source)?;
@@ -47,7 +50,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     debug!("Parsed summary.");
 
     let mut zk = MDBook::load_with_config_and_summary(root, config, summary)?;
-    info!("Successfully loaded mdzk: {:?}", zk.root);
+    info!("Successfully loaded mdzk in: {:?}", zk.root);
 
     if !zk
         .config
@@ -60,6 +63,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         zk.with_preprocessor(KatexProcessor);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(WikiLinks);
+        zk.with_preprocessor(IndexPreprocessor);
     } else {
         info!("Running without default mdzk preprocessors.")
     }
