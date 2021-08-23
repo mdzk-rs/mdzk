@@ -1,12 +1,12 @@
 use crate::{
-    preprocessors::FrontMatter,
+    preprocessors::{FrontMatter, ReadmePreprocessor},
     utils::{find_mdzk_root, update_summary},
     CONFIG_FILE,
     SUMMARY_FILE,
 };
 
 use anyhow::Context;
-use mdbook::{book::parse_summary, errors::*, Config, MDBook, preprocess::IndexPreprocessor};
+use mdbook::{book::parse_summary, errors::*, Config, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_katex::KatexProcessor;
 use mdbook_wikilink::WikiLinks;
@@ -63,7 +63,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         zk.with_preprocessor(KatexProcessor);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(WikiLinks);
-        zk.with_preprocessor(IndexPreprocessor);
+        zk.with_preprocessor(ReadmePreprocessor);
     } else {
         info!("Running without default mdzk preprocessors.")
     }
