@@ -1,4 +1,4 @@
-use regex::Regex;
+use regex::{Regex, Captures};
 use lazy_static::lazy_static;
 use mdbook::errors::*;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
@@ -23,6 +23,10 @@ impl Preprocessor for ReadmePreprocessor {
     }
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
+        lazy_static! {
+            static ref README_LINK: Regex = Regex::new(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)").unwrap();
+        }
+
         let source_dir = ctx.root.join(&ctx.config.book.src);
         book.for_each_mut(|section: &mut BookItem| {
             if let BookItem::Chapter(ref mut ch) = *section {
@@ -32,9 +36,12 @@ impl Preprocessor for ReadmePreprocessor {
                         if index_md.exists() {
                             warn_readme_name_conflict(&path, &&mut index_md);
                         }
-
                         path.set_file_name("index.md");
-                    } else {}
+                    }  else {
+                        ch.content = README_LINK.replace_all(&ch.content, |caps: &Captures| {
+                            format!("[{}](index.md)", &caps[1])
+                        }).to_string();
+                    }
                 }
             }
         });
