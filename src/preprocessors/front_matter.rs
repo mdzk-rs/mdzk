@@ -66,9 +66,9 @@ impl Preprocessor for FrontMatter {
                         };
 
                         ch.content = format!(
-                            "\n\n<div class=\"datetime\" style=\"text-align: center; color: gray; font-style: italic; font-size: 90%;\">{}</div>\n\n{}",
+                            "{}\n\n<div class=\"datetime\" style=\"text-align: center; color: gray; font-style: italic; font-size: 90%;\">{}</div>\n\n",
+                            ch.content,
                             &formatted_date,
-                            ch.content
                         );
                     }
                 };
