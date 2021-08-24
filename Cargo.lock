@@ -1301,7 +1301,7 @@ dependencies = [
 
 [[package]]
 name = "mdzk"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "ammonia",
  "anyhow",
