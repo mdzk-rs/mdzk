@@ -1,7 +1,7 @@
 # Changelog
 
 
-## 0.3.3 (Unreleased)
+## 0.3.3 (2021-08-24)
 
 ### New features
 
@@ -10,6 +10,7 @@
 ### Enhancements
 
 - You are now able to use [TOML](https://toml.io/en/) in the front matter, if that suits your fancy.
+- The [`IndexPreprocessor`](https://github.com/rust-lang/mdBook/blob/master/src/preprocess/index.rs) bundled with mdBook is improved for mdzk and now replaces all links to `README.md` into `index.md`. This means you can use the Markdown convention of naming the main page README without having broken links/backlinks.
 
 
 ## 0.3.2 (2021-08-13)
