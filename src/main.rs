@@ -11,11 +11,14 @@ use structopt::StructOpt;
 struct Mdzk {
     #[structopt(subcommand)]
     cmd: Command,
+
+    #[structopt(long = "log-level", short = "l", default_value = "3", help = "Set the logging level")]
+    log_level: usize,
 }
 
 #[derive(StructOpt)]
 enum Command {
-    #[structopt(name = "build", about = "Build a Zettelkasten")]
+    #[structopt(name = "build", about = "Builds an mdzk")]
     Build {
         #[structopt(parse(from_os_str))]
         dir: Option<PathBuf>,
@@ -24,10 +27,10 @@ enum Command {
         renderer: String,
     },
 
-    #[structopt(name = "init")]
+    #[structopt(name = "init", about = "Initializes an mdzk")]
     Init { dir: Option<PathBuf> },
 
-    #[structopt(name = "serve")]
+    #[structopt(name = "serve", about = "Serves the generated files")]
     Serve {
         #[structopt(parse(from_os_str))]
         dir: Option<PathBuf>,
@@ -41,9 +44,9 @@ enum Command {
 }
 
 fn main() -> Result<(), Error> {
-    init_logger();
-
     let args = Mdzk::from_args();
+
+    init_logger(args.log_level);
 
     match args.cmd {
         Command::Build { dir, renderer } => build(dir, renderer),
@@ -52,9 +55,19 @@ fn main() -> Result<(), Error> {
     }
 }
 
-fn init_logger() {
+fn init_logger(log_level: usize) {
     let mut builder = Builder::new();
-    builder.filter(None, log::LevelFilter::Info);
+
+    builder.filter(None, match log_level {
+        0 => log::LevelFilter::Off,
+        1 => log::LevelFilter::Error,
+        2 => log::LevelFilter::Warn,
+        3 => log::LevelFilter::Info,
+        4 => log::LevelFilter::Debug,
+        5 => log::LevelFilter::Trace,
+        _ => log::LevelFilter::Info,
+    });
+
     builder.format(|formatter, record| {
         writeln!(formatter, "{:8>} - {}", record.level(), record.args())
     });
