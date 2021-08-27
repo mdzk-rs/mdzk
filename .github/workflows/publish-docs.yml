@@ -1,0 +1,34 @@
+name: Publish Docs
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-docs-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+
+      - name: Install Rust 🦀
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install mdzk 📝
+        uses: actions-rs/install@master
+        with:
+          crate: mdzk
+
+      - name: Build 🔧
+        run: |
+          cd docs/
+          mdzk build
+
+      - name: Deploy 🚀
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./book
