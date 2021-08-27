@@ -1256,9 +1256,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-backlinks"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49a79c2ce81c90e807fdbab22f1fcdcf5fbf43e09c5cf4407c0bddede58d0972"
+checksum = "a8e76cba09f5556cf07b03b196d9e7744823aea9f026e56332a782e29c7441a8"
 dependencies = [
  "clap",
  "mdbook",
@@ -1284,9 +1284,9 @@ dependencies = [
 
 [[package]]
 name = "mdbook-wikilink"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "417e0b8b2d402f4d031edb5727756bfce72ac43a0459f1a71bfb573c3da79eee"
+checksum = "a49b68ad6e0c006ece98027f6e87cab2d6ee12c923a2b41f4d38c3f3d3807f93"
 dependencies = [
  "clap",
  "lazy-regex",

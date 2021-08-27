@@ -100,7 +100,7 @@ pub fn update_summary(book_source: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-/// String escapes for URLs.
+/// String escapes for HTML entity.
 fn escape_special_chars(text: &str) -> String {
     text.replace(' ', "%20")
         .replace('<', "&lt;")
