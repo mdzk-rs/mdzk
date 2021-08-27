@@ -105,9 +105,6 @@ fn escape_special_chars(text: &str) -> String {
     text.replace(' ', "%20")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
-        .replace("'", "&apos;")
-        .replace('"', "&quot;")
-        .replace('&', "&amp;")
 }
 
 /// Ease-of-use function for creating a file and writing bytes to it
