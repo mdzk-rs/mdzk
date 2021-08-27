@@ -1301,7 +1301,7 @@ dependencies = [
 
 [[package]]
 name = "mdzk"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "ammonia",
  "anyhow",
@@ -1313,7 +1313,6 @@ dependencies = [
  "gray_matter",
  "handlebars",
  "lazy-regex",
- "lazy_static",
  "log",
  "mdbook",
  "mdbook-backlinks",
