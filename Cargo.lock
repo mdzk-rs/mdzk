@@ -1312,6 +1312,7 @@ dependencies = [
  "gitignore",
  "gray_matter",
  "handlebars",
+ "lazy-regex",
  "lazy_static",
  "log",
  "mdbook",
