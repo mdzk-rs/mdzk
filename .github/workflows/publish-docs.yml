@@ -2,8 +2,6 @@ name: Publish Docs
 
 on:
   push:
-    tags:
-      - "*"
     paths:
       - 'docs/**'
 
