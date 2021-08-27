@@ -8,8 +8,7 @@ use mdbook::{
     errors::*,
     preprocess::{Preprocessor, PreprocessorContext},
 };
-use regex::Regex;
-use lazy_static::lazy_static;
+use lazy_regex::regex;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -20,24 +19,20 @@ struct Config {
 
 pub struct FrontMatter;
 
-const FRONT_MATTER_RE: &str = r"(?sm)^\s*---(.*)---\s*$";
-
 impl Preprocessor for FrontMatter {
     fn name(&self) -> &str {
         "front_matter"
     }
 
     fn run(&self, _: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
-        lazy_static! {
-            static ref RE: Regex = Regex::new(FRONT_MATTER_RE).unwrap();
-        }
+        let re = regex!(r"(?sm)^\s*---(.*)---\s*$");
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
                 let content = ch.content.clone();
 
                 let mut handle_front_matter = |config: Config| {
                     // Remove metadata from content
-                    ch.content = RE.replace_all(&ch.content, "").to_string();
+                    ch.content = re.replace_all(&ch.content, "").to_string();
 
                     // Set title
                     if let Some(title) = config.title {

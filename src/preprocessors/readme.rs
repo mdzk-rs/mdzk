@@ -1,5 +1,5 @@
-use regex::{Regex, Captures};
-use lazy_static::lazy_static;
+use regex::Captures;
+use lazy_regex::regex;
 use mdbook::errors::*;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use mdbook::book::{Book, BookItem};
@@ -23,9 +23,7 @@ impl Preprocessor for ReadmePreprocessor {
     }
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
-        lazy_static! {
-            static ref README_LINK: Regex = Regex::new(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)").unwrap();
-        }
+        let readme_link_re = regex!(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)");
 
         let source_dir = ctx.root.join(&ctx.config.book.src);
         book.for_each_mut(|section: &mut BookItem| {
@@ -38,7 +36,7 @@ impl Preprocessor for ReadmePreprocessor {
                         }
                         path.set_file_name("index.md");
                     }  else {
-                        ch.content = README_LINK.replace_all(&ch.content, |caps: &Captures| {
+                        ch.content = readme_link_re.replace_all(&ch.content, |caps: &Captures| {
                             format!("[{}](index.md)", &caps[1])
                         }).to_string();
                     }
@@ -71,10 +69,7 @@ fn warn_readme_name_conflict<P: AsRef<Path>>(readme_path: P, index_path: P) {
 }
 
 fn is_readme_file<P: AsRef<Path>>(path: P) -> bool {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"(?i)^readme$").unwrap();
-    }
-    RE.is_match(
+    regex!(r"(?i)^readme$").is_match(
         path.as_ref()
             .file_stem()
             .and_then(std::ffi::OsStr::to_str)
