@@ -1,6 +1,13 @@
 # Changelog
 
 
+## 0.3.4 (Unreleased)
+
+### Bug fixes
+
+- `'` and `"` threw errors when compiling, because these characters were escaped in their filename, meaning mdzk could not find the source.
+
+
 ## 0.3.3 (2021-08-24)
 
 ### New features
