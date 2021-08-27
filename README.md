@@ -17,3 +17,9 @@ mdzk will soon also be available as a pre-built binary for quicker installation.
 ## Getting started
 
 We are still figuring out the exact user interface, so there would not be much help in a "getting started" guide just yet. mdzk works very much like [mdBook](https://rust-lang.github.io/mdBook/cli/index.html), so you can use their guide for the time being. We hope to provide a full documentation very soon...
+
+## Important notes
+
+- **Supported characters**:
+
+    These characters are disallowed in note filenames: `=`, `\``, `^`, `#`, `|`, `:`, `/`, `[` and `]`. `$` is supported, but not recommended, as it might intefere with the KaTeX math delimiters.
