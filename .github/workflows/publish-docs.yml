@@ -7,6 +7,9 @@ on:
 
 jobs:
   build-docs-and-deploy:
+    defaults:
+      run:
+        working-directory: docs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -23,9 +26,7 @@ jobs:
           crate: mdzk
 
       - name: Build 🔧
-        run: |
-          cd docs/
-          mdzk build
+        run: mdzk build
 
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
