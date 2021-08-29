@@ -22,4 +22,4 @@ We are still figuring out the exact user interface, so there would not be much h
 
 - **Supported characters**:
 
-    These characters are disallowed in note filenames: `=`, `\``, `^`, `#`, `|`, `:`, `/`, `[` and `]`. `$` is supported, but not recommended, as it might intefere with the KaTeX math delimiters.
+    These characters are disallowed in note filenames: `=`, <code>\`</code>, `^`, `#`, `|`, `:`, `/`, `[` and `]`. `$` is supported, but not recommended, as it might intefere with the KaTeX math delimiters.
