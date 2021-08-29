@@ -1,9 +1,12 @@
 /target
 .envrc
 .direnv/
-.vscode
 result
 
 # docs
 .obsidian
 out
+
+# editors
+.idea
+.vscode
