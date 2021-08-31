@@ -1,6 +1,7 @@
 use crate::{CONFIG_FILE, SUMMARY_FILE};
 
 use mdbook::errors::*;
+use std::cmp::Ordering;
 use std::fs::{self, File};
 use std::io::Write;
 use std::{
@@ -51,7 +52,15 @@ pub fn get_author_name() -> Option<String> {
 /// correspondingly. Ignores the summary file itself.
 pub fn update_summary(book_source: &Path) -> Result<(), Error> {
     let summary = WalkDir::new(book_source)
-        .sort_by_file_name()
+        .sort_by(|a, b| {
+            if a.path().is_dir() {
+                return Ordering::Less
+            } else if b.path().is_dir() {
+                return Ordering::Greater
+            } else {
+                a.file_name().to_ascii_uppercase().cmp(&b.file_name().to_ascii_uppercase())
+            }
+        })
         .into_iter()
         // remove hidden files
         .filter_entry(|e| {
