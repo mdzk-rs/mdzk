@@ -40,6 +40,9 @@ enum Command {
 
         #[structopt(long = "bind", short = "b", default_value = "localhost")]
         bind: String,
+
+        #[structopt(long = "renderer", short = "r", default_value = "mdbook")]
+        renderer: String,
     },
 }
 
@@ -51,7 +54,7 @@ fn main() -> Result<(), Error> {
     match args.cmd {
         Command::Build { dir, renderer } => build(dir, renderer),
         Command::Init { dir } => init(dir),
-        Command::Serve { dir, port, bind } => serve(dir, port, bind),
+        Command::Serve { dir, port, bind, renderer } => serve(dir, port, bind, renderer),
     }
 }
 
