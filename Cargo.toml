@@ -15,6 +15,7 @@ readme = "README.md"
 license-file = "LICENSE"
 include = [
     "**/*.rs",
+    "**/*.hbs",
     "Cargo.toml"
 ]
 
