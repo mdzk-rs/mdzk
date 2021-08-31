@@ -4,7 +4,11 @@
 
 ### Enhancements
 
-- Summary is now sorted by directories first.
+- Summary is now sorted by directories first. (78f98d040fe4674c34571d115d8e7de10c14eb97)
+
+### Bug fixed
+
+- Added `*.hbs` files to Cargo.toml. (3b4bcd98374b4463143fd81cf621b97c198bafae)
 
 ## 0.3.4 (2021-08-27)
 
