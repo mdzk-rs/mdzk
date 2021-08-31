@@ -1,4 +1,4 @@
-name: Build
+name: Publish Crate
 
 on:
   push:
