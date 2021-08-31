@@ -1,7 +1,12 @@
 # Changelog
 
+## 0.3.5 (2021-08-31)
 
-## 0.3.4 (Unreleased)
+### Enhancements
+
+- Summary is now sorted by directories first.
+
+## 0.3.4 (2021-08-27)
 
 ### Enhancements
 
@@ -11,7 +16,6 @@
 
 - `'` and `"` threw errors when compiling, because these characters were escaped in their filename, meaning mdzk could not find the source.
 - The URLs produced by our preprocessors did not escape special characters properly. This is now fixed, meaning URLs should all work properly again. Unsupported characters are documented in the [README](https://github.com/mdzk-rs/mdzk/blob/main/README.md), but repeated here: `=`, `\``, `^`, `#`, `|`, `:`, `/`, `[` and `]`. `$` is supported, but not recommended, as it might intefere with the KaTeX math delimiters.
-
 
 ## 0.3.3 (2021-08-24)
 
