@@ -21,11 +21,20 @@ include = [
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = [
+    "preprocessors/mdbook-backlinks",
+    "preprocessors/mdbook-wikilinks",
+    "preprocessors/mdbook-frontmatter",
+]
+
 [dependencies]
 mdbook = "0.4.12"
 mdbook-katex = "0.2.10"
-mdbook-wikilink = "0.3.4"
-mdbook-backlinks = "0.2.3"
+mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks" }
+mdbook-backlinks = { path = "preprocessors/mdbook-backlinks" }
+mdbook-frontmatter = { path = "preprocessors/mdbook-frontmatter" }
+mdbook-readme = { path = "preprocessors/mdbook-readme" }
 structopt = "0.2"
 futures-util = "0.3.4"
 tokio = { version = "0.2.18", features = ["macros"] }
@@ -46,4 +55,3 @@ env_logger = "0.9.0"
 elasticlunr-rs = "2.3.13"
 pulldown-cmark = "0.7.0"
 ammonia = "3.1.2"
-chrono = "0.4.19"
