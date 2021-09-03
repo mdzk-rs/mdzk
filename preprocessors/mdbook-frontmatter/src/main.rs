@@ -21,8 +21,8 @@ fn main() {
 
     // Users will want to construct their own preprocessor here
     if let Some(sub_args) = matches.subcommand_matches("supports") {
-        handle_supports(&Backlinks, sub_args);
-    } else if let Err(e) = handle_preprocessing(&Backlinks) {
+        handle_supports(&FrontMatter, sub_args);
+    } else if let Err(e) = handle_preprocessing(&FrontMatter) {
         eprintln!("{}", e);
         process::exit(1);
     }
