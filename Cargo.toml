@@ -51,3 +51,4 @@ env_logger = "0.9.0"
 elasticlunr-rs = { version = "2.3.13", default-features = false }
 pulldown-cmark = "0.7.0"
 ammonia = "3.1.2"
+unicase = "2.6.0"
