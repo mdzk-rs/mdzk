@@ -1,0 +1,25 @@
+[package]
+name = "mdbook-readme"
+description = "Preprocessor for converting file name `README.md` to `index.md`"
+# homepage = "https://github.com/mdzk-rs/mdbook-wikilink"
+# repository = "https://github.com/mdzk-rs/mdbook-wikilink"
+version = "0.0.1"
+authors = [
+    "Victor Freire <victor@freire.dev.br>",
+    "Leo Silva Souza <leovano@protonmail.com>",
+    "Knut Magnus Aasrud <km@aasrud.com>",
+    "Xiangru Lian <admin@mail.xrlian.com>",
+]
+edition = "2018"
+license = "MIT"
+readme = "README.md"
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
+
+[dependencies]
+lazy-regex = "2.2.1"
+mdbook = "0.4.12"
+regex = "1.5.4"
+log = "0.4.14"
