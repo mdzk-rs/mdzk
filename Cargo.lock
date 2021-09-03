@@ -1071,17 +1071,30 @@ dependencies = [
 
 [[package]]
 name = "mdbook-backlinks"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8e76cba09f5556cf07b03b196d9e7744823aea9f026e56332a782e29c7441a8"
+version = "0.2.4"
 dependencies = [
  "clap",
+ "lazy-regex",
  "mdbook",
  "pathdiff",
  "regex",
  "semver",
  "serde_json",
  "toml",
+]
+
+[[package]]
+name = "mdbook-frontmatter"
+version = "0.0.1"
+dependencies = [
+ "chrono",
+ "clap",
+ "gray_matter",
+ "lazy-regex",
+ "mdbook",
+ "semver",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -1098,10 +1111,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-wikilink"
+name = "mdbook-readme"
+version = "0.0.1"
+dependencies = [
+ "lazy-regex",
+ "log",
+ "mdbook",
+ "regex",
+]
+
+[[package]]
+name = "mdbook-wikilinks"
 version = "0.3.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a49b68ad6e0c006ece98027f6e87cab2d6ee12c923a2b41f4d38c3f3d3807f93"
 dependencies = [
  "clap",
  "lazy-regex",
@@ -1120,7 +1141,6 @@ version = "0.3.5"
 dependencies = [
  "ammonia",
  "anyhow",
- "chrono",
  "elasticlunr-rs",
  "env_logger 0.9.0",
  "futures-util",
@@ -1131,8 +1151,10 @@ dependencies = [
  "log",
  "mdbook",
  "mdbook-backlinks",
+ "mdbook-frontmatter",
  "mdbook-katex",
- "mdbook-wikilink",
+ "mdbook-readme",
+ "mdbook-wikilinks",
  "notify",
  "pulldown-cmark",
  "regex",
