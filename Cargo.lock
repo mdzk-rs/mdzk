@@ -1259,6 +1259,7 @@ name = "mdbook-backlinks"
 version = "0.2.3"
 dependencies = [
  "clap",
+ "lazy-regex",
  "mdbook",
  "pathdiff",
  "regex",
