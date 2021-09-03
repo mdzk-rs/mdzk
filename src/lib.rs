@@ -2,7 +2,6 @@
 extern crate log;
 
 pub mod cmd;
-pub mod preprocessors;
 pub mod renderer;
 pub mod utils;
 pub mod zk;
@@ -15,5 +14,3 @@ pub const BUILD_DIR: &str = "html";
 pub const CONFIG_FILE: &str = "mdzk.toml";
 pub const SUMMARY_FILE: &str = ".mdzk_summary.md";
 pub const DEFAULT_ZK_TITLE: &str = "My mdzk";
-
-
