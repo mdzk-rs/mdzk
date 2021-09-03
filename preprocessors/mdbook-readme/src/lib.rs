@@ -4,6 +4,7 @@ use mdbook::errors::*;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use mdbook::book::{Book, BookItem};
 use std::path::Path;
+use log::{warn};
 
 /// A preprocessor for converting file name `README.md` to `index.md` since
 /// `README.md` is the de facto index file in markdown-based documentation.

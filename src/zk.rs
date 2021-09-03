@@ -1,5 +1,4 @@
 use crate::{
-    preprocessors::{FrontMatter, ReadmePreprocessor},
     utils::{find_mdzk_root, update_summary},
     CONFIG_FILE,
     SUMMARY_FILE,
@@ -8,8 +7,10 @@ use crate::{
 use anyhow::Context;
 use mdbook::{book::parse_summary, errors::*, Config, MDBook};
 use mdbook_backlinks::Backlinks;
+use mdbook_frontmatter::FrontMatter;
 use mdbook_katex::KatexProcessor;
-use mdbook_wikilink::WikiLinks;
+use mdbook_wikilinks::WikiLinks;
+use mdbook_readme::ReadmePreprocessor;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
