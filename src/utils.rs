@@ -9,6 +9,7 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
 };
+use unicase::UniCase;
 use walkdir::WalkDir;
 
 const PAD_SIZE: usize = 4;
@@ -52,14 +53,17 @@ pub fn get_author_name() -> Option<String> {
 /// correspondingly. Ignores the summary file itself.
 pub fn update_summary(book_source: &Path) -> Result<(), Error> {
     let summary = WalkDir::new(book_source)
-        .sort_by(|a, b| {
-            if a.path().is_dir() {
-                return Ordering::Less
-            } else if b.path().is_dir() {
-                return Ordering::Greater
+        .sort_by_key(|it| {
+            let path_ord = if it.path().is_dir() {
+                Ordering::Less
             } else {
-                a.file_name().to_ascii_uppercase().cmp(&b.file_name().to_ascii_uppercase())
-            }
+                Ordering::Greater
+            };
+
+            (
+                path_ord,
+                UniCase::new(it.file_name().to_string_lossy().to_string()),
+            )
         })
         .into_iter()
         // remove hidden files
