@@ -13,11 +13,7 @@ homepage = "https://github.com/mdzk-rs/mdzk"
 repository = "https://github.com/mdzk-rs/mdzk"
 readme = "README.md"
 license-file = "LICENSE"
-include = [
-    "**/*.rs",
-    "**/*.hbs",
-    "Cargo.toml"
-]
+include = ["**/*.rs", "**/*.hbs", "Cargo.toml"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -52,6 +48,6 @@ handlebars = "4.1.2"
 log = "0.4.14"
 anyhow = "1.0.42"
 env_logger = "0.9.0"
-elasticlunr-rs = "2.3.13"
+elasticlunr-rs = { version = "2.3.13", default-features = false }
 pulldown-cmark = "0.7.0"
 ammonia = "3.1.2"
