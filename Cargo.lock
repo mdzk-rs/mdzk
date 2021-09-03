@@ -1163,6 +1163,7 @@ dependencies = [
  "structopt",
  "tokio 0.2.25",
  "toml",
+ "unicase",
  "walkdir 2.3.2",
  "warp 0.2.5",
 ]
