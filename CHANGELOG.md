@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.6 (2021-09-03)
+
+### Enhancements
+
+- The binary's size is now a lot smaller. (f5e6ca4b4bc98e98a3f28a5859665a332ff10262)
+- Sorting now works with non-ASCII characters. (16bb74d62314c4bdaa75809b64caae3e9b2ec7dc)
+
 ## 0.3.5 (2021-08-31)
 
 ### Enhancements
