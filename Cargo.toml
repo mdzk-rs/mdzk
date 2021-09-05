@@ -28,8 +28,8 @@ members = [
 [dependencies]
 mdbook = "0.4.12"
 mdbook-katex = "0.2.10"
-mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks", version = "0.3.4" }
-mdbook-backlinks = { path = "preprocessors/mdbook-backlinks", version = "0.2.4" }
+mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks", version = "0.3.5" }
+mdbook-backlinks = { path = "preprocessors/mdbook-backlinks", version = "0.2.5" }
 mdbook-frontmatter = { path = "preprocessors/mdbook-frontmatter", version = "0.0.2" }
 mdbook-readme = { path = "preprocessors/mdbook-readme", version = "0.0.2" }
 structopt = "0.2"
