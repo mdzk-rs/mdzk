@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.7 (2021-09-05)
+
+0.3.7 moves mdzk to a monorepo structure. No other changes.
+
 ## 0.3.6 (2021-09-03)
 
 ### Enhancements
