@@ -1071,7 +1071,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-backlinks"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "clap",
  "lazy-regex",
@@ -1122,7 +1122,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-wikilinks"
-version = "0.3.4"
+version = "0.3.5"
 dependencies = [
  "clap",
  "lazy-regex",
