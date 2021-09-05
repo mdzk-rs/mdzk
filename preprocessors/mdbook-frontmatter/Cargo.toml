@@ -1,7 +1,7 @@
 [package]
 name = "mdbook-frontmatter"
 description = "Support for frontmatter on mdBook."
-version = "0.0.1"
+version = "0.0.2"
 authors = [
     "Victor Freire <victor@freire.dev.br>",
     "Leo Silva Souza <leovano@protonmail.com>",
