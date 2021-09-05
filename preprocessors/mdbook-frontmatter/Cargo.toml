@@ -1,8 +1,6 @@
 [package]
 name = "mdbook-frontmatter"
 description = "Support for frontmatter on mdBook."
-# homepage = "https://github.com/mdzk-rs/mdbook-wikilink"
-# repository = "https://github.com/mdzk-rs/mdbook-wikilink"
 version = "0.0.1"
 authors = [
     "Victor Freire <victor@freire.dev.br>",
