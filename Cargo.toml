@@ -22,6 +22,7 @@ members = [
     "preprocessors/mdbook-backlinks",
     "preprocessors/mdbook-wikilinks",
     "preprocessors/mdbook-frontmatter",
+    "preprocessors/mdbook-readme"
 ]
 
 [dependencies]
