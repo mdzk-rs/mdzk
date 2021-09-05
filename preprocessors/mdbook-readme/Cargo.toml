@@ -1,8 +1,6 @@
 [package]
 name = "mdbook-readme"
-description = "Preprocessor for converting file name `README.md` to `index.md`"
-# homepage = "https://github.com/mdzk-rs/mdbook-wikilink"
-# repository = "https://github.com/mdzk-rs/mdbook-wikilink"
+description = "Preprocessor for converting file name `README.md` to `index.md`, and fix corresponding links."
 version = "0.0.1"
 authors = [
     "Victor Freire <victor@freire.dev.br>",
