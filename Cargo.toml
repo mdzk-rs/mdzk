@@ -22,34 +22,40 @@ members = [
     "preprocessors/mdbook-backlinks",
     "preprocessors/mdbook-wikilinks",
     "preprocessors/mdbook-frontmatter",
-    "preprocessors/mdbook-readme"
+    "preprocessors/mdbook-readme",
 ]
 
 [dependencies]
+anyhow = "1.0.42"
+env_logger = "0.9.0"
+futures-util = "0.3.4"
+gitignore = "1.0.7"
+gray_matter = "0.2.0"
+handlebars = "4.1.2"
+lazy-regex = "2.2.1"
+log = "0.4.14"
 mdbook = "0.4.12"
+notify = "4.0.17"
+pulldown-cmark = "0.7.0"
+regex = "1.4.3"
+serde = "1.0.117"
+serde_json = "1.0.59"
+structopt = "0.2"
+toml = "0.5.8"
+unicase = "2.6.0"
+walkdir = "2.3.2"
+
+# Preprocessors
 mdbook-katex = "0.2.10"
-mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks", version = "0.3.5" }
 mdbook-backlinks = { path = "preprocessors/mdbook-backlinks", version = "0.2.5" }
 mdbook-frontmatter = { path = "preprocessors/mdbook-frontmatter", version = "0.0.2" }
 mdbook-readme = { path = "preprocessors/mdbook-readme", version = "0.0.2" }
-structopt = "0.2"
-futures-util = "0.3.4"
+mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks", version = "0.3.5" }
+
+# Feature: Search
+ammonia = "3.1.2"
+elasticlunr-rs = { version = "2.3.13", default-features = false }
+
+# Feature: Serve
 tokio = { version = "0.2.18", features = ["macros"] }
 warp = { version = "0.2.2", default-features = false, features = ["websocket"] }
-toml = "0.5.8"
-notify = "4.0.17"
-gitignore = "1.0.7"
-walkdir = "2.3.2"
-gray_matter = "0.2.0"
-serde = "1.0.117"
-serde_json = "1.0.59"
-regex = "1.4.3"
-lazy-regex = "2.2.1"
-handlebars = "4.1.2"
-log = "0.4.14"
-anyhow = "1.0.42"
-env_logger = "0.9.0"
-elasticlunr-rs = { version = "2.3.13", default-features = false }
-pulldown-cmark = "0.7.0"
-ammonia = "3.1.2"
-unicase = "2.6.0"
