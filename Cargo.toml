@@ -36,11 +36,11 @@ lazy-regex = "2.2.1"
 log = "0.4.14"
 mdbook = "0.4.12"
 notify = "4.0.17"
-pulldown-cmark = "0.7.0"
+pulldown-cmark = "0.8.0"
 regex = "1.4.3"
 serde = "1.0.117"
 serde_json = "1.0.59"
-structopt = "0.2"
+structopt = "0.3.23"
 toml = "0.5.8"
 unicase = "2.6.0"
 walkdir = "2.3.2"
@@ -57,5 +57,5 @@ ammonia = "3.1.2"
 elasticlunr-rs = { version = "2.3.13", default-features = false }
 
 # Feature: Serve
-tokio = { version = "0.2.18", features = ["macros"] }
-warp = { version = "0.2.2", default-features = false, features = ["websocket"] }
+tokio = { version = "1.11.0", features = ["macros"] }
+warp = { version = "0.3.1", default-features = false, features = ["websocket"] }
