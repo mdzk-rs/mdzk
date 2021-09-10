@@ -6,7 +6,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::{
     env,
-    path::{Path, PathBuf},
+    path::{Path, PathBuf, Component},
     process::Command,
 };
 use unicase::UniCase;
@@ -132,4 +132,22 @@ pub fn write_file(path: &PathBuf, bytes: &[u8]) -> Result<()> {
     f.write_all(bytes)?;
 
     Ok(())
+}
+
+/// Takes a path and returns a path containing just enough `../` to point to
+/// the root of the given path.
+pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
+    path.into()
+        .parent()
+        .unwrap() // FIXME: Should handle this more gracefully
+        .components()
+        .fold(String::new(), |mut s, c| {
+            match c {
+                Component::Normal(_) => s.push_str("../"),
+                _ => {
+                    debug!("Other path component... {:?}", c);
+                }
+            }
+            s
+        })
 }
