@@ -5,6 +5,7 @@ use std::fs;
 use std::collections::BTreeMap;
 use pulldown_cmark::{Options, Parser, html::push_html};
 use handlebars::{Handlebars, no_escape};
+use serde_json::json;
 
 /// The HTML backend for mdzk, implementing [`Renderer`](https://docs.rs/mdbook/0.4.12/mdbook/renderer/trait.Renderer.html).
 #[derive(Default)]
@@ -26,7 +27,9 @@ impl HtmlMdzk {
 
         // Make map with values for all handlebars keys
         let mut data = BTreeMap::new();
-        data.insert("content", &content);
+        data.insert("content", json!(content));
+        data.insert("title", json!(ch.name));
+        data.insert("language", json!("en"));
 
         // Render output
         let out = hbs.render("index", &data)?;
@@ -72,6 +75,9 @@ impl Renderer for HtmlMdzk {
                 }
             }
         }
+
+        // Write static files
+        utils::write_file(&destination.join("main.css"), include_bytes!("theme/main.css"));
 
         Ok(())
     }
