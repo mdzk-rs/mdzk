@@ -13,6 +13,8 @@ pub struct HtmlMdzk;
 
 impl HtmlMdzk {
     fn render_chapter(&self, ch: &Chapter, ctx: &RenderContext, hbs: &Handlebars) -> Result<()> {
+        let path = ch.path.as_ref().unwrap();
+
         // Set up CommonMark parser
         let mut opts = Options::empty();
         opts.insert(Options::ENABLE_TABLES);
@@ -30,12 +32,13 @@ impl HtmlMdzk {
         data.insert("content", json!(content));
         data.insert("title", json!(ch.name));
         data.insert("language", json!("en"));
+        data.insert("path_to_root", json!(utils::path_to_root(path)));
 
         // Render output
         let out = hbs.render("index", &data)?;
         
         // Write to file
-        let path = &ctx.destination.join(ch.path.as_ref().unwrap().with_extension("html"));
+        let path = &ctx.destination.join(path.with_extension("html"));
         debug!("Writing {:?}", &ctx.destination.join(&path));
         utils::write_file(path, out.as_bytes())?;
 
@@ -55,11 +58,11 @@ impl Renderer for HtmlMdzk {
         if destination.exists() {
             // If output directory exists already, remove all content inside
             mdbook::utils::fs::remove_dir_content(destination)
-                .with_context(|| "Unable to remove old output")?;
+                .context("Unable to remove old output")?;
         } else {
             // If output direcory doesn't exist, create it
             fs::create_dir_all(destination)
-                .with_context(|| "Unexpected error when constructing destination path")?;
+                .context("Unexpected error when constructing destination path")?;
         }
 
         let mut hbs = Handlebars::new();
@@ -77,8 +80,47 @@ impl Renderer for HtmlMdzk {
         }
 
         // Write static files
-        utils::write_file(&destination.join("main.css"), include_bytes!("theme/main.css"));
+        let css_path = destination.join("css");
+        let js_path = destination.join("js");
+        let font_path = destination.join("fonts");
+        utils::write_file(&css_path.join("main.css"), include_bytes!("theme/css/main.css"))?;
+        utils::write_file(&css_path.join("katex.min.css"), include_bytes!("theme/js/katex.min.css"))?;
+        utils::write_file(&js_path.join("katex.min.js"), include_bytes!("theme/js/katex.min.js"))?;
+        utils::write_file(&js_path.join("auto-render.min.js"), include_bytes!("theme/js/auto-render.min.js"))?;
+        if font_path.exists() {
+            mdbook::utils::fs::remove_dir_content(&font_path)
+                .context("Unable to remove old fonts")?;
+        } else {
+            fs::create_dir_all(&font_path)
+                .context("Unexpected error when constructing fonts path")?;
+        }
+        for (font, bytes) in FONTS {
+            utils::write_file(&font_path.join(font), bytes)?;
+        }
 
         Ok(())
     }
 }
+
+const FONTS: [(&str, &[u8]); 20] = [
+    ("KaTeX_Main-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Main-Regular.woff2")),
+    ("KaTeX_Main-Italic.woff2", include_bytes!("theme/fonts/KaTeX_Main-Italic.woff2")),
+    ("KaTeX_Main-Bold.woff2", include_bytes!("theme/fonts/KaTeX_Main-Bold.woff2")),
+    ("KaTeX_Main-BoldItalic.woff2", include_bytes!("theme/fonts/KaTeX_Main-BoldItalic.woff2")),
+    ("KaTeX_Math-Italic.woff2", include_bytes!("theme/fonts/KaTeX_Math-Italic.woff2")),
+    ("KaTeX_Math-BoldItalic.woff2", include_bytes!("theme/fonts/KaTeX_Math-BoldItalic.woff2")),
+    ("KaTeX_AMS-Regular.woff2", include_bytes!("theme/fonts/KaTeX_AMS-Regular.woff2")),
+    ("KaTeX_Fraktur-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Fraktur-Regular.woff2")),
+    ("KaTeX_Fraktur-Bold.woff2", include_bytes!("theme/fonts/KaTeX_Fraktur-Bold.woff2")),
+    ("KaTeX_SansSerif-Regular.woff2", include_bytes!("theme/fonts/KaTeX_SansSerif-Regular.woff2")),
+    ("KaTeX_SansSerif-Italic.woff2", include_bytes!("theme/fonts/KaTeX_SansSerif-Italic.woff2")),
+    ("KaTeX_SansSerif-Bold.woff2", include_bytes!("theme/fonts/KaTeX_SansSerif-Bold.woff2")),
+    ("KaTeX_TypeWriter-Regular.woff2", include_bytes!("theme/fonts/KaTeX_TypeWriter-Regular.woff2")),
+    ("KaTeX_Caligraphic-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Caligraphic-Regular.woff2")),
+    ("KaTeX_Caligraphic-Bold.woff2", include_bytes!("theme/fonts/KaTeX_Caligraphic-Bold.woff2")),
+    ("KaTeX_Script-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Script-Regular.woff2")),
+    ("KaTeX_Size1-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size1-Regular.woff2")),
+    ("KaTeX_Size2-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size2-Regular.woff2")),
+    ("KaTeX_Size3-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size3-Regular.woff2")),
+    ("KaTeX_Size4-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size4-Regular.woff2")),
+];
