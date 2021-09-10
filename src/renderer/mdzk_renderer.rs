@@ -82,9 +82,10 @@ impl Renderer for HtmlMdzk {
         // Write static files
         let css_path = destination.join("css");
         let js_path = destination.join("js");
-        let font_path = destination.join("fonts");
+        let font_path = css_path.join("fonts");
         utils::write_file(&css_path.join("main.css"), include_bytes!("theme/css/main.css"))?;
-        utils::write_file(&css_path.join("katex.min.css"), include_bytes!("theme/js/katex.min.css"))?;
+        utils::write_file(&css_path.join("inter.css"), include_bytes!("theme/css/inter.css"))?;
+        utils::write_file(&css_path.join("katex.min.css"), include_bytes!("theme/css/katex.min.css"))?;
         utils::write_file(&js_path.join("katex.min.js"), include_bytes!("theme/js/katex.min.js"))?;
         utils::write_file(&js_path.join("auto-render.min.js"), include_bytes!("theme/js/auto-render.min.js"))?;
         if font_path.exists() {
@@ -102,25 +103,26 @@ impl Renderer for HtmlMdzk {
     }
 }
 
-const FONTS: [(&str, &[u8]); 20] = [
-    ("KaTeX_Main-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Main-Regular.woff2")),
-    ("KaTeX_Main-Italic.woff2", include_bytes!("theme/fonts/KaTeX_Main-Italic.woff2")),
-    ("KaTeX_Main-Bold.woff2", include_bytes!("theme/fonts/KaTeX_Main-Bold.woff2")),
-    ("KaTeX_Main-BoldItalic.woff2", include_bytes!("theme/fonts/KaTeX_Main-BoldItalic.woff2")),
-    ("KaTeX_Math-Italic.woff2", include_bytes!("theme/fonts/KaTeX_Math-Italic.woff2")),
-    ("KaTeX_Math-BoldItalic.woff2", include_bytes!("theme/fonts/KaTeX_Math-BoldItalic.woff2")),
-    ("KaTeX_AMS-Regular.woff2", include_bytes!("theme/fonts/KaTeX_AMS-Regular.woff2")),
-    ("KaTeX_Fraktur-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Fraktur-Regular.woff2")),
-    ("KaTeX_Fraktur-Bold.woff2", include_bytes!("theme/fonts/KaTeX_Fraktur-Bold.woff2")),
-    ("KaTeX_SansSerif-Regular.woff2", include_bytes!("theme/fonts/KaTeX_SansSerif-Regular.woff2")),
-    ("KaTeX_SansSerif-Italic.woff2", include_bytes!("theme/fonts/KaTeX_SansSerif-Italic.woff2")),
-    ("KaTeX_SansSerif-Bold.woff2", include_bytes!("theme/fonts/KaTeX_SansSerif-Bold.woff2")),
-    ("KaTeX_TypeWriter-Regular.woff2", include_bytes!("theme/fonts/KaTeX_TypeWriter-Regular.woff2")),
-    ("KaTeX_Caligraphic-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Caligraphic-Regular.woff2")),
-    ("KaTeX_Caligraphic-Bold.woff2", include_bytes!("theme/fonts/KaTeX_Caligraphic-Bold.woff2")),
-    ("KaTeX_Script-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Script-Regular.woff2")),
-    ("KaTeX_Size1-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size1-Regular.woff2")),
-    ("KaTeX_Size2-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size2-Regular.woff2")),
-    ("KaTeX_Size3-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size3-Regular.woff2")),
-    ("KaTeX_Size4-Regular.woff2", include_bytes!("theme/fonts/KaTeX_Size4-Regular.woff2")),
+const FONTS: [(&str, &[u8]); 21] = [
+    ("Inter.ttf", include_bytes!("theme/css/fonts/Inter.ttf")),
+    ("KaTeX_Main-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Main-Regular.woff2")),
+    ("KaTeX_Main-Italic.woff2", include_bytes!("theme/css/fonts/KaTeX_Main-Italic.woff2")),
+    ("KaTeX_Main-Bold.woff2", include_bytes!("theme/css/fonts/KaTeX_Main-Bold.woff2")),
+    ("KaTeX_Main-BoldItalic.woff2", include_bytes!("theme/css/fonts/KaTeX_Main-BoldItalic.woff2")),
+    ("KaTeX_Math-Italic.woff2", include_bytes!("theme/css/fonts/KaTeX_Math-Italic.woff2")),
+    ("KaTeX_Math-BoldItalic.woff2", include_bytes!("theme/css/fonts/KaTeX_Math-BoldItalic.woff2")),
+    ("KaTeX_AMS-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_AMS-Regular.woff2")),
+    ("KaTeX_Fraktur-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Fraktur-Regular.woff2")),
+    ("KaTeX_Fraktur-Bold.woff2", include_bytes!("theme/css/fonts/KaTeX_Fraktur-Bold.woff2")),
+    ("KaTeX_SansSerif-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_SansSerif-Regular.woff2")),
+    ("KaTeX_SansSerif-Italic.woff2", include_bytes!("theme/css/fonts/KaTeX_SansSerif-Italic.woff2")),
+    ("KaTeX_SansSerif-Bold.woff2", include_bytes!("theme/css/fonts/KaTeX_SansSerif-Bold.woff2")),
+    ("KaTeX_TypeWriter-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_TypeWriter-Regular.woff2")),
+    ("KaTeX_Caligraphic-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Caligraphic-Regular.woff2")),
+    ("KaTeX_Caligraphic-Bold.woff2", include_bytes!("theme/css/fonts/KaTeX_Caligraphic-Bold.woff2")),
+    ("KaTeX_Script-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Script-Regular.woff2")),
+    ("KaTeX_Size1-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Size1-Regular.woff2")),
+    ("KaTeX_Size2-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Size2-Regular.woff2")),
+    ("KaTeX_Size3-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Size3-Regular.woff2")),
+    ("KaTeX_Size4-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Size4-Regular.woff2")),
 ];
