@@ -22,18 +22,16 @@ const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) -> Result<(), Error> {
     let mut zk = load_zk(dir)?;
 
-    match renderer.as_str() {
-        "markdown" => zk.execute_build_process(&MarkdownRenderer)?,
-        "mdzk" => zk.execute_build_process(&HtmlMdzk)?,
-        _ => zk.execute_build_process(&HtmlHandlebars)?,
-    }
-
     let address = format!("{}:{}", bind, port.to_string());
 
     let livereload_url = format!("ws://{}/{}", address, LIVE_RELOAD_ENDPOINT);
     update_config(&mut zk, &livereload_url)?;
 
-    zk.build()?;
+    match renderer.as_str() {
+        "markdown" => zk.execute_build_process(&MarkdownRenderer)?,
+        "mdzk" => zk.execute_build_process(&HtmlMdzk)?,
+        _ => zk.execute_build_process(&HtmlHandlebars)?,
+    }
 
     let sockaddr: SocketAddr = address
         .to_socket_addrs()?
@@ -69,7 +67,11 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
 
         let mut new_zk = load_zk(Some(book_dir.to_path_buf())).unwrap();
         update_config(&mut new_zk, &livereload_url).unwrap();
-        let result = new_zk.build();
+        let result = match renderer.as_str() {
+            "markdown" => new_zk.execute_build_process(&MarkdownRenderer),
+            "mdzk" => new_zk.execute_build_process(&HtmlMdzk),
+            _ => new_zk.execute_build_process(&HtmlHandlebars),
+        };
 
         if let Err(e) = result {
             error!("Unable to load the book");
