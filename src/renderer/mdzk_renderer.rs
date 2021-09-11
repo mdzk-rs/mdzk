@@ -117,7 +117,7 @@ const FONTS: [(&str, &[u8]); 21] = [
     ("KaTeX_SansSerif-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_SansSerif-Regular.woff2")),
     ("KaTeX_SansSerif-Italic.woff2", include_bytes!("theme/css/fonts/KaTeX_SansSerif-Italic.woff2")),
     ("KaTeX_SansSerif-Bold.woff2", include_bytes!("theme/css/fonts/KaTeX_SansSerif-Bold.woff2")),
-    ("KaTeX_TypeWriter-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_TypeWriter-Regular.woff2")),
+    ("KaTeX_Typewriter-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Typewriter-Regular.woff2")),
     ("KaTeX_Caligraphic-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Caligraphic-Regular.woff2")),
     ("KaTeX_Caligraphic-Bold.woff2", include_bytes!("theme/css/fonts/KaTeX_Caligraphic-Bold.woff2")),
     ("KaTeX_Script-Regular.woff2", include_bytes!("theme/css/fonts/KaTeX_Script-Regular.woff2")),
