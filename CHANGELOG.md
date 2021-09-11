@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.8 (Unreleased)
+
+### New features
+
+- You can now choose a renderer with the `--renderer` or `-r` flag when running `build` or `serve`. The choices are between `mdbook`, `markdown` or `mdzk`, the latter being our own work in progress custom renderer. This feature is mostly for debugging purposes.
+
+### Enhancements
+
+- The mdzk renderer now copies over KaTeX locally in the output, to ensure speedy math rendering.
+- The mdzk renderer now uses the Inter font.
+
 ## 0.3.7 (2021-09-05)
 
 0.3.7 moves mdzk to a monorepo structure. No other changes.
