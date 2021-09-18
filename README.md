@@ -6,13 +6,21 @@ mdzk is a plain text Zettelkasten system that is based on the mdBook API. It con
 
 ## Installation
 
-You can install mdzk with Cargo by running
+### Cargo
+
+You can install mdzk with Cargo by running.
 
 ```
-cargo install mdzk
+$ cargo install mdzk
 ```
 
-mdzk will soon also be available as a pre-built binary for quicker installation.
+### Nix
+
+You can use without installing with [Nix](https://nixos.org). **Note:** This will compile it from source and make it available from your nix store.
+
+```
+$ nix run github:mdzk-rs/mdzk help
+```
 
 ## Getting started
 
