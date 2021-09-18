@@ -21,9 +21,10 @@
               overlays = [ rust-overlay ];
             };
 
-            rust-pkg = pkgs.rust-bin.stable."1.54.0".default.override {
+            rust-pkg = pkgs.rust-bin.stable.latest.default.override {
               extensions = [
                 "rust-std"
+                "rust-src"
               ];
             };
 
