@@ -1,4 +1,4 @@
-use crate::{CONFIG_FILE, SUMMARY_FILE};
+use crate::{Config, CONFIG_FILE, SUMMARY_FILE};
 
 use mdbook::errors::*;
 use std::cmp::Ordering;
@@ -11,6 +11,7 @@ use std::{
 };
 use unicase::UniCase;
 use walkdir::WalkDir;
+use gitignore::Pattern;
 
 const PAD_SIZE: usize = 4;
 
@@ -51,8 +52,13 @@ pub fn get_author_name() -> Option<String> {
 
 /// Searches for Markdown-files in the source directory, and updates the summary file
 /// correspondingly. Ignores the summary file itself.
-pub fn update_summary(book_source: &Path) -> Result<(), Error> {
-    let summary = WalkDir::new(book_source)
+pub fn update_summary(config: &Config, root: &PathBuf) -> Result<(), Error> {
+    let book_source = root.join(&config.mdzk.src);
+    let ignore_patterns: Vec<Pattern> = config.mdzk.ignore.iter().filter_map(|pattern| {
+        Pattern::new(pattern, &book_source).ok()
+    }).collect();
+
+    let summary = WalkDir::new(&book_source)
         .sort_by_key(|it| {
             let path_ord = if it.path().is_dir() {
                 Ordering::Less
@@ -76,6 +82,18 @@ pub fn update_summary(book_source: &Path) -> Result<(), Error> {
         .filter_map(|e| e.ok())
         // Don't include the book source directory or the summary file
         .filter(|e| e.path() != book_source && e.path() != book_source.join(SUMMARY_FILE))
+        // Filter ignored files
+        .filter(|e| {
+            let path = book_source.join(e.path());
+            let is_dir = fs::metadata(&path).expect("This really shouldn't fail").is_dir();
+            ignore_patterns.iter().fold(true, |acc, pattern| {
+                if !pattern.is_excluded(&path, is_dir) {
+                    acc
+                } else {
+                    pattern.negation
+                }
+            })
+        })
         .map(|e| {
             let stripped_path = e.path().strip_prefix(&book_source).unwrap();
             let file_stem = stripped_path.file_stem().unwrap().to_str().unwrap();

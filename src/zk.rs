@@ -31,18 +31,12 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         ))?;
     debug!("Successfully loaded config.");
 
-    let book_source = &config.mdzk.src;
-    update_summary(book_source)?;
+    update_summary(&config, &root)?;
 
-    let summary_file = book_source.join(SUMMARY_FILE);
+    let summary_file = config.mdzk.src.join(SUMMARY_FILE);
     let mut summary_content = String::new();
     File::open(&summary_file)
-        .with_context(|| {
-            format!(
-                "Couldn't open {} in {:?} directory",
-                SUMMARY_FILE, book_source
-            )
-        })?
+        .with_context(|| format!("Couldn't open {:?}", summary_file))?
         .read_to_string(&mut summary_content)?;
 
     let summary = parse_summary(&summary_content).context("Summary parsing failed")?;
