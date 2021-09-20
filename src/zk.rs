@@ -15,7 +15,6 @@ use mdbook_readme::ReadmePreprocessor;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
-use toml::Value;
 
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let root = match dir {
@@ -25,16 +24,12 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     };
     debug!("Found root: {:?}", root);
 
-    let mut config: Config = Config::from_disk(root.join(CONFIG_FILE))
+    let config: Config = Config::from_disk(root.join(CONFIG_FILE))
         .with_context(|| format!(
             "Could not load config file {:?}",
             root.join(CONFIG_FILE)
         ))?;
     debug!("Successfully loaded config.");
-
-    // Override use_default_preprocessors config option. We are using
-    // 'disable_default_preprocessors' instead.
-    config.build.use_default_preprocessors = false;
 
     let book_source = &config.mdzk.src;
     update_summary(book_source)?;
@@ -53,16 +48,11 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let summary = parse_summary(&summary_content).context("Summary parsing failed")?;
     debug!("Parsed summary.");
 
+    let disable_default_preprocessors = config.build.disable_default_preprocessors.clone();
     let mut zk = MDBook::load_with_config_and_summary(root, config.into(), summary)?;
     info!("Successfully loaded mdzk in: {:?}", zk.root);
 
-    if !zk
-        .config
-        .get("disable_default_preprocessors")
-        .unwrap_or(&Value::Boolean(false))
-        .as_bool()
-        .ok_or_else(|| Error::msg("use-mdzk-preprocessors should be a boolean"))?
-    {
+    if !disable_default_preprocessors {
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(KatexProcessor);
         zk.with_preprocessor(Backlinks);

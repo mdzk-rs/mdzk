@@ -1,10 +1,10 @@
-use crate::SRC_DIR;
+use crate::{SRC_DIR, BUILD_DIR};
 
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::fs::File;
 use std::io::Read;
-use mdbook::config::{BuildConfig, RustConfig, BookConfig};
+use mdbook::config::{RustConfig, BookConfig};
 use mdbook::errors::{Error, Result};
 use anyhow::Context;
 use serde::{Deserialize, Deserializer};
@@ -46,7 +46,7 @@ impl Into<mdbook::Config> for Config {
     fn into(self) -> mdbook::Config {
         let mut config = mdbook::Config::default();
         config.book = self.mdzk.into();
-        config.build = self.build;
+        config.build = self.build.into();
         config.rust = self.rust;
         config
     }
@@ -136,6 +136,37 @@ impl Into<BookConfig> for MdzkConfig {
             src: self.src,
             multilingual: self.multilingual,
             language: self.language,
+        }
+    }
+}
+
+/// Configuration describing the build process.
+#[derive(Deserialize)]
+#[serde(default, rename_all = "kebab-case")]
+pub struct BuildConfig {
+    pub build_dir: PathBuf,
+    pub create_missing: bool,
+    pub disable_default_preprocessors: bool,
+}
+
+impl Default for BuildConfig {
+    fn default() -> BuildConfig {
+        BuildConfig {
+            build_dir: PathBuf::from(BUILD_DIR),
+            create_missing: true,
+            disable_default_preprocessors: false,
+        }
+    }
+}
+
+impl Into<mdbook::config::BuildConfig> for BuildConfig {
+    fn into(self) -> mdbook::config::BuildConfig {
+        mdbook::config::BuildConfig {
+            build_dir: self.build_dir,
+            create_missing: self.create_missing,
+            // Override use_default_preprocessors config option. We are using our own versions of
+            // the defaults, controlled with `disable_default_preprocessors`.
+            use_default_preprocessors: false,
         }
     }
 }
