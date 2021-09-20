@@ -1,7 +1,7 @@
 [package]
 name = "mdbook-frontmatter"
 description = "Support for frontmatter on mdBook."
-version = "0.0.2"
+version = "0.0.3"
 authors = [
     "Victor Freire <victor@freire.dev.br>",
     "Leo Silva Souza <leovano@protonmail.com>",
@@ -19,7 +19,7 @@ include = [
 [dependencies]
 chrono = "0.4.19"
 clap = "2.33.3"
-gray_matter = "0.2.0"
+gray_matter = "0.2.1"
 lazy-regex = "2.2.1"
 mdbook = "0.4.12"
 semver = "1.0.3"
