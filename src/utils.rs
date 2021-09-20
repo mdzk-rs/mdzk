@@ -1,6 +1,5 @@
 use crate::{Config, CONFIG_FILE, SUMMARY_FILE};
 
-use gitignore::Pattern;
 use mdbook::errors::*;
 use std::cmp::Ordering;
 use std::fs::{self, File};
@@ -10,8 +9,7 @@ use std::{
     path::{Component, Path, PathBuf},
     process::Command,
 };
-use unicase::UniCase;
-use walkdir::WalkDir;
+use ignore::{WalkBuilder, overrides::OverrideBuilder, types::TypesBuilder};
 
 const PAD_SIZE: usize = 4;
 
@@ -54,78 +52,52 @@ pub fn get_author_name() -> Option<String> {
 /// correspondingly. Ignores the summary file itself.
 pub fn update_summary(config: &Config, root: &PathBuf) -> Result<(), Error> {
     let book_source = root.join(&config.mdzk.src);
-    let ignore_patterns: Vec<Pattern> = config
-        .mdzk
-        .ignore
-        .iter()
-        .filter_map(|pattern| Pattern::new(pattern, &book_source).ok())
-        .collect();
 
-    let summary = WalkDir::new(&book_source)
-        .sort_by_key(|it| {
-            let path_ord = if it.path().is_dir() {
+    let mut overrides = OverrideBuilder::new(&book_source);
+    for ignore in config.mdzk.ignore.iter() {
+        if let Some(s) = ignore.strip_prefix('!') {
+            overrides.add(s)?;
+        } else {
+            overrides.add(&format!("!{}", ignore))?;
+        }
+    }
+
+    let walker = WalkBuilder::new(&book_source)
+        .hidden(true)
+        .overrides(overrides.build()?)
+        .types(TypesBuilder::new().add_defaults().select("markdown").build()?)
+        .sort_by_file_path(|path1, path2| {
+            if path1.is_dir() && !path2.is_dir() {
                 Ordering::Less
-            } else {
+            } else if !path1.is_dir() && path2.is_dir() {
                 Ordering::Greater
-            };
+            } else  {
+                path1.cmp(path2)
+            }
+        })
+        .build();
 
-            (
-                path_ord,
-                UniCase::new(it.file_name().to_string_lossy().to_string()),
-            )
-        })
-        .into_iter()
-        // remove hidden files
-        .filter_entry(|e| {
-            !e.file_name()
-                .to_str()
-                .map(|s| s.starts_with('.'))
-                .unwrap_or(false)
-        })
+    let summary = walker
         .filter_map(|e| e.ok())
-        // Don't include the book source directory or the summary file
+        // Don't include the book source directory
         .filter(|e| e.path() != book_source && e.path() != book_source.join(SUMMARY_FILE))
-        // Filter ignored files
-        .filter(|e| {
-            let path = book_source.join(e.path());
-            let is_dir = fs::metadata(&path)
-                .expect("This really shouldn't fail")
-                .is_dir();
-            ignore_patterns.iter().fold(true, |acc, pattern| {
-                if !pattern.is_excluded(&path, is_dir) {
-                    acc
-                } else {
-                    pattern.negation
-                }
-            })
-        })
         .map(|e| {
             let stripped_path = e.path().strip_prefix(&book_source).unwrap();
             let file_stem = stripped_path.file_stem().unwrap().to_str().unwrap();
             let depth = (stripped_path.components().count() - 1) * PAD_SIZE;
 
             if e.path().is_dir() {
-                return Some(format!("{1:>0$}- [{2}]()\n", depth, "", file_stem));
-            }
-
-            let file_ext = match e.path().extension() {
-                Some(ext) => ext.to_str()?,
-                None => return None,
-            };
-
-            if file_ext == "md" {
-                return Some(format!(
+                format!("{1:>0$}- [{2}]()\n", depth, "", file_stem)
+            } else {
+                format!(
                     "{1:>0$}- [{2}](<{3}>)\n",
                     depth,
                     "",
                     file_stem,
                     escape_special_chars(stripped_path.to_str().unwrap())
-                ));
+                )
             }
-
-            None
         })
-        .filter_map(|e| e)
         .fold(String::new(), |acc, curr| acc + &curr);
 
     let mut summary_file = File::create(book_source.join(SUMMARY_FILE))?;
