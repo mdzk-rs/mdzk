@@ -5,6 +5,7 @@
 ### Breaking changes
 
 - The `[book]` table header in `mdzk.toml` is now changed to `[mdzk]`. You will need to change this in your own configuration, or else the values will be ignored.
+- The `disable_default_processors` configuration option is now placed under the `[build]` table.
 
 ### New features
 
@@ -12,6 +13,7 @@
 
 ### Enhancements
 
+- We now use our own configuration struct. This will allow us to more easily expand mdzk with more options and configuration.
 - The mdzk renderer now copies over KaTeX locally in the output, to ensure speedy math rendering.
 - The mdzk renderer now uses the Inter font.
 
