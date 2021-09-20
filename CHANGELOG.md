@@ -5,11 +5,12 @@
 ### Breaking changes
 
 - The `[book]` table header in `mdzk.toml` is now changed to `[mdzk]`. You will need to change this in your own configuration, or else the values will be ignored.
-- The `disable_default_processors` configuration option is now placed under the `[build]` table.
+- The `disable-default-processors` configuration option is now placed under the `[build]` table.
 
 ### New features
 
 - An `ignore` field is added under the `[mdzk]` table. This is a list of gitignore-style patterns that specify files or directories which mdzk should ignore when building.
+- The header above the backlinks can now also be configured under the `[mdzk]` table, with the `backlinks-header` field. Both this and the previous `preprocessor.backlinks.header` field are supported, but you are recommended to use the former, in case we might remove the latter.
 - You can now choose a renderer with the `--renderer` or `-r` flag when running `build` or `serve`. The choices are between `mdbook`, `markdown` or `mdzk`, the latter being our own work in progress custom renderer. This feature is mostly for debugging purposes.
 
 ### Enhancements
