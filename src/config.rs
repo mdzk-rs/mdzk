@@ -67,7 +67,7 @@ impl<'de> Deserialize<'de> for Config {
         };
 
         let mdzk: MdzkConfig = table
-            .remove("vault")
+            .remove("mdzk")
             .map(|book| book.try_into().map_err(D::Error::custom))
             .transpose()?
             .unwrap_or_default();
