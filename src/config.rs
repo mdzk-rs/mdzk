@@ -1,13 +1,13 @@
-use crate::{SRC_DIR, BUILD_DIR};
+use crate::{BUILD_DIR, SRC_DIR};
 
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use anyhow::Context;
+use mdbook::config::{BookConfig, RustConfig};
+use mdbook::errors::{Error, Result};
+use serde::{Deserialize, Deserializer};
 use std::fs::File;
 use std::io::Read;
-use mdbook::config::{RustConfig, BookConfig};
-use mdbook::errors::{Error, Result};
-use anyhow::Context;
-use serde::{Deserialize, Deserializer};
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use toml::Value;
 
 /// This struct represents the configuration of an mdzk. It is loaded from the mdzk.toml file.
@@ -84,11 +84,7 @@ impl<'de> Deserialize<'de> for Config {
             .transpose()?
             .unwrap_or_default();
 
-        Ok(Config {
-            mdzk,
-            build,
-            rust,
-        })
+        Ok(Config { mdzk, build, rust })
     }
 }
 
@@ -122,7 +118,7 @@ impl Default for MdzkConfig {
             src: PathBuf::from(SRC_DIR),
             ignore: Vec::new(),
             multilingual: false,
-            language: Some("en".to_string())
+            language: Some("en".to_string()),
         }
     }
 }

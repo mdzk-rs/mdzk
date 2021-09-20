@@ -1,10 +1,10 @@
-use regex::Captures;
 use lazy_regex::regex;
+use log::warn;
+use mdbook::book::{Book, BookItem};
 use mdbook::errors::*;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use mdbook::book::{Book, BookItem};
+use regex::Captures;
 use std::path::Path;
-use log::{warn};
 
 /// A preprocessor for converting file name `README.md` to `index.md` since
 /// `README.md` is the de facto index file in markdown-based documentation.
@@ -36,10 +36,12 @@ impl Preprocessor for ReadmePreprocessor {
                             warn_readme_name_conflict(&path, &&mut index_md);
                         }
                         path.set_file_name("index.md");
-                    }  else {
-                        ch.content = readme_link_re.replace_all(&ch.content, |caps: &Captures| {
-                            format!("[{}](index.md)", &caps[1])
-                        }).to_string();
+                    } else {
+                        ch.content = readme_link_re
+                            .replace_all(&ch.content, |caps: &Captures| {
+                                format!("[{}](index.md)", &caps[1])
+                            })
+                            .to_string();
                     }
                 }
             }

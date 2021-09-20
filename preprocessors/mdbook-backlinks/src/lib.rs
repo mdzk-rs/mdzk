@@ -2,11 +2,11 @@ use lazy_regex::{lazy_regex, Lazy};
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
+use pathdiff;
 use regex::Regex;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use toml::value::Value;
-use pathdiff;
 
 static WIKILINK_REGEX: Lazy<Regex> =
     lazy_regex!(r"\[\[(?P<link>[^\]\|]+)(?:\|(?P<title>[^\]]+))?\]\]");
@@ -65,7 +65,8 @@ impl Preprocessor for Backlinks {
                         for backlink in backlinks.iter() {
                             // This is really ugly, but the unwraps should be safe
                             let dest = backlink.source_path.clone().unwrap();
-                            let diff_path = pathdiff::diff_paths(dest, source_path.parent().unwrap()).unwrap();
+                            let diff_path =
+                                pathdiff::diff_paths(dest, source_path.parent().unwrap()).unwrap();
                             ch.content += &format!(
                                 "> - [{}](<{}>)\n",
                                 backlink.name,
@@ -84,7 +85,7 @@ impl Preprocessor for Backlinks {
 /// Finds all the links in content linking to chapters listed in index.
 fn find_links(content: &str, index: &HashMap<PathBuf, Vec<Chapter>>) -> Vec<PathBuf> {
     let mut links: Vec<PathBuf> = Vec::new();
-    
+
     for cap in WIKILINK_REGEX.captures_iter(&content) {
         if let Some(dest) = cap.get(1) {
             let mut path = PathBuf::from(dest.as_str());

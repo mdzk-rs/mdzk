@@ -12,7 +12,12 @@ struct Mdzk {
     #[structopt(subcommand)]
     cmd: Command,
 
-    #[structopt(long = "log-level", short = "l", default_value = "3", help = "Set the logging level")]
+    #[structopt(
+        long = "log-level",
+        short = "l",
+        default_value = "3",
+        help = "Set the logging level"
+    )]
     log_level: usize,
 }
 
@@ -54,22 +59,30 @@ fn main() -> Result<(), Error> {
     match args.cmd {
         Command::Build { dir, renderer } => build(dir, renderer),
         Command::Init { dir } => init(dir),
-        Command::Serve { dir, port, bind, renderer } => serve(dir, port, bind, renderer),
+        Command::Serve {
+            dir,
+            port,
+            bind,
+            renderer,
+        } => serve(dir, port, bind, renderer),
     }
 }
 
 fn init_logger(log_level: usize) {
     let mut builder = Builder::new();
 
-    builder.filter(None, match log_level {
-        0 => log::LevelFilter::Off,
-        1 => log::LevelFilter::Error,
-        2 => log::LevelFilter::Warn,
-        3 => log::LevelFilter::Info,
-        4 => log::LevelFilter::Debug,
-        5 => log::LevelFilter::Trace,
-        _ => log::LevelFilter::Info,
-    });
+    builder.filter(
+        None,
+        match log_level {
+            0 => log::LevelFilter::Off,
+            1 => log::LevelFilter::Error,
+            2 => log::LevelFilter::Warn,
+            3 => log::LevelFilter::Info,
+            4 => log::LevelFilter::Debug,
+            5 => log::LevelFilter::Trace,
+            _ => log::LevelFilter::Info,
+        },
+    );
 
     builder.format(|formatter, record| {
         writeln!(formatter, "{:8>} - {}", record.level(), record.args())

@@ -1,17 +1,17 @@
 use crate::{Config, CONFIG_FILE, SUMMARY_FILE};
 
+use gitignore::Pattern;
 use mdbook::errors::*;
 use std::cmp::Ordering;
 use std::fs::{self, File};
 use std::io::Write;
 use std::{
     env,
-    path::{Path, PathBuf, Component},
+    path::{Component, Path, PathBuf},
     process::Command,
 };
 use unicase::UniCase;
 use walkdir::WalkDir;
-use gitignore::Pattern;
 
 const PAD_SIZE: usize = 4;
 
@@ -54,9 +54,12 @@ pub fn get_author_name() -> Option<String> {
 /// correspondingly. Ignores the summary file itself.
 pub fn update_summary(config: &Config, root: &PathBuf) -> Result<(), Error> {
     let book_source = root.join(&config.mdzk.src);
-    let ignore_patterns: Vec<Pattern> = config.mdzk.ignore.iter().filter_map(|pattern| {
-        Pattern::new(pattern, &book_source).ok()
-    }).collect();
+    let ignore_patterns: Vec<Pattern> = config
+        .mdzk
+        .ignore
+        .iter()
+        .filter_map(|pattern| Pattern::new(pattern, &book_source).ok())
+        .collect();
 
     let summary = WalkDir::new(&book_source)
         .sort_by_key(|it| {
@@ -85,7 +88,9 @@ pub fn update_summary(config: &Config, root: &PathBuf) -> Result<(), Error> {
         // Filter ignored files
         .filter(|e| {
             let path = book_source.join(e.path());
-            let is_dir = fs::metadata(&path).expect("This really shouldn't fail").is_dir();
+            let is_dir = fs::metadata(&path)
+                .expect("This really shouldn't fail")
+                .is_dir();
             ignore_patterns.iter().fold(true, |acc, pattern| {
                 if !pattern.is_excluded(&path, is_dir) {
                     acc

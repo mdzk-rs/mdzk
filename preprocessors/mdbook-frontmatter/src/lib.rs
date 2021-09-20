@@ -3,12 +3,12 @@ use gray_matter::{
     engine::{Engine, TOML, YAML},
     Matter,
 };
+use lazy_regex::regex;
 use mdbook::{
     book::{Book, BookItem},
     errors::*,
     preprocess::{Preprocessor, PreprocessorContext},
 };
-use lazy_regex::regex;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]

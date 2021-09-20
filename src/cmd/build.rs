@@ -1,5 +1,8 @@
 use crate::{load_zk, renderer::HtmlMdzk};
-use mdbook::{errors::*, renderer::{HtmlHandlebars, MarkdownRenderer}};
+use mdbook::{
+    errors::*,
+    renderer::{HtmlHandlebars, MarkdownRenderer},
+};
 use std::path::PathBuf;
 
 pub fn build(dir: Option<PathBuf>, renderer: String) -> Result<()> {
@@ -13,4 +16,3 @@ pub fn build(dir: Option<PathBuf>, renderer: String) -> Result<()> {
 
     Ok(())
 }
-

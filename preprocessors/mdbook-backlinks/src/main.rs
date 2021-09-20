@@ -1,7 +1,7 @@
-use mdbook_backlinks::Backlinks;
 use clap::{App, Arg, ArgMatches, SubCommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::{CmdPreprocessor, Preprocessor};
+use mdbook_backlinks::Backlinks;
 use semver::{Version, VersionReq};
 use std::io;
 use std::process;

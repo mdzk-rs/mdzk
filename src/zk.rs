@@ -1,8 +1,6 @@
 use crate::{
-    Config,
     utils::{find_mdzk_root, update_summary},
-    CONFIG_FILE,
-    SUMMARY_FILE,
+    Config, CONFIG_FILE, SUMMARY_FILE,
 };
 
 use anyhow::Context;
@@ -10,8 +8,8 @@ use mdbook::{book::parse_summary, errors::*, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
 use mdbook_katex::KatexProcessor;
-use mdbook_wikilinks::WikiLinks;
 use mdbook_readme::ReadmePreprocessor;
+use mdbook_wikilinks::WikiLinks;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -25,10 +23,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     debug!("Found root: {:?}", root);
 
     let config: Config = Config::from_disk(root.join(CONFIG_FILE))
-        .with_context(|| format!(
-            "Could not load config file {:?}",
-            root.join(CONFIG_FILE)
-        ))?;
+        .with_context(|| format!("Could not load config file {:?}", root.join(CONFIG_FILE)))?;
     debug!("Successfully loaded config.");
 
     update_summary(&config, &root)?;

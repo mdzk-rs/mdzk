@@ -1,8 +1,8 @@
 mod build;
+mod init;
 mod serve;
 mod watch;
-mod init;
 
 pub use build::build;
-pub use serve::serve;
 pub use init::init;
+pub use serve::serve;

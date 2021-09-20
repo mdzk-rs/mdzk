@@ -1,5 +1,5 @@
 // This is simply a modified version of https://github.com/rust-lang/mdBook/blob/master/src/cmd/watch.rs
-use crate::{SUMMARY_FILE, CONFIG_FILE};
+use crate::{CONFIG_FILE, SUMMARY_FILE};
 
 use mdbook::MDBook;
 use notify::Watcher;
