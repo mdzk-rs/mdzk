@@ -1,11 +1,12 @@
 use crate::{
+    Config,
     utils::{find_mdzk_root, update_summary},
     CONFIG_FILE,
     SUMMARY_FILE,
 };
 
 use anyhow::Context;
-use mdbook::{book::parse_summary, errors::*, Config, MDBook};
+use mdbook::{book::parse_summary, errors::*, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
 use mdbook_katex::KatexProcessor;
@@ -24,16 +25,18 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     };
     debug!("Found root: {:?}", root);
 
-    let mut config: Config = Config::from_disk(root.join(CONFIG_FILE)).context(format!(
-        "Could not load config file {:?}",
-        root.join(CONFIG_FILE)
-    ))?;
+    let mut config: Config = Config::from_disk(root.join(CONFIG_FILE))
+        .with_context(|| format!(
+            "Could not load config file {:?}",
+            root.join(CONFIG_FILE)
+        ))?;
     debug!("Successfully loaded config.");
+
     // Override use_default_preprocessors config option. We are using
     // 'disable_default_preprocessors' instead.
     config.build.use_default_preprocessors = false;
 
-    let book_source = &config.book.src;
+    let book_source = &config.vault.src;
     update_summary(book_source)?;
 
     let summary_file = book_source.join(SUMMARY_FILE);
@@ -50,7 +53,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let summary = parse_summary(&summary_content).context("Summary parsing failed")?;
     debug!("Parsed summary.");
 
-    let mut zk = MDBook::load_with_config_and_summary(root, config, summary)?;
+    let mut zk = MDBook::load_with_config_and_summary(root, config.into(), summary)?;
     info!("Successfully loaded mdzk in: {:?}", zk.root);
 
     if !zk
