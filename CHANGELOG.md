@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 (Unreleased)
+## 0.4.1 (2021-09-20)
 
 ### Breaking changes
 
