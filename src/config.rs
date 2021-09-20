@@ -12,12 +12,16 @@ use toml::Value;
 
 /// This struct represents the configuration of an mdzk. It is loaded from the mdzk.toml file.
 pub struct Config {
-    pub vault: VaultConfig,
+    /// Metadata describing the mdzk.
+    pub mdzk: MdzkConfig,
+    /// Configuration for the build process.
     pub build: BuildConfig,
+    /// Configuration for the Rust language support.
     pub rust: RustConfig,
 }
 
 impl Config {
+    /// Load an mdzk configuration file from a path.
     pub fn from_disk<P: AsRef<Path>>(path: P) -> Result<Config> {
         let mut buffer = String::new();
         File::open(path)
@@ -32,7 +36,7 @@ impl Config {
 impl FromStr for Config {
     type Err = Error;
 
-    /// Load a `Config` from some string.
+    /// Load an mdzk configuration from some string.
     fn from_str(src: &str) -> Result<Self> {
         toml::from_str(src).with_context(|| "Invalid configuration file")
     }
@@ -41,7 +45,7 @@ impl FromStr for Config {
 impl Into<mdbook::Config> for Config {
     fn into(self) -> mdbook::Config {
         let mut config = mdbook::Config::default();
-        config.book = self.vault.into();
+        config.book = self.mdzk.into();
         config.build = self.build;
         config.rust = self.rust;
         config
@@ -62,7 +66,7 @@ impl<'de> Deserialize<'de> for Config {
             }
         };
 
-        let vault: VaultConfig = table
+        let mdzk: MdzkConfig = table
             .remove("vault")
             .map(|book| book.try_into().map_err(D::Error::custom))
             .transpose()?
@@ -81,16 +85,18 @@ impl<'de> Deserialize<'de> for Config {
             .unwrap_or_default();
 
         Ok(Config {
-            vault,
+            mdzk,
             build,
             rust,
         })
     }
 }
 
+/// This struct holds the configuration for the metadata of the mdzk, as well as what it should
+/// include.
 #[derive(Deserialize)]
 #[serde(default, rename_all = "kebab-case")]
-pub struct VaultConfig {
+pub struct MdzkConfig {
     /// The title of the vault.
     pub title: Option<String>,
     /// The author(s) of the vault.
@@ -107,9 +113,9 @@ pub struct VaultConfig {
     pub language: Option<String>,
 }
 
-impl Default for VaultConfig {
+impl Default for MdzkConfig {
     fn default() -> Self {
-        VaultConfig {
+        MdzkConfig {
             title: None,
             authors: Vec::new(),
             description: None,
@@ -121,7 +127,7 @@ impl Default for VaultConfig {
     }
 }
 
-impl Into<BookConfig> for VaultConfig {
+impl Into<BookConfig> for MdzkConfig {
     fn into(self) -> BookConfig {
         BookConfig {
             title: self.title,

@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.8 (Unreleased)
+## 0.4.0 (Unreleased)
+
+### Breaking changes
+
+- The `[book]` table header in `mdzk.toml` is now changed to `[mdzk]`. You will need to change this in your own configuration, or else the values will be ignored.
 
 ### New features
 

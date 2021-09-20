@@ -36,7 +36,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     // 'disable_default_preprocessors' instead.
     config.build.use_default_preprocessors = false;
 
-    let book_source = &config.vault.src;
+    let book_source = &config.mdzk.src;
     update_summary(book_source)?;
 
     let summary_file = book_source.join(SUMMARY_FILE);
