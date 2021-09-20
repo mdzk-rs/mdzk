@@ -18,6 +18,7 @@ pub struct Config {
     pub build: BuildConfig,
     /// Configuration for the Rust language support.
     pub rust: RustConfig,
+    rest: Value,
 }
 
 impl Config {
@@ -45,9 +46,17 @@ impl FromStr for Config {
 impl Into<mdbook::Config> for Config {
     fn into(self) -> mdbook::Config {
         let mut config = mdbook::Config::default();
+        let backlinks_header = self.mdzk.backlinks_header.clone();
         config.book = self.mdzk.into();
         config.build = self.build.into();
         config.rust = self.rust;
+
+        config.set("mdzk.backlinks-header", backlinks_header).unwrap();
+        for (key, value) in self.rest.as_table().unwrap().iter() {
+            // FIXME: Scary unwraps!
+            config.set(key, value).unwrap();
+        }
+
         config
     }
 }
@@ -84,7 +93,7 @@ impl<'de> Deserialize<'de> for Config {
             .transpose()?
             .unwrap_or_default();
 
-        Ok(Config { mdzk, build, rust })
+        Ok(Config { mdzk, build, rust, rest: Value::Table(table) })
     }
 }
 
@@ -107,6 +116,8 @@ pub struct MdzkConfig {
     pub multilingual: bool,
     /// The language of the vault.
     pub language: Option<String>,
+    /// The header before the backlinks list
+    pub backlinks_header: Option<String>,
 }
 
 impl Default for MdzkConfig {
@@ -119,6 +130,7 @@ impl Default for MdzkConfig {
             ignore: Vec::new(),
             multilingual: false,
             language: Some("en".to_string()),
+            backlinks_header: None,
         }
     }
 }

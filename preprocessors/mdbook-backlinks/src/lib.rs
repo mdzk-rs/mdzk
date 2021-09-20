@@ -39,7 +39,7 @@ impl Preprocessor for Backlinks {
         }
 
         // Should probably clean up this, but why bother?...
-        let backlink_prefix = if let Some(header) = ctx.config.get("preprocessor.backlinks.header")
+        let backlink_prefix = if let Some(header) = ctx.config.get("mdzk.backlinks-header")
         {
             if let Value::String(val) = header {
                 format!("\n\n---\n\n## {}\n\n", val)
