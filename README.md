@@ -22,6 +22,10 @@ You can use without installing with [Nix](https://nixos.org). **Note:** This wil
 $ nix run github:mdzk-rs/mdzk help
 ```
 
+### Pre-compiled binaries
+
+On the [Releases](https://github.com/mdzk-rs/mdzk/releases) page, you can find pre-compiled binaries for Windows and Linux (x86).
+
 ## Getting started
 
 We are still figuring out the exact user interface, so there would not be much help in a "getting started" guide just yet. mdzk works very much like [mdBook](https://rust-lang.github.io/mdBook/cli/index.html), so you can use their guide for the time being. We hope to provide a full documentation very soon...
