@@ -79,13 +79,38 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
         .filter_map(|e| e.ok())
         // Don't include the book source directory
         .filter(|e| e.path() != book_source && e.path() != book_source.join(SUMMARY_FILE))
+        // Filter files which share the name of it's parent directory.
+        .filter(|e| {
+            if let Some(dir_stem) = e.path().parent() {
+                let dir_stem = dir_stem.file_stem().unwrap_or_default();
+                let file_stem = e.path().file_stem().unwrap_or_default();
+                file_stem != dir_stem
+            } else { true }
+        })
         .map(|e| {
-            let stripped_path = e.path().strip_prefix(&book_source).unwrap();
+            let path = e.path();
+            let stripped_path = path.strip_prefix(&book_source).unwrap();
             let file_stem = stripped_path.file_stem().unwrap().to_str().unwrap();
             let depth = (stripped_path.components().count() - 1) * PAD_SIZE;
 
-            if e.path().is_dir() {
-                format!("{1:>0$}- [{2}]()\n", depth, "", file_stem)
+            if path.is_dir() {
+                let dir_file = stripped_path
+                    .join(&stripped_path.file_stem().unwrap_or_default())
+                    .with_extension("md");
+
+                if book_source.join(&dir_file).is_file() {
+                    // Directory contains equally named file
+                    format!(
+                        "{1:>0$}- [{2}](<{3}>)\n",
+                        depth,
+                        "",
+                        file_stem,
+                        escape_special_chars(dir_file.to_str().unwrap())
+                    )
+                } else {
+                    // Directory has no equally named file
+                    format!("{1:>0$}- [{2}]()\n", depth, "", file_stem)
+                }
             } else {
                 format!(
                     "{1:>0$}- [{2}](<{3}>)\n",
