@@ -3,12 +3,12 @@ use crate::{BUILD_DIR, SRC_DIR};
 use anyhow::Context;
 use mdbook::config::{BookConfig, RustConfig};
 use mdbook::errors::{Error, Result};
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use toml::Value;
+use toml::{self, Value, value::Table};
 
 /// This struct represents the configuration of an mdzk. It is loaded from the mdzk.toml file.
 pub struct Config {
@@ -34,6 +34,17 @@ impl Config {
     }
 }
 
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            mdzk: MdzkConfig::default(),
+            build: BuildConfig::default(),
+            rust: RustConfig::default(),
+            rest: Value::Table(Table::default()),
+        }     
+    }
+}
+
 impl FromStr for Config {
     type Err = Error;
 
@@ -46,12 +57,13 @@ impl FromStr for Config {
 impl Into<mdbook::Config> for Config {
     fn into(self) -> mdbook::Config {
         let mut config = mdbook::Config::default();
-        let backlinks_header = self.mdzk.backlinks_header.clone();
+
+        config.set("mdzk.backlinks-header", self.mdzk.backlinks_header.clone()).unwrap();
+
         config.book = self.mdzk.into();
         config.build = self.build.into();
         config.rust = self.rust;
 
-        config.set("mdzk.backlinks-header", backlinks_header).unwrap();
         for (key, value) in self.rest.as_table().unwrap().iter() {
             // FIXME: Scary unwraps!
             config.set(key, value).unwrap();
@@ -97,9 +109,30 @@ impl<'de> Deserialize<'de> for Config {
     }
 }
 
+impl Serialize for Config {
+    fn serialize<S: Serializer>(&self, s: S) -> std::result::Result<S::Ok, S::Error> {
+        let mut table = self.rest.clone();
+
+        let book_config = Value::try_from(&self.mdzk).expect("should always be serializable");
+        table.insert("mdzk", book_config);
+
+        if self.build != BuildConfig::default() {
+            let build_config = Value::try_from(&self.build).expect("should always be serializable");
+            table.insert("build", build_config);
+        }
+
+        if self.rust != RustConfig::default() {
+            let rust_config = Value::try_from(&self.rust).expect("should always be serializable");
+            table.insert("rust", rust_config);
+        }
+
+        table.serialize(s)
+    }
+}
+
 /// This struct holds the configuration for the metadata of the mdzk, as well as what it should
 /// include.
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(default, rename_all = "kebab-case")]
 pub struct MdzkConfig {
     /// The title of the vault.
@@ -149,7 +182,7 @@ impl Into<BookConfig> for MdzkConfig {
 }
 
 /// Configuration describing the build process.
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize, PartialEq)]
 #[serde(default, rename_all = "kebab-case")]
 pub struct BuildConfig {
     pub build_dir: PathBuf,
@@ -175,6 +208,39 @@ impl Into<mdbook::config::BuildConfig> for BuildConfig {
             // Override use_default_preprocessors config option. We are using our own versions of
             // the defaults, controlled with `disable_default_preprocessors`.
             use_default_preprocessors: false,
+        }
+    }
+}
+
+trait Insert {
+    fn insert(&mut self, key: &str, value: Value);
+}
+
+impl Insert for Value {
+    fn insert(&mut self, key: &str, value: Value) {
+        fn split(key: &str) -> Option<(&str, &str)> {
+            let ix = key.find('.')?;
+
+            let (head, tail) = key.split_at(ix);
+            // splitting will leave the "."
+            let tail = &tail[1..];
+
+            Some((head, tail))
+        }
+
+        if !self.is_table() {
+            *self = Value::Table(Table::new());
+        }
+
+        let table = self.as_table_mut().expect("unreachable");
+
+        if let Some((head, tail)) = split(key) {
+            table
+                .entry(head)
+                .or_insert_with(|| Value::Table(Table::new()))
+                .insert(tail, value);
+        } else {
+            table.insert(key.to_string(), value);
         }
     }
 }

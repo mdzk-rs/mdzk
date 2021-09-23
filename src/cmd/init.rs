@@ -1,8 +1,7 @@
-use crate::{utils, BUILD_DIR, CONFIG_FILE, DEFAULT_ZK_TITLE, SRC_DIR, SUMMARY_FILE};
+use crate::{utils, BUILD_DIR, CONFIG_FILE, DEFAULT_ZK_TITLE, SRC_DIR, SUMMARY_FILE, Config};
 
 use anyhow::Context;
 use mdbook::errors::*;
-use mdbook::Config;
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::PathBuf;
@@ -16,17 +15,17 @@ pub fn init(dir: Option<PathBuf>) -> Result<()> {
 
     let mut config = Config::default();
 
-    config.book.title = Some(DEFAULT_ZK_TITLE.to_string());
-    config.book.src = PathBuf::from(SRC_DIR);
+    config.mdzk.title = Some(DEFAULT_ZK_TITLE.to_string());
+    config.mdzk.src = PathBuf::from(SRC_DIR);
     config.build.build_dir = PathBuf::from(BUILD_DIR);
     if let Some(author) = utils::get_author_name() {
-        config.book.authors.push(author);
+        config.mdzk.authors.push(author);
     }
 
     // Create directory structure
     debug!("Creating directory tree");
     fs::create_dir_all(&root)?;
-    fs::create_dir_all(&root.join(&config.book.src))
+    fs::create_dir_all(&root.join(&config.mdzk.src))
         .context("Could not create source directory.")?;
     fs::create_dir_all(&root.join(&config.build.build_dir))
         .context("Could not create output directory.")?;
@@ -37,7 +36,7 @@ pub fn init(dir: Option<PathBuf>) -> Result<()> {
     writeln!(f, "{}", config.build.build_dir.display())?;
 
     // Create Summary
-    let summary = root.join(&config.book.src).join(SUMMARY_FILE);
+    let summary = root.join(&config.mdzk.src).join(SUMMARY_FILE);
     if !summary.exists() {
         trace!("Creating summary file.");
         File::create(&summary)?;
