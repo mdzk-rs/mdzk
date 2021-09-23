@@ -1,6 +1,6 @@
 [package]
 name = "mdzk"
-version = "0.4.0"
+version = "0.4.1"
 authors = [
     "Knut Magnus Aasrud <km@aasrud.com>",
     "Victor Freire <victor@freire.dev.br>",
