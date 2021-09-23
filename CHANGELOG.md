@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2 (Unreleased)
+
+### New features
+
+- When naming a file the same name as it's parent directory, this file will work as the content of that directory. Namely, the directory will itself function as a note.
+
 ## 0.4.1 (2020-09-23)
 
 ### Enhancements
