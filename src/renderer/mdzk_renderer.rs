@@ -136,7 +136,7 @@ fn render_markdown(text: &str) -> String {
     content
 }
 
-fn fix<'a>(dest: CowStr<'a>) -> CowStr<'a> {
+fn fix(dest: CowStr) -> CowStr {
     let scheme_link_re = regex!(r"^[a-z][a-z0-9+.-]*:");
     let md_link_re= regex!(r"(?P<link>.*)\.md(?P<anchor>#.*)?");
 

@@ -37,7 +37,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let summary = parse_summary(&summary_content).context("Summary parsing failed")?;
     debug!("Parsed summary.");
 
-    let disable_default_preprocessors = config.build.disable_default_preprocessors.clone();
+    let disable_default_preprocessors = config.build.disable_default_preprocessors;
     let mut zk = MDBook::load_with_config_and_summary(root, config.into(), summary)?;
     info!("Successfully loaded mdzk in: {:?}", zk.root);
 

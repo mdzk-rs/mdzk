@@ -50,7 +50,7 @@ pub fn get_author_name() -> Option<String> {
 
 /// Searches for Markdown-files in the source directory, and updates the summary file
 /// correspondingly. Ignores the summary file itself.
-pub fn update_summary(config: &Config, root: &PathBuf) -> Result<(), Error> {
+pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
     let book_source = root.join(&config.mdzk.src);
 
     let mut overrides = OverrideBuilder::new(&book_source);
@@ -114,7 +114,7 @@ fn escape_special_chars(text: &str) -> String {
 }
 
 /// Ease-of-use function for creating a file and writing bytes to it
-pub fn write_file(path: &PathBuf, bytes: &[u8]) -> Result<()> {
+pub fn write_file(path: &Path, bytes: &[u8]) -> Result<()> {
     // Create file
     if let Some(p) = path.parent() {
         fs::create_dir_all(p)?;
