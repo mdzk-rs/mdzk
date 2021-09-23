@@ -2,10 +2,11 @@ use crate::utils;
 use anyhow::Context;
 use handlebars::{no_escape, Handlebars};
 use mdbook::{book::Chapter, errors::*, renderer::RenderContext, BookItem, Renderer};
-use pulldown_cmark::{html::push_html, Options, Parser};
+use pulldown_cmark::{html::push_html, Options, Parser, Event, Tag, CowStr};
 use serde_json::json;
 use std::collections::BTreeMap;
 use std::fs;
+use lazy_regex::regex;
 
 /// The HTML backend for mdzk, implementing [`Renderer`](https://docs.rs/mdbook/0.4.12/mdbook/renderer/trait.Renderer.html).
 #[derive(Default)]
@@ -15,21 +16,11 @@ impl HtmlMdzk {
     fn render_chapter(&self, ch: &Chapter, ctx: &RenderContext, hbs: &Handlebars) -> Result<()> {
         let path = ch.path.as_ref().unwrap();
 
-        // Set up CommonMark parser
-        let mut opts = Options::empty();
-        opts.insert(Options::ENABLE_TABLES);
-        opts.insert(Options::ENABLE_FOOTNOTES);
-        opts.insert(Options::ENABLE_STRIKETHROUGH);
-        opts.insert(Options::ENABLE_TASKLISTS);
-        let parser = Parser::new_ext(&ch.content, opts);
-
-        // Push HTML into string
-        let mut content = String::new();
-        push_html(&mut content, parser);
+        let html = render_markdown(&ch.content);
 
         // Make map with values for all handlebars keys
         let mut data = BTreeMap::new();
-        data.insert("content", json!(content));
+        data.insert("content", json!(html));
         data.insert("title", json!(ch.name));
         data.insert("language", json!("en"));
         data.insert("path_to_root", json!(utils::path_to_root(path)));
@@ -116,6 +107,59 @@ impl Renderer for HtmlMdzk {
 
         Ok(())
     }
+}
+
+fn render_markdown(text: &str) -> String {
+    // Set up CommonMark parser
+    let mut opts = Options::empty();
+    opts.insert(Options::ENABLE_TABLES);
+    opts.insert(Options::ENABLE_FOOTNOTES);
+    opts.insert(Options::ENABLE_STRIKETHROUGH);
+    opts.insert(Options::ENABLE_TASKLISTS);
+    let parser = Parser::new_ext(text, opts);
+    let parser = parser
+        .map(|event| {
+            match event {
+                Event::Start(Tag::Link(link_type, dest, title)) => {
+                    Event::Start(Tag::Link(link_type, fix(dest), title))
+                }
+                Event::Start(Tag::Image(link_type, dest, title)) => {
+                    Event::Start(Tag::Image(link_type, fix(dest), title))
+                }
+                _ => event,
+            }
+        });
+
+    // Push HTML into string
+    let mut content = String::new();
+    push_html(&mut content, parser);
+    content
+}
+
+fn fix<'a>(dest: CowStr<'a>) -> CowStr<'a> {
+    let scheme_link_re = regex!(r"^[a-z][a-z0-9+.-]*:");
+    let md_link_re= regex!(r"(?P<link>.*)\.md(?P<anchor>#.*)?");
+
+    if dest.starts_with('#') {
+        return dest;
+    }
+    // Don't modify links with schemes like `https`.
+    if !scheme_link_re.is_match(&dest) {
+        // This is a relative link, adjust it as necessary.
+        let mut fixed_link = String::new();
+
+        if let Some(caps) = md_link_re.captures(&dest) {
+            fixed_link.push_str(&caps["link"]);
+            fixed_link.push_str(".html");
+            if let Some(anchor) = caps.name("anchor") {
+                fixed_link.push_str(anchor.as_str());
+            }
+        } else {
+            fixed_link.push_str(&dest);
+        };
+        return CowStr::from(fixed_link);
+    }
+    dest
 }
 
 const FONTS: [(&str, &[u8]); 21] = [
