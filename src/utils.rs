@@ -67,12 +67,10 @@ pub fn update_summary(config: &Config, root: &PathBuf) -> Result<(), Error> {
         .overrides(overrides.build()?)
         .types(TypesBuilder::new().add_defaults().select("markdown").build()?)
         .sort_by_file_path(|path1, path2| {
-            if path1.is_dir() && !path2.is_dir() {
-                Ordering::Less
-            } else if !path1.is_dir() && path2.is_dir() {
-                Ordering::Greater
-            } else  {
-                path1.cmp(path2)
+            match (path1.is_dir(), path2.is_dir()) {
+                (true, false) => Ordering::Less,
+                (false, true) => Ordering::Greater,
+                _ => path1.cmp(path2),
             }
         })
         .build();
