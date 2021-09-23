@@ -6,8 +6,9 @@
 
 - The mdzk renderer now converts `.md` into `.html` in links/images during rendering.
 
-    - [ ] This is based on regexes. Would like a pest parser for this.
-    - [ ] Raw HTML links/images are not converted. Implementing this will be most robust with the abovementioned pest parser.
+### Bug fixes
+
+- Fixed `init` command. It did not produce a correctly formatted config file, and a subsequent build failed.
 
 ## 0.4.0 (2021-09-20)
 
