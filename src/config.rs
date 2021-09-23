@@ -54,17 +54,17 @@ impl FromStr for Config {
     }
 }
 
-impl Into<mdbook::Config> for Config {
-    fn into(self) -> mdbook::Config {
+impl From<Config> for mdbook::Config {
+    fn from(conf: Config) -> Self {
         let mut config = mdbook::Config::default();
 
-        config.set("mdzk.backlinks-header", self.mdzk.backlinks_header.clone()).unwrap();
+        config.set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone()).unwrap();
 
-        config.book = self.mdzk.into();
-        config.build = self.build.into();
-        config.rust = self.rust;
+        config.book = conf.mdzk.into();
+        config.build = conf.build.into();
+        config.rust = conf.rust;
 
-        for (key, value) in self.rest.as_table().unwrap().iter() {
+        for (key, value) in conf.rest.as_table().unwrap().iter() {
             // FIXME: Scary unwraps!
             config.set(key, value).unwrap();
         }
@@ -168,15 +168,15 @@ impl Default for MdzkConfig {
     }
 }
 
-impl Into<BookConfig> for MdzkConfig {
-    fn into(self) -> BookConfig {
-        BookConfig {
-            title: self.title,
-            authors: self.authors,
-            description: self.description,
-            src: self.src,
-            multilingual: self.multilingual,
-            language: self.language,
+impl From<MdzkConfig> for BookConfig {
+    fn from(conf: MdzkConfig) -> Self {
+        Self {
+            title: conf.title,
+            authors: conf.authors,
+            description: conf.description,
+            src: conf.src,
+            multilingual: conf.multilingual,
+            language: conf.language,
         }
     }
 }
@@ -200,11 +200,11 @@ impl Default for BuildConfig {
     }
 }
 
-impl Into<mdbook::config::BuildConfig> for BuildConfig {
-    fn into(self) -> mdbook::config::BuildConfig {
-        mdbook::config::BuildConfig {
-            build_dir: self.build_dir,
-            create_missing: self.create_missing,
+impl From<BuildConfig> for mdbook::config::BuildConfig {
+    fn from(conf: BuildConfig) -> Self {
+        Self {
+            build_dir: conf.build_dir,
+            create_missing: conf.create_missing,
             // Override use_default_preprocessors config option. We are using our own versions of
             // the defaults, controlled with `disable_default_preprocessors`.
             use_default_preprocessors: false,
