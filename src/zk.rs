@@ -7,7 +7,7 @@ use anyhow::Context;
 use mdbook::{book::parse_summary, errors::*, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
-use mdbook_katex::KatexProcessor;
+use mdbook_katex::Katex;
 use mdbook_readme::ReadmePreprocessor;
 use mdbook_wikilinks::WikiLinks;
 use std::fs::File;
@@ -43,7 +43,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
 
     if !disable_default_preprocessors {
         zk.with_preprocessor(FrontMatter);
-        zk.with_preprocessor(KatexProcessor);
+        zk.with_preprocessor(Katex);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(WikiLinks);
         zk.with_preprocessor(ReadmePreprocessor);
