@@ -1,12 +1,13 @@
+use super::toc;
 use crate::utils;
 use anyhow::Context;
 use handlebars::{no_escape, Handlebars};
+use lazy_regex::regex;
 use mdbook::{book::Chapter, errors::*, renderer::RenderContext, BookItem, Renderer};
-use pulldown_cmark::{html::push_html, Options, Parser, Event, Tag, CowStr};
+use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag};
 use serde_json::json;
 use std::collections::BTreeMap;
 use std::fs;
-use lazy_regex::regex;
 
 /// The HTML backend for mdzk, implementing [`Renderer`](https://docs.rs/mdbook/0.4.12/mdbook/renderer/trait.Renderer.html).
 #[derive(Default)]
@@ -26,7 +27,9 @@ impl HtmlMdzk {
         data.insert("path_to_root", json!(utils::path_to_root(path)));
 
         // Render output
+        println!("Before");
         let out = hbs.render("index", &data)?;
+        println!("After");
 
         // Write to file
         let path = &ctx.destination.join(path.with_extension("html"));
@@ -59,6 +62,16 @@ impl Renderer for HtmlMdzk {
         let mut hbs = Handlebars::new();
         hbs.register_escape_fn(no_escape);
         hbs.register_template_string("index", include_str!("theme/index.hbs"))?;
+        hbs.register_helper(
+            "toc",
+            Box::new(toc::RenderToc {
+                no_section_label: ctx
+                    .config
+                    .html_config()
+                    .unwrap_or_default()
+                    .no_section_label,
+            }),
+        );
 
         // Render out each note
         trace!("mdzk render");
@@ -117,18 +130,15 @@ fn render_markdown(text: &str) -> String {
     opts.insert(Options::ENABLE_STRIKETHROUGH);
     opts.insert(Options::ENABLE_TASKLISTS);
     let parser = Parser::new_ext(text, opts);
-    let parser = parser
-        .map(|event| {
-            match event {
-                Event::Start(Tag::Link(link_type, dest, title)) => {
-                    Event::Start(Tag::Link(link_type, fix(dest), title))
-                }
-                Event::Start(Tag::Image(link_type, dest, title)) => {
-                    Event::Start(Tag::Image(link_type, fix(dest), title))
-                }
-                _ => event,
-            }
-        });
+    let parser = parser.map(|event| match event {
+        Event::Start(Tag::Link(link_type, dest, title)) => {
+            Event::Start(Tag::Link(link_type, fix(dest), title))
+        }
+        Event::Start(Tag::Image(link_type, dest, title)) => {
+            Event::Start(Tag::Image(link_type, fix(dest), title))
+        }
+        _ => event,
+    });
 
     // Push HTML into string
     let mut content = String::new();
@@ -138,7 +148,7 @@ fn render_markdown(text: &str) -> String {
 
 fn fix(dest: CowStr) -> CowStr {
     let scheme_link_re = regex!(r"^[a-z][a-z0-9+.-]*:");
-    let md_link_re= regex!(r"(?P<link>.*)\.md(?P<anchor>#.*)?");
+    let md_link_re = regex!(r"(?P<link>.*)\.md(?P<anchor>#.*)?");
 
     if dest.starts_with('#') {
         return dest;
