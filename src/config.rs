@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use toml::{self, Value, value::Table};
+use toml::{self, value::Table, Value};
 
 /// This struct represents the configuration of an mdzk. It is loaded from the mdzk.toml file.
 pub struct Config {
@@ -41,7 +41,7 @@ impl Default for Config {
             build: BuildConfig::default(),
             rust: RustConfig::default(),
             rest: Value::Table(Table::default()),
-        }     
+        }
     }
 }
 
@@ -58,7 +58,9 @@ impl From<Config> for mdbook::Config {
     fn from(conf: Config) -> Self {
         let mut config = mdbook::Config::default();
 
-        config.set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone()).unwrap();
+        config
+            .set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone())
+            .unwrap();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
@@ -105,7 +107,12 @@ impl<'de> Deserialize<'de> for Config {
             .transpose()?
             .unwrap_or_default();
 
-        Ok(Config { mdzk, build, rust, rest: Value::Table(table) })
+        Ok(Config {
+            mdzk,
+            build,
+            rust,
+            rest: Value::Table(table),
+        })
     }
 }
 

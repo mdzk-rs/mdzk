@@ -1,4 +1,4 @@
-use crate::{utils, BUILD_DIR, CONFIG_FILE, DEFAULT_ZK_TITLE, SRC_DIR, SUMMARY_FILE, Config};
+use crate::{utils, Config, BUILD_DIR, CONFIG_FILE, DEFAULT_ZK_TITLE, SRC_DIR, SUMMARY_FILE};
 
 use anyhow::Context;
 use mdbook::errors::*;

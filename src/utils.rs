@@ -1,5 +1,6 @@
 use crate::{Config, CONFIG_FILE, SUMMARY_FILE};
 
+use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use mdbook::errors::*;
 use std::cmp::Ordering;
 use std::fs::{self, File};
@@ -9,7 +10,6 @@ use std::{
     path::{Component, Path, PathBuf},
     process::Command,
 };
-use ignore::{WalkBuilder, overrides::OverrideBuilder, types::TypesBuilder};
 
 const PAD_SIZE: usize = 4;
 
@@ -65,13 +65,16 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
     let walker = WalkBuilder::new(&book_source)
         .hidden(true)
         .overrides(overrides.build()?)
-        .types(TypesBuilder::new().add_defaults().select("markdown").build()?)
-        .sort_by_file_path(|path1, path2| {
-            match (path1.is_dir(), path2.is_dir()) {
-                (true, false) => Ordering::Less,
-                (false, true) => Ordering::Greater,
-                _ => path1.cmp(path2),
-            }
+        .types(
+            TypesBuilder::new()
+                .add_defaults()
+                .select("markdown")
+                .build()?,
+        )
+        .sort_by_file_path(|path1, path2| match (path1.is_dir(), path2.is_dir()) {
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            _ => path1.cmp(path2),
         })
         .build();
 
@@ -85,7 +88,9 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
                 let dir_stem = dir_stem.file_stem().unwrap_or_default();
                 let file_stem = e.path().file_stem().unwrap_or_default();
                 file_stem != dir_stem
-            } else { true }
+            } else {
+                true
+            }
         })
         .map(|e| {
             let path = e.path();
