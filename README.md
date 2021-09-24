@@ -24,7 +24,7 @@ $ nix run github:mdzk-rs/mdzk help
 
 ### Pre-compiled binaries
 
-On the [Releases](https://github.com/mdzk-rs/mdzk/releases) page, you can find pre-compiled binaries for Linux (x86).
+On the [Releases](https://github.com/mdzk-rs/mdzk/releases) page, you can find pre-compiled binaries for Windows and Linux (x86).
 
 ## Getting started
 
