@@ -31,7 +31,6 @@ members = [
     "preprocessors/mdbook-wikilinks",
     "preprocessors/mdbook-frontmatter",
     "preprocessors/mdbook-readme",
-    "preprocessors/mdbook-katex",
 ]
 
 [dependencies]
@@ -54,7 +53,6 @@ structopt = "0.3.23"
 toml = "0.5.8"
 
 # Preprocessors
-mdbook-katex = { path = "preprocessors/mdbook-katex", version = "0.1.1" }
 mdbook-backlinks = { path = "preprocessors/mdbook-backlinks", version = "0.2.6" }
 mdbook-frontmatter = { path = "preprocessors/mdbook-frontmatter", version = "0.0.3" }
 mdbook-readme = { path = "preprocessors/mdbook-readme", version = "0.0.3" }

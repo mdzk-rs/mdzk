@@ -3,6 +3,7 @@ extern crate log;
 
 pub mod cmd;
 pub mod config;
+pub mod katex;
 pub mod renderer;
 pub mod utils;
 pub mod zk;

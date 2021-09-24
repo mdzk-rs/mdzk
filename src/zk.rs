@@ -7,7 +7,7 @@ use anyhow::Context;
 use mdbook::{book::parse_summary, errors::*, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
-use mdbook_katex::Katex;
+use crate::katex::Katex;
 use mdbook_readme::ReadmePreprocessor;
 use mdbook_wikilinks::WikiLinks;
 use std::fs::File;

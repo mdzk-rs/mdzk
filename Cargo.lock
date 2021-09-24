@@ -953,13 +953,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-katex"
-version = "0.1.1"
-dependencies = [
- "mdbook",
-]
-
-[[package]]
 name = "mdbook-readme"
 version = "0.0.3"
 dependencies = [
@@ -1002,7 +995,6 @@ dependencies = [
  "mdbook",
  "mdbook-backlinks",
  "mdbook-frontmatter",
- "mdbook-katex",
  "mdbook-readme",
  "mdbook-wikilinks",
  "notify",
