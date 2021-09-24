@@ -9,6 +9,7 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use toml::{self, value::Table, Value};
+use serde_json::json;
 
 /// This struct represents the configuration of an mdzk. It is loaded from the mdzk.toml file.
 pub struct Config {
@@ -58,17 +59,14 @@ impl From<Config> for mdbook::Config {
     fn from(conf: Config) -> Self {
         let mut config = mdbook::Config::default();
 
-        config
-            .set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone())
-            .unwrap();
+        config.set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone()).ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
         config.rust = conf.rust;
 
         for (key, value) in conf.rest.as_table().unwrap().iter() {
-            // FIXME: Scary unwraps!
-            config.set(key, value).unwrap();
+            config.set(key, value).ok();
         }
 
         config

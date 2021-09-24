@@ -27,9 +27,7 @@ impl HtmlMdzk {
         data.insert("path_to_root", json!(utils::path_to_root(path)));
 
         // Render output
-        println!("Before");
         let out = hbs.render("index", &data)?;
-        println!("After");
 
         // Write to file
         let path = &ctx.destination.join(path.with_extension("html"));
