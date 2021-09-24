@@ -1,10 +1,18 @@
 # Changelog
 
-## 0.4.2 (Unreleased)
+## 0.4.2 (2020-09-24)
+
+This is a quick update that should make compiling mdzk easier (and even possible) for Windows users.
+
+We have also experienced some trouble with Windows Defender flagging pre-compiled mdzk binaries as a trojan. **This is a false positive.** A report is submitted to Microsoft, and we have removed all previously released Windows binaries. We suspect the warning is related to the amount of embedded JavaScript that is contained in mdzk. Hopefully, you will not get any warnings from this version and onwards. If you do, please leave a comment with a screenshot of the warning in [this issue](https://github.com/mdzk-rs/mdzk/issues/22).
 
 ### New features
 
 - When naming a file the same name as it's parent directory, this file will work as the content of that directory. Namely, the directory will itself function as a note.
+
+### Bug fixes
+
+- Our dependency on [`mdbook-katex`](https://github.com/lzanini/mdbook-katex), and subsequently QuickJS, did not work well with most Windows computers. To circumvent this, KaTeX is now loaded from a CDN and handles the rendering client-side. This shouldn't lead to any significant increases in load time, but it is not ideal for offline usage. We are working on embedding KaTeX locally in the generated output, which hopefully will be included soon.
 
 ## 0.4.1 (2020-09-23)
 
