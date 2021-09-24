@@ -96,16 +96,16 @@ impl Renderer for HtmlMdzk {
             include_bytes!("theme/css/inter.css"),
         )?;
         utils::write_file(
-            &css_path.join("katex.min.css"),
-            include_bytes!("theme/css/katex.min.css"),
+            &css_path.join("katex.css"),
+            include_bytes!("theme/css/katex.css"),
         )?;
         utils::write_file(
             &js_path.join("katex.min.js"),
-            include_bytes!("theme/js/katex.min.js"),
+            include_bytes!("theme/js/katex.js"),
         )?;
         utils::write_file(
             &js_path.join("auto-render.min.js"),
-            include_bytes!("theme/js/auto-render.min.js"),
+            include_bytes!("theme/js/auto-render.js"),
         )?;
         if font_path.exists() {
             mdbook::utils::fs::remove_dir_content(&font_path)
