@@ -37,7 +37,6 @@ members = [
 anyhow = "1.0.44"
 env_logger = "0.9.0"
 futures-util = "0.3.17"
-gitignore = "1.0.7"
 gray_matter = "0.2.1"
 handlebars = "4.1.3"
 ignore = "0.4"

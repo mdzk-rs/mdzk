@@ -9,7 +9,6 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use toml::{self, value::Table, Value};
-use serde_json::json;
 
 /// This struct represents the configuration of an mdzk. It is loaded from the mdzk.toml file.
 pub struct Config {

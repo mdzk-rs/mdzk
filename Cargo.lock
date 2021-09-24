@@ -986,7 +986,6 @@ dependencies = [
  "elasticlunr-rs",
  "env_logger 0.9.0",
  "futures-util",
- "gitignore",
  "gray_matter",
  "handlebars",
  "ignore",

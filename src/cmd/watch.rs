@@ -1,6 +1,7 @@
 // This is simply a modified version of https://github.com/rust-lang/mdBook/blob/master/src/cmd/watch.rs
 use crate::{CONFIG_FILE, SUMMARY_FILE};
 
+use ignore::gitignore::Gitignore;
 use mdbook::MDBook;
 use notify::Watcher;
 use std::ffi::OsStr;
@@ -19,21 +20,15 @@ fn remove_ignored_files(book_root: &Path, paths: &[PathBuf]) -> Vec<PathBuf> {
         .filter(|x| x.file_name() != Some(OsStr::new(SUMMARY_FILE)))
         .collect();
 
-    match find_gitignore(book_root) {
-        Some(gitignore_path) => {
-            match gitignore::File::new(gitignore_path.as_path()) {
-                Ok(exclusion_checker) => filter_ignored_files(exclusion_checker, paths),
-                Err(_) => {
-                    // We're unable to read the .gitignore file, so we'll silently allow everything.
-                    // Please see discussion: https://github.com/rust-lang/mdBook/pull/1051
-                    paths.iter().map(|path| path.to_path_buf()).collect()
-                }
-            }
-        }
-        None => {
-            // There is no .gitignore file.
-            paths.iter().map(|path| path.to_path_buf()).collect()
-        }
+    if let Some(gitignore_path) = find_gitignore(book_root) {
+        let (ignore, _) = Gitignore::new(gitignore_path);
+        paths
+            .iter()
+            .filter(|path| !ignore.matched(path, path.is_dir()).is_ignore())
+            .map(|path| path.to_path_buf())
+            .collect()
+    } else {
+        paths.iter().map(|path| path.to_path_buf()).collect()
     }
 }
 
@@ -42,23 +37,6 @@ fn find_gitignore(book_root: &Path) -> Option<PathBuf> {
         .ancestors()
         .map(|p| p.join(".gitignore"))
         .find(|p| p.exists())
-}
-
-fn filter_ignored_files(exclusion_checker: gitignore::File, paths: Vec<&PathBuf>) -> Vec<PathBuf> {
-    paths
-        .iter()
-        .filter(|path| match exclusion_checker.is_excluded(path) {
-            Ok(exclude) => !exclude,
-            Err(error) => {
-                error!(
-                    "Unable to determine if {:?} is excluded: {:?}. Including it.",
-                    &path, error
-                );
-                true
-            }
-        })
-        .map(|path| path.to_path_buf())
-        .collect()
 }
 
 /// Calls the closure when a book source file is changed, blocking indefinitely.
