@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3 (Unreleased)
+
+### Enhancements
+
+- Removed `unwrap`s to make the codebase more robust.
+
 ## 0.4.2 (2020-09-24)
 
 This is a quick update that should make compiling mdzk easier (and even possible) for Windows users.
