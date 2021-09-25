@@ -162,14 +162,12 @@ pub fn write_file(path: &Path, bytes: &[u8]) -> Result<()> {
 pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
     path.into()
         .parent()
-        .unwrap() // FIXME: Should handle this more gracefully
+        .unwrap_or(&Path::new(""))
         .components()
         .fold(String::new(), |mut s, c| {
             match c {
                 Component::Normal(_) => s.push_str("../"),
-                _ => {
-                    debug!("Other path component... {:?}", c);
-                }
+                _ => debug!("Other path component... {:?}", c),
             }
             s
         })

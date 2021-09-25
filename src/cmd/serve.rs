@@ -10,7 +10,7 @@ use mdbook::{
     MDBook,
 };
 use std::net::{SocketAddr, ToSocketAddrs};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use tokio::sync::broadcast;
 use toml;
 use warp::ws::Message;
@@ -61,12 +61,12 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
         open(serving_url);
     } */
 
-    watch::trigger_on_change(&zk, move |paths, book_dir| {
+    watch::trigger_on_change(&zk, move |paths, book_dir: &Path| -> Result<()> {
         info!("Files changed: {:?}", paths);
         info!("Building book...");
 
-        let mut new_zk = load_zk(Some(book_dir.to_path_buf())).unwrap();
-        update_config(&mut new_zk, &livereload_url).unwrap();
+        let mut new_zk = load_zk(Some(book_dir.to_path_buf()))?;
+        update_config(&mut new_zk, &livereload_url)?;
         let result = match renderer.as_str() {
             "markdown" => new_zk.execute_build_process(&MarkdownRenderer),
             "mdzk" => new_zk.execute_build_process(&HtmlMdzk),
@@ -79,7 +79,8 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
         } else {
             let _ = tx.send(Message::text("reload"));
         }
-    });
+        Ok(())
+    })?;
 
     let _ = thread_handle.join();
 
@@ -87,10 +88,8 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
 }
 
 fn update_config(book: &mut MDBook, livereload_url: &str) -> Result<()> {
-    // Override site-url for local serving of the 404 file
     book.config.set("output.html.site-url", "/")?;
-    book.config
-        .set("output.html.livereload-url", &livereload_url)?;
+    book.config.set("output.html.livereload-url", &livereload_url)?;
     Ok(())
 }
 

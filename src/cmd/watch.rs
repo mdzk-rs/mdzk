@@ -2,7 +2,7 @@
 use crate::{CONFIG_FILE, SUMMARY_FILE};
 
 use ignore::gitignore::Gitignore;
-use mdbook::MDBook;
+use mdbook::{MDBook, errors::*};
 use notify::Watcher;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -40,9 +40,9 @@ fn find_gitignore(book_root: &Path) -> Option<PathBuf> {
 }
 
 /// Calls the closure when a book source file is changed, blocking indefinitely.
-pub fn trigger_on_change<F>(book: &MDBook, closure: F)
+pub fn trigger_on_change<F>(book: &MDBook, closure: F) -> Result<()>
 where
-    F: Fn(Vec<PathBuf>, &Path),
+    F: Fn(Vec<PathBuf>, &Path) -> Result<()>,
 {
     use notify::DebouncedEvent::*;
     use notify::RecursiveMode::*;
@@ -92,7 +92,7 @@ where
         let paths = remove_ignored_files(&book.root, &paths[..]);
 
         if !paths.is_empty() {
-            closure(paths, &book.root);
+            closure(paths, &book.root)?;
         }
     }
 }
