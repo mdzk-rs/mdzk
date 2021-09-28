@@ -27,7 +27,7 @@ impl Preprocessor for Katex {
     fn run(&self, _: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
-                ch.content = format!("{}\n{}", KATEX_HTML, ch.content);
+                ch.content = format!("{}\n\n{}", KATEX_HTML, ch.content);
             }
         });
         Ok(book)
