@@ -3,11 +3,11 @@ use crate::{
     Config, CONFIG_FILE, SUMMARY_FILE,
 };
 
+use crate::katex::Katex;
 use anyhow::Context;
 use mdbook::{book::parse_summary, errors::*, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
-use crate::katex::Katex;
 use mdbook_readme::ReadmePreprocessor;
 use mdbook_wikilinks::WikiLinks;
 use std::fs::File;
@@ -26,7 +26,15 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         .with_context(|| format!("Could not load config file {:?}", root.join(CONFIG_FILE)))?;
     debug!("Successfully loaded config.");
 
-    update_summary(&config, &root)?;
+    let generate_summary = match config.mdzk.generate_summary {
+        Some(value) => value,
+        // default behavior of the `generate_summary` flag
+        None => true,
+    };
+
+    if generate_summary {
+        update_summary(&config, &root)?;
+    }
 
     let summary_file = config.mdzk.src.join(SUMMARY_FILE);
     let mut summary_content = String::new();

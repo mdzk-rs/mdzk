@@ -6,6 +6,10 @@
 
 - Removed `unwrap`s to make the codebase more robust.
 
+### New features
+
+- New `generate-summary` key at the `[mdzk]` section on `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
+
 ## 0.4.2 (2020-09-24)
 
 This is a quick update that should make compiling mdzk easier (and even possible) for Windows users.
