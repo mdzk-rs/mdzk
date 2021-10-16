@@ -26,11 +26,11 @@ jobs:
       - name: Build
         run: |
           cargo build --release
-          mv target/release/mdzk target/release/mdzk_amd64
+          mv target/release/mdzk target/release/mdzk-x86_64-linux
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/release/mdzk_amd64
+          files: target/release/mdzk-x86_64-linux
           body: For more information, read the [CHANGELOG](https://github.com/mdzk-rs/mdzk/blob/main/CHANGELOG.md).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,10 +55,11 @@ jobs:
       - name: Build
         run: |
           cargo build --release
+          Ren "target\release\mdzk.exe" "target\release\mdzk-x86_64-windows.exe"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/release/mdzk.exe
+          files: target/release/mdzk-x86_64-windows.exe
           body: For more information, read the [CHANGELOG](https://github.com/mdzk-rs/mdzk/blob/main/CHANGELOG.md).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,11 +85,11 @@ jobs:
       - name: Build for mac
         run: |
           cargo build --release
-          mv target/release/mdzk target/release/mdzk_darwin
+          mv target/release/mdzk target/release/mdzk-x86_64-apple-darwin
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/release/mdzk_darwin
+          files: target/release/mdzk-x86_64-apple-darwin
           body: For more information, read the [CHANGELOG](https://github.com/mdzk-rs/mdzk/blob/main/CHANGELOG.md).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
