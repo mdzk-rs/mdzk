@@ -58,7 +58,9 @@ impl From<Config> for mdbook::Config {
     fn from(conf: Config) -> Self {
         let mut config = mdbook::Config::default();
 
-        config.set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone()).ok();
+        config
+            .set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone())
+            .ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
@@ -155,6 +157,8 @@ pub struct MdzkConfig {
     pub language: Option<String>,
     /// The header before the backlinks list
     pub backlinks_header: Option<String>,
+    /// Whether the summary will be auto-generated or not.
+    pub generate_summary: Option<bool>,
 }
 
 impl Default for MdzkConfig {
@@ -168,6 +172,7 @@ impl Default for MdzkConfig {
             multilingual: false,
             language: Some("en".to_string()),
             backlinks_header: None,
+            generate_summary: None,
         }
     }
 }
