@@ -6,7 +6,9 @@ use mdbook::{
     BookItem,
 };
 use regex::{Captures, Regex};
-use std::{collections::HashMap, io};
+use std::{collections::HashMap, io, path::PathBuf};
+use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag};
+use pulldown_cmark_to_cmark::cmark;
 
 static WIKILINK_REGEX: Lazy<Regex> =
     lazy_regex!(r"\[\[(?P<link>[^\]\|]+)(?:\|(?P<title>[^\]]+))?\]\]");
@@ -61,39 +63,100 @@ impl Preprocessor for WikiLinks {
 
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
-                chapter.content = WIKILINK_REGEX
-                    .replace_all(&chapter.content, |it: &Captures| -> String {
-                        let key = it.name("link").unwrap().as_str().trim();
-                        if !chapters_map.contains_key(key) {
-                            return (maud::html! {
-                                span.missing-link style="color:darkred;" {
-                                   (key)
-                                }
-                            })
-                            .into_string();
-                        }
-                        let title = it
-                            .name("title")
-                            .map(|x| x.as_str().trim().to_string())
-                            .unwrap_or(key.to_string());
-                        let diff_path = pathdiff::diff_paths(
-                            chapters_map.get(key).unwrap(),
-                            chapter.path.as_ref().unwrap().parent().unwrap(),
-                        )
-                        .unwrap();
+                chapter.content = pulldown_method(&chapter.content);
 
-                        return format!(
-                            "[{}](<{}>)",
-                            title,
-                            escape_special_chars(&diff_path.to_string_lossy())
-                        );
-                    })
-                    .to_string();
+                // chapter.content = regex_method(&chapter, &chapters_map);
             }
         });
 
         Ok(book)
     }
+}
+
+fn regex_method(chapter: &Chapter, chapters_map: &HashMap<String, PathBuf>) -> String {
+    WIKILINK_REGEX
+        .replace_all(&chapter.content, |it: &Captures| -> String {
+            let key = it.name("link").unwrap().as_str().trim();
+            if !chapters_map.contains_key(key) {
+                return (maud::html! {
+                    span.missing-link style="color:darkred;" {
+                       (key)
+                    }
+                })
+                .into_string();
+            }
+            let title = it
+                .name("title")
+                .map(|x| x.as_str().trim().to_string())
+                .unwrap_or(key.to_string());
+            let diff_path = pathdiff::diff_paths(
+                chapters_map.get(key).unwrap(),
+                chapter.path.as_ref().unwrap().parent().unwrap(),
+            )
+            .unwrap();
+
+            return format!(
+                "[{}](<{}>)",
+                title,
+                escape_special_chars(&diff_path.to_string_lossy())
+            );
+        })
+        .to_string()
+}
+
+enum WikiTag {
+    Link,
+    MaybeLink,
+    Waiting,
+    Ignore,
+}
+
+fn pulldown_method(content: &str) -> String {
+    let mut out = content.clone().to_owned();
+
+    let mut opts = Options::empty();
+    opts.insert(Options::ENABLE_TABLES);
+    opts.insert(Options::ENABLE_FOOTNOTES);
+    opts.insert(Options::ENABLE_TASKLISTS);
+    let parser = Parser::new_ext(content, opts);
+    let mut link = WikiTag::Ignore;
+    for event in parser {
+        match event {
+            Event::Start(Tag::Paragraph) => {
+                link = WikiTag::Waiting;
+            }
+            Event::End(Tag::Paragraph) => {
+                link = WikiTag::Ignore;
+            }
+            Event::Text(CowStr::Borrowed("[")) => {
+                match link {
+                    WikiTag::Waiting => link = WikiTag::MaybeLink,
+                    WikiTag::MaybeLink => link = WikiTag::Link,
+                    WikiTag::Link => link = WikiTag::Waiting,
+                    WikiTag::Ignore => {}
+                }
+            }
+            Event::Text(ref text) => {
+                // Really messy solution, need to match closing brackets as well.
+                // This works as a proof of concept in my own vault, since I never use `[[`
+                // anywhere but for wikilinks.
+                match link {
+                    WikiTag::Link => {
+                        out = out.replace(
+                            &format!("[[{}]]", text),
+                            &format!("!!This was link!!")
+                        );
+                        link = WikiTag::Waiting;
+                    }
+                    WikiTag::MaybeLink => link = WikiTag::Waiting,
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
+    }
+
+    out
 }
 
 /// Escape characters for usage in URLs
