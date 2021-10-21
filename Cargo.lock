@@ -971,6 +971,8 @@ dependencies = [
  "maud",
  "mdbook",
  "pathdiff",
+ "pulldown-cmark 0.8.0",
+ "pulldown-cmark-to-cmark",
  "regex",
  "serde",
  "serde_json",
@@ -1399,6 +1401,15 @@ dependencies = [
  "getopts",
  "memchr",
  "unicase",
+]
+
+[[package]]
+name = "pulldown-cmark-to-cmark"
+version = "6.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f5925e2c68fb0c3c189cd0f6bbcf1e16402a070d4fcaf7600e239e8302dd0e8"
+dependencies = [
+ "pulldown-cmark 0.8.0",
 ]
 
 [[package]]
