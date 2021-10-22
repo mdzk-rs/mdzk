@@ -105,61 +105,60 @@ fn regex_method(chapter: &Chapter, chapters_map: &HashMap<String, PathBuf>) -> S
         .to_string()
 }
 
-#[derive(Debug)]
-enum WikiTag {
-    OutsideLink,
-    MaybeOpen,
-    MaybeInsideLink,
-    MaybeClose,
-    Ignore,
-}
-
 fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) {
+    enum Currently {
+        OutsideLink,
+        MaybeOpen,
+        MaybeInsideLink,
+        MaybeClose,
+        Ignore,
+    }
+
     let parser = Parser::new(content);
 
     let mut buffer = String::new();
-    let mut current = WikiTag::OutsideLink;
+    let mut current = Currently::OutsideLink;
     for event in parser {
         match event {
             Event::Text(CowStr::Borrowed("[")) => {
                 match current {
-                    WikiTag::OutsideLink => current = WikiTag::MaybeOpen,
-                    WikiTag::MaybeOpen => current = WikiTag::MaybeInsideLink,
-                    WikiTag::MaybeInsideLink => current = WikiTag::OutsideLink,
-                    WikiTag::MaybeClose => {
+                    Currently::OutsideLink => current = Currently::MaybeOpen,
+                    Currently::MaybeOpen => current = Currently::MaybeInsideLink,
+                    Currently::MaybeInsideLink => current = Currently::OutsideLink,
+                    Currently::MaybeClose => {
                         buffer.clear();
-                        current = WikiTag::OutsideLink;
+                        current = Currently::OutsideLink;
                     }
-                    WikiTag::Ignore => {}
+                    Currently::Ignore => {}
                 }
             }
 
             Event::Text(CowStr::Borrowed("]")) => {
                 match current {
-                    WikiTag::MaybeOpen => current = WikiTag::OutsideLink,
-                    WikiTag::MaybeInsideLink => current = WikiTag::MaybeClose,
-                    WikiTag::MaybeClose => {
+                    Currently::MaybeOpen => current = Currently::OutsideLink,
+                    Currently::MaybeInsideLink => current = Currently::MaybeClose,
+                    Currently::MaybeClose => {
                         if !buffer.contains('\n') {
                             handle_link(&buffer.trim());
                         }
                         buffer.clear();
-                        current = WikiTag::OutsideLink;
+                        current = Currently::OutsideLink;
                     }
-                    WikiTag::OutsideLink => {},
-                    WikiTag::Ignore => {}
+                    Currently::OutsideLink => {},
+                    Currently::Ignore => {}
                 }
             }
 
             Event::Text(ref text) => {
                 match current {
-                    WikiTag::MaybeInsideLink => {
+                    Currently::MaybeInsideLink => {
                         if buffer.is_empty() {
                             buffer.push_str(text);
                         } else {
                             // Buffer contains something, which means a newline or something else
                             // split it up. Clear buffer and don't consider this a link.
                             buffer.clear();
-                            current = WikiTag::OutsideLink;
+                            current = Currently::OutsideLink;
                         }
                     }
                     _ => {}
