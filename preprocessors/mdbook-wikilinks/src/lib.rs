@@ -138,9 +138,7 @@ fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) {
                     Currently::MaybeOpen => current = Currently::OutsideLink,
                     Currently::MaybeInsideLink => current = Currently::MaybeClose,
                     Currently::MaybeClose => {
-                        if !buffer.contains('\n') {
-                            handle_link(&buffer.trim());
-                        }
+                        handle_link(&buffer.trim());
                         buffer.clear();
                         current = Currently::OutsideLink;
                     }
