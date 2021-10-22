@@ -7,8 +7,7 @@ use mdbook::{
 };
 use regex::{Captures, Regex};
 use std::{collections::HashMap, io, path::PathBuf};
-use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag};
-use pulldown_cmark_to_cmark::cmark;
+use pulldown_cmark::{CowStr, Event, Parser};
 
 static WIKILINK_REGEX: Lazy<Regex> =
     lazy_regex!(r"\[\[(?P<link>[^\]\|]+)(?:\|(?P<title>[^\]]+))?\]\]");
