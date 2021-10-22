@@ -63,7 +63,7 @@ impl Preprocessor for WikiLinks {
 
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
-                chapter.content = pulldown_method(&chapter.content);
+                chapter.content = pulldown_method(&chapter.content, |link_text| println!("This is link: {}", link_text));
 
                 // chapter.content = regex_method(&chapter, &chapters_map);
             }
@@ -104,14 +104,16 @@ fn regex_method(chapter: &Chapter, chapters_map: &HashMap<String, PathBuf>) -> S
         .to_string()
 }
 
+#[derive(Debug)]
 enum WikiTag {
-    Link,
-    MaybeLink,
-    Waiting,
+    OutsideLink,
+    MaybeOpen,
+    MaybeInsideLink,
+    MaybeClose,
     Ignore,
 }
 
-fn pulldown_method(content: &str) -> String {
+fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) -> String {
     let mut out = content.clone().to_owned();
 
     let mut opts = Options::empty();
@@ -119,36 +121,43 @@ fn pulldown_method(content: &str) -> String {
     opts.insert(Options::ENABLE_FOOTNOTES);
     opts.insert(Options::ENABLE_TASKLISTS);
     let parser = Parser::new_ext(content, opts);
-    let mut link = WikiTag::Ignore;
+
+    let mut buffer = String::new();
+    let mut current = WikiTag::OutsideLink;
     for event in parser {
         match event {
-            Event::Start(Tag::Paragraph) => {
-                link = WikiTag::Waiting;
-            }
-            Event::End(Tag::Paragraph) => {
-                link = WikiTag::Ignore;
-            }
             Event::Text(CowStr::Borrowed("[")) => {
-                match link {
-                    WikiTag::Waiting => link = WikiTag::MaybeLink,
-                    WikiTag::MaybeLink => link = WikiTag::Link,
-                    WikiTag::Link => link = WikiTag::Waiting,
+                match current {
+                    WikiTag::OutsideLink => current = WikiTag::MaybeOpen,
+                    WikiTag::MaybeOpen => current = WikiTag::MaybeInsideLink,
+                    WikiTag::MaybeInsideLink => current = WikiTag::OutsideLink,
+                    WikiTag::MaybeClose => {
+                        buffer.clear();
+                        current = WikiTag::OutsideLink;
+                    }
                     WikiTag::Ignore => {}
                 }
             }
-            Event::Text(ref text) => {
-                // Really messy solution, need to match closing brackets as well.
-                // This works as a proof of concept in my own vault, since I never use `[[`
-                // anywhere but for wikilinks.
-                match link {
-                    WikiTag::Link => {
-                        out = out.replace(
-                            &format!("[[{}]]", text),
-                            &format!("!!This was link!!")
-                        );
-                        link = WikiTag::Waiting;
+
+            Event::Text(CowStr::Borrowed("]")) => {
+                match current {
+                    WikiTag::MaybeOpen => current = WikiTag::OutsideLink,
+                    WikiTag::MaybeInsideLink => current = WikiTag::MaybeClose,
+                    WikiTag::MaybeClose => {
+                        handle_link(&buffer.trim());
+                        buffer.clear();
+                        current = WikiTag::OutsideLink;
                     }
-                    WikiTag::MaybeLink => link = WikiTag::Waiting,
+                    WikiTag::OutsideLink => {},
+                    WikiTag::Ignore => {}
+                }
+            }
+
+            Event::Text(ref text) => {
+                match current {
+                    WikiTag::MaybeInsideLink => {
+                        buffer.push_str(text);
+                    }
                     _ => {}
                 }
             }
@@ -169,7 +178,19 @@ fn escape_special_chars(text: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::WIKILINK_REGEX;
+    use super::*;
+
+    #[test]
+    fn detect_links() {
+        let content = r#"This is a note with four links:
+
+This one [[link]], this one [[ link#header ]], this one [[   link | a bit more complex]], and this one [[     link#header | more 😭 complex]]."#;
+
+        let mut links = vec![];
+         
+        pulldown_method(content, |link_text| { links.push(link_text.to_owned()); });
+        assert_eq!(links, vec!["link", "link#header", "link | a bit more complex", "link#header | more 😭 complex"]);
+    }
 
     #[test]
     fn extract_link_regex() {
