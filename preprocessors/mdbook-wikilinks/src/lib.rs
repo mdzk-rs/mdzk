@@ -63,7 +63,9 @@ impl Preprocessor for WikiLinks {
 
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
-                chapter.content = pulldown_method(&chapter.content, |link_text| println!("This is link: {}", link_text));
+                pulldown_method(&chapter.content.clone(), |link_text| {
+                    chapter.content = chapter.content.replacen(&format!("[[{}]]", link_text), "!!This was link!!", 1);
+                });
 
                 // chapter.content = regex_method(&chapter, &chapters_map);
             }
@@ -113,14 +115,8 @@ enum WikiTag {
     Ignore,
 }
 
-fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) -> String {
-    let mut out = content.clone().to_owned();
-
-    let mut opts = Options::empty();
-    opts.insert(Options::ENABLE_TABLES);
-    opts.insert(Options::ENABLE_FOOTNOTES);
-    opts.insert(Options::ENABLE_TASKLISTS);
-    let parser = Parser::new_ext(content, opts);
+fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) {
+    let parser = Parser::new(content);
 
     let mut buffer = String::new();
     let mut current = WikiTag::OutsideLink;
@@ -173,8 +169,6 @@ fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) -> String {
             _ => {}
         }
     }
-
-    out
 }
 
 /// Escape characters for usage in URLs
@@ -223,10 +217,13 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
         let content = r#"Here are some non-correct links:
 
 First a link [[with
-
 newline]]
 
 Then a link `inside [[inline code]]`, or inside <span class="katex-inline">inline [[math]]</span>. What about \[\[escaped brackets\]\]?
+
+<div class="katex-display">
+    f(x) = \text{[[display link]]}
+</div>
 
 ```rust
 let link = "[[link_in_code]]".to_owned();
@@ -239,7 +236,7 @@ let link = "[[link_in_code]]".to_owned();
         let mut links = Vec::<String>::new();
         pulldown_method(content, |link_text| { links.push(link_text.to_owned()); });
 
-        assert_eq!(links, Vec::<String>::new());
+        assert!(links.is_empty(), "Got links: {:?}", links);
     }
 
     #[test]
