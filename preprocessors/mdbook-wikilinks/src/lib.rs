@@ -120,6 +120,10 @@ fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) {
     let mut current = Currently::OutsideLink;
     for event in parser {
         match event {
+            // Ignore KaTeX spans
+            Event::Html(CowStr::Borrowed("<span class=\"katex-inline\">")) => current = Currently::Ignore,
+            Event::Html(CowStr::Borrowed("</span>")) => current = Currently::OutsideLink,
+
             Event::Text(CowStr::Borrowed("[")) => {
                 match current {
                     Currently::OutsideLink => current = Currently::MaybeOpen,
