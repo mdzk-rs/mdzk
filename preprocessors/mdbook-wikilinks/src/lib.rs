@@ -144,7 +144,9 @@ fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) -> String {
                     WikiTag::MaybeOpen => current = WikiTag::OutsideLink,
                     WikiTag::MaybeInsideLink => current = WikiTag::MaybeClose,
                     WikiTag::MaybeClose => {
-                        handle_link(&buffer.trim());
+                        if !buffer.contains('\n') {
+                            handle_link(&buffer.trim());
+                        }
                         buffer.clear();
                         current = WikiTag::OutsideLink;
                     }
@@ -156,7 +158,14 @@ fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) -> String {
             Event::Text(ref text) => {
                 match current {
                     WikiTag::MaybeInsideLink => {
-                        buffer.push_str(text);
+                        if buffer.is_empty() {
+                            buffer.push_str(text);
+                        } else {
+                            // Buffer contains something, which means a newline or something else
+                            // split it up. Clear buffer and don't consider this a link.
+                            buffer.clear();
+                            current = WikiTag::OutsideLink;
+                        }
                     }
                     _ => {}
                 }
@@ -181,15 +190,56 @@ mod tests {
     use super::*;
 
     #[test]
-    fn detect_links() {
+    fn detect_these() {
         let content = r#"This is a note with four links:
 
-This one [[link]], this one [[ link#header ]], this one [[   link | a bit more complex]], and this one [[     link#header | more 😭 complex]]."#;
+This one [[link]], this one [[ link#header ]], this one [[   link | a bit more complex]], and this one [[     link#header | more 😭 complex]].
+
+> This is a [[link in a blockquote]]
+
+- List item
+- Second list item with [[list link]]
+
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Tables can also have [[table links]] | more stuff |"#;
 
         let mut links = vec![];
-         
         pulldown_method(content, |link_text| { links.push(link_text.to_owned()); });
-        assert_eq!(links, vec!["link", "link#header", "link | a bit more complex", "link#header | more 😭 complex"]);
+
+        assert_eq!(links, vec![
+                   "link",
+                   "link#header",
+                   "link | a bit more complex",
+                   "link#header | more 😭 complex",
+                   "link in a blockquote",
+                   "list link",
+                   "table links"
+        ]);
+    }
+
+    #[test]
+    fn dont_detect_these() {
+        let content = r#"Here are some non-correct links:
+
+First a link [[with
+
+newline]]
+
+Then a link `inside [[inline code]]`, or inside <span class="katex-inline">inline [[math]]</span>. What about \[\[escaped brackets\]\]?
+
+```rust
+let link = "[[link_in_code]]".to_owned();
+```
+
+<p>
+  This is some raw HTML. We don't want [[html links]] detected here.
+</p>"#;
+
+        let mut links = Vec::<String>::new();
+        pulldown_method(content, |link_text| { links.push(link_text.to_owned()); });
+
+        assert_eq!(links, Vec::<String>::new());
     }
 
     #[test]
