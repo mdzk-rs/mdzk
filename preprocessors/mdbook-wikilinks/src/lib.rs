@@ -2,52 +2,19 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-use lazy_regex::{lazy_regex, Lazy};
 use mdbook::{
     book::{Book, Chapter},
     errors::Error,
-    preprocess::{CmdPreprocessor, Preprocessor, PreprocessorContext},
+    preprocess::{Preprocessor, PreprocessorContext},
     BookItem,
 };
 use pest::Parser;
-use regex::{Captures, Regex};
-use std::{collections::HashMap, io, path::PathBuf};
+use std::collections::HashMap;
 use pulldown_cmark::{CowStr, Event, escape::escape_href};
 
 #[derive(Parser)]
 #[grammar = "wikilink.pest"]
 pub struct WikiLinkParser;
-
-static WIKILINK_REGEX: Lazy<Regex> =
-    lazy_regex!(r"\[\[(?P<link>[^\]\|]+)(?:\|(?P<title>[^\]]+))?\]\]");
-
-pub fn handle_preprocessing(pre: impl Preprocessor) -> Result<(), Error> {
-    let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
-
-    if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
-        eprintln!(
-            "Warning: The {} plugin was built against version {} of mdbook, \
-             but we're being called from version {}",
-            pre.name(),
-            mdbook::MDBOOK_VERSION,
-            ctx.mdbook_version
-        );
-    }
-
-    let processed_book = pre.run(&ctx, book)?;
-    //serde_json::to_writer_pretty(io::stderr(), &processed_book);
-    serde_json::to_writer(io::stdout(), &processed_book)?;
-
-    Ok(())
-}
-
-fn chapter(it: &BookItem) -> Option<&Chapter> {
-    if let BookItem::Chapter(ch) = it {
-        Some(ch)
-    } else {
-        None
-    }
-}
 
 pub struct WikiLinks;
 
@@ -58,20 +25,18 @@ impl Preprocessor for WikiLinks {
 
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
         let mut path_map = HashMap::new();
-        for chapter in book.iter().filter_map(chapter) {
+        for chapter in book.iter().filter_map(get_chapter) {
             let key = chapter.name.clone();
-            if chapter.path.is_none() {
-                continue;
-            }
+            if chapter.path.is_none() { continue; }
             if path_map.contains_key(&key) {
-                eprintln!("duplicated page title found: {} at {:?}", key, chapter.path);
+                eprintln!("Duplicated page title found: {} at {:?}", key, chapter.path);
             }
             path_map.insert(key, chapter.path.as_ref().unwrap().clone());
         }
 
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
-                pulldown_method(&chapter.content.clone(), |link_text| {
+                for_each_link(&chapter.content.clone(), |link_text| {
                     let mut link = WikiLinkParser::parse(Rule::link, link_text)
                         .expect("Unsuccessful parse")
                         .next()
@@ -112,7 +77,7 @@ impl Preprocessor for WikiLinks {
 }
 
 
-fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) {
+fn for_each_link(content: &str, mut handle_link: impl FnMut(&str)) {
     enum Currently {
         OutsideLink,
         MaybeOpen,
@@ -178,44 +143,19 @@ fn pulldown_method(content: &str, mut handle_link: impl FnMut(&str)) {
     }
 }
 
-fn _regex_method(chapter: &Chapter, chapters_map: &HashMap<String, PathBuf>) -> String {
-    WIKILINK_REGEX
-        .replace_all(&chapter.content, |it: &Captures| -> String {
-            let key = it.name("link").unwrap().as_str().trim();
-            if !chapters_map.contains_key(key) {
-                return format!(
-                    "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>", 
-                    key
-                )
-            }
-            let title = it
-                .name("title")
-                .map(|x| x.as_str().trim().to_string())
-                .unwrap_or(key.to_string());
-            let diff_path = pathdiff::diff_paths(
-                chapters_map.get(key).unwrap(),
-                chapter.path.as_ref().unwrap().parent().unwrap(),
-            )
-            .unwrap();
-
-            return format!(
-                "[{}](<{}>)",
-                title,
-                escape_special_chars(&diff_path.to_string_lossy())
-            );
-        })
-        .to_string()
-}
-
 /// Escape characters for usage in URLs
 fn escape_special_chars(text: &str) -> String {
     let mut buf = String::new();
     escape_href(&mut buf, text).ok();
     buf
-    /* text.replace(" ", "%20")
-        .replace("<", "%3C")
-        .replace(">", "%3E")
-        .replace('?', "%3F") */
+}
+
+fn get_chapter(it: &BookItem) -> Option<&Chapter> {
+    if let BookItem::Chapter(ch) = it {
+        Some(ch)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -238,7 +178,7 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
 | Tables can also have [[table links]] | more stuff |"#;
 
         let mut links = vec![];
-        pulldown_method(content, |link_text| { links.push(link_text.to_owned()); });
+        for_each_link(content, |link_text| { links.push(link_text.to_owned()); });
 
         assert_eq!(links, vec![
                    "link",
@@ -273,49 +213,16 @@ let link = "[[link_in_code]]".to_owned();
 </p>"#;
 
         let mut links = Vec::<String>::new();
-        pulldown_method(content, |link_text| { links.push(link_text.to_owned()); });
+        for_each_link(content, |link_text| { links.push(link_text.to_owned()); });
 
         assert!(links.is_empty(), "Got links: {:?}", links);
     }
 
     #[test]
-    fn extract_link_regex() {
-        let cases = [
-            ("[[Link]]", "Link"),
-            ("[[🪴 Sowing<Your>Garden]]", "🪴 Sowing<Your>Garden"),
-            (
-                "[[/Templates/🪴 Sowing<Your>Garden]]",
-                "/Templates/🪴 Sowing<Your>Garden",
-            ),
-        ];
-
-        for (case, expected) in &cases {
-            let got = WIKILINK_REGEX
-                .captures(case)
-                .unwrap()
-                .name("link")
-                .unwrap()
-                .as_str();
-            assert_eq!(got.trim(), *expected);
-        }
-    }
-
-    #[test]
-    fn extract_title_regex() {
-        let cases = [
-            ("[[Link | My New Link]]", "My New Link"),
-            ("[[🪴 Sowing<Your>Garden | 🪴 Emoji Link]]", "🪴 Emoji Link"),
-            ("[[🪴 Sowing<Your>Garden | 🪴/Emoji/Link]]", "🪴/Emoji/Link"),
-        ];
-
-        for (case, expected) in &cases {
-            let got = WIKILINK_REGEX
-                .captures(case)
-                .unwrap()
-                .name("title")
-                .unwrap()
-                .as_str();
-            assert_eq!(got.trim(), *expected)
-        }
+    fn escapel_special_chars() {
+        assert_eq!(
+            escape_special_chars("w3ir∂ førmättÎñg"),
+            "w3ir%E2%88%82%20f%C3%B8rm%C3%A4tt%C3%8E%C3%B1g"
+        )
     }
 }
