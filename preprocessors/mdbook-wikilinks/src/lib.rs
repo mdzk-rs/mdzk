@@ -7,6 +7,7 @@ use mdbook::{
     errors::Error,
     preprocess::{Preprocessor, PreprocessorContext},
     BookItem,
+    utils::id_from_content,
 };
 use pest::Parser;
 use std::collections::HashMap;
@@ -43,39 +44,44 @@ impl Preprocessor for WikiLinks {
                         .unwrap()
                         .into_inner();
 
-                    let dest = link.next().unwrap().into_inner().next().unwrap().as_str();
-                    let href = if !path_map.contains_key(dest) {
+                    // Handle destination
+                    let mut dest = link.next().unwrap().into_inner();
+                    let note = dest.next().unwrap().as_str();
+                    let cmark_link = if !path_map.contains_key(note) {
                         format!(
                             "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>", 
-                            dest
+                            note
                         )
                     } else {
-                        pathdiff::diff_paths(
-                            path_map.get(dest).unwrap(),
+                        let mut href = pathdiff::diff_paths(
+                            path_map.get(note).unwrap(),
                             chapter.path.as_ref().unwrap().parent().unwrap(),
-                        ).unwrap().to_string_lossy().to_string() // Gotta love Rust <3
+                        ).unwrap().to_string_lossy().to_string(); // Gotta love Rust <3
+
+                        // Handle anchor
+                        // TODO: Blockrefs are currently not handled here
+                        if let Some(anchor) = dest.next() {
+                            let header_kebab = id_from_content(&anchor.as_str()[1..]);
+                            href.push_str(&format!("#{}", header_kebab));
+                        }
+
+                        // Handle link text
+                        let title = match link.next() {
+                            Some(alias) => alias.as_str(),
+                            None => note.as_ref(),
+                        };
+                        format!("[{}](<{}>)", title, escape_special_chars(&href))
                     };
 
-                    let title = match link.next() {
-                        Some(alias) => alias.as_str(),
-                        None => dest.as_ref(),
-                    };
-
-                    chapter.content = chapter.content.replacen(
-                        &format!("[[{}]]", link_text),
-                        &format!("[{}](<{}>)", title, escape_special_chars(&href)),
-                        1
-                    );
+                    chapter.content = chapter.content
+                        .replacen(&format!("[[{}]]", link_text), &cmark_link, 1);
                 });
-
-                // chapter.content = _regex_method(&chapter, &path_map);
             }
         });
 
         Ok(book)
     }
 }
-
 
 fn for_each_link(content: &str, mut handle_link: impl FnMut(&str)) {
     enum Currently {
@@ -124,18 +130,15 @@ fn for_each_link(content: &str, mut handle_link: impl FnMut(&str)) {
             }
 
             Event::Text(ref text) => {
-                match current {
-                    Currently::MaybeInsideLink => {
-                        if buffer.is_empty() {
-                            buffer.push_str(text);
-                        } else {
-                            // Buffer contains something, which means a newline or something else
-                            // split it up. Clear buffer and don't consider this a link.
-                            buffer.clear();
-                            current = Currently::OutsideLink;
-                        }
+                if let Currently::MaybeInsideLink = current {
+                    if buffer.is_empty() {
+                        buffer.push_str(text);
+                    } else {
+                        // Buffer contains something, which means a newline or something else
+                        // split it up. Clear buffer and don't consider this a link.
+                        buffer.clear();
+                        current = Currently::OutsideLink;
                     }
-                    _ => {}
                 }
             }
             _ => {}
