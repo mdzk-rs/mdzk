@@ -51,10 +51,17 @@ impl Preprocessor for WikiLinks {
                     // Handle destination
                     let mut dest = link.next().unwrap().into_inner();
                     let note = dest.next().unwrap().as_str();
+
+                    // Handle link text
+                    let title = match link.next() {
+                        Some(alias) => alias.as_str(),
+                        None => note.as_ref(),
+                    };
+
                     let cmark_link = if !path_map.contains_key(note) {
                         format!(
                             "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>", 
-                            note
+                            title
                         )
                     } else {
                         let mut href = pathdiff::diff_paths(
@@ -69,11 +76,6 @@ impl Preprocessor for WikiLinks {
                             href.push_str(&format!("#{}", header_kebab));
                         }
 
-                        // Handle link text
-                        let title = match link.next() {
-                            Some(alias) => alias.as_str(),
-                            None => note.as_ref(),
-                        };
                         format!("[{}](<{}>)", title, escape_special_chars(&href))
                     };
 
