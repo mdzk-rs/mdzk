@@ -992,6 +992,7 @@ dependencies = [
  "maud",
  "mdbook",
  "pathdiff",
+ "pulldown-cmark 0.8.0",
  "regex",
  "serde",
  "serde_json",
@@ -1442,6 +1443,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ffade02495f22453cd593159ea2f59827aae7f53fa8323f756799b670881dcf8"
 dependencies = [
  "bitflags",
+ "getopts",
  "memchr",
  "unicase",
 ]
