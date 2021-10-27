@@ -32,9 +32,11 @@ impl Preprocessor for Katex {
                         Event::End(Tag::Paragraph) => {
                             in_paragraph = false;
                             if let Some(math) = is_display(&buf) {
-                                render_display(math, &buf, ch);
-                            /* } else if let Some(maths) = has_inline(&buf) {
- paprintln!("{:?}", maths); */
+                                render(math, &buf, ch, true);
+                            } else if let Some(maths) = has_inline(&buf) {
+                                for math in maths {
+                                    render(math, &format!("${}$", math), ch, false);
+                                }
                             }
                             buf.clear();
                         }
@@ -48,20 +50,26 @@ impl Preprocessor for Katex {
     }
 }
 
-/* fn has_inline(paragraph: &str) -> Option<Vec<&str>> {
+fn has_inline(paragraph: &str) -> Option<Vec<&str>> {
     let mut maths = Vec::new();
-    let mut buf = paragraph.clone();
-    loop {
-        match buf.find(" $") {
-            Some(i) => {
-                maths.push(&paragraph[i..]);
-                buf = &buf[i..];
+    let mut splits = paragraph.split("$");
+    let mut escaped = match splits.next() {
+        Some(first_split) => first_split.ends_with("\\"),
+        None => false
+    };
+    for split in splits {
+        if escaped || split.starts_with(" ") || split.ends_with(" ") {
+            if split.ends_with("\\") {
+                escaped = true
             }
-            None => break
+        } else if paragraph.ends_with(split) { // Hacky way of finding if this is the last split
+            continue
+        } else {
+            maths.push(split);
         }
     }
     Some(maths)
-} */
+}
 
 fn is_display(paragraph: &str) -> Option<&str> {
     if let Some(math) = paragraph.strip_prefix("$$") {
@@ -73,17 +81,17 @@ fn is_display(paragraph: &str) -> Option<&str> {
 }
 
 /// Checks if paragraph is a math block, and renders this math to the chapter content if it is.
-fn render_display(math: &str, paragraph: &str, ch: &mut Chapter) {
+fn render(math: &str, paragraph: &str, ch: &mut Chapter, display: bool) {
     // `\`s are really `\\`s, but they are escaped by pulldown-cmark. we want them present for
     // things like matrices, so replace them back.
-    let math = math.replace(r#" \ "#, r#" \\ "#);
+    let fixed_math = math.replace(r#" \ "#, r#" \\ "#);
 
     let opts = katex::Opts::builder()
-        .display_mode(true)
+        .display_mode(display)
         .build()
         .unwrap(); // No idea why they return a Result. build should never fail.
 
-    match katex::render_with_opts(&math, opts) {
+    match katex::render_with_opts(&fixed_math, opts) {
         Ok(math) => {
             ch.content = ch.content.replacen(
                 paragraph,
