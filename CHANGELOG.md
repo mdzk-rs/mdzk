@@ -6,15 +6,7 @@
 
 - New `generate-summary` key at the `[mdzk]` section on `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
 
-### Enhancements
-
-- Removed several dangerous `unwrap`s, to make the codebase more robust.
-- The Nix build now supports Apple Silicon as well.
-- Dependencies have been cleaned up, leading to a slightly smaller binary size.
-
-### Bug fixes
-
-- [#24](https://github.com/mdzk-rs/mdzk/issues/24): `mdzk.backlinks-header` in the config had no defuault value, which made mdzk panic when it was not set. This is now fixed.
+- New `draft` option on the frontmatter. Putting `draft: true` or `draft = true` won't render your note on the final book.
 
 ## 0.4.2 (2020-09-24)
 
