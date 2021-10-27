@@ -1,4 +1,4 @@
-use mdbook::book::{Book, BookItem};
+use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use pulldown_cmark::{Event, Tag};
@@ -30,25 +30,9 @@ impl Preprocessor for Katex {
                             }
                         }
                         Event::End(Tag::Paragraph) => {
-                            if let Some(text) = buf.strip_prefix("$$") {
-                                if let Some(text) = text.strip_suffix("$$") {
-                                    let opts = katex::OptsBuilder::default()
-                                        .display_mode(true)
-                                        .build()
-                                        .unwrap();
-                                    match katex::render_with_opts(text, opts) {
-                                        Ok(math) => {
-                                            ch.content = ch.content.replacen(
-                                                &buf,
-                                                &math,
-                                                1
-                                            );
-                                        },
-                                        Err(e) => {
-                                            error!("Failed to render: {}\n    {}", text, e);
-                                        }
-                                    };
-                                }
+                            if let Ok(_) = handle_display(&mut buf, ch) {
+                                in_paragraph = false;
+                                continue
                             }
                             buf.clear();
                             in_paragraph = false;
@@ -61,4 +45,31 @@ impl Preprocessor for Katex {
         });
         Ok(book)
     }
+}
+
+fn handle_display(buf: &mut String, ch: &mut Chapter) -> Result<(), ()> {
+    if let Some(text) = buf.strip_prefix("$$") {
+        if let Some(text) = text.strip_suffix("$$") {
+            let opts = katex::OptsBuilder::default()
+                .display_mode(true)
+                .build()
+                .unwrap(); // No idea why they return a Result. build should never fail.
+
+            match katex::render_with_opts(text, opts) {
+                Ok(math) => {
+                    ch.content = ch.content.replacen(
+                        buf.as_str(),
+                        &math,
+                        1
+                    );
+                },
+                Err(e) => {
+                    error!("Failed to render: {}\n    {}", text, e);
+                }
+            };
+            buf.clear();
+            return Ok(())
+        };
+    }
+    Err(())
 }
