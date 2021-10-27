@@ -6,7 +6,7 @@ pkgs.rustPlatform.buildRustPackage {
   src = pkgs.lib.cleanSource ./.;
 
   buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [ 
-    pkgs.darwin.apple_sdk.framework.CoreServices 
+    pkgs.darwin.apple_sdk.frameworks.CoreServices 
   ]; 
   nativeBuildInputs = [ rust-toolchain ];
 
