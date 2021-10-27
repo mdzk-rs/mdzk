@@ -57,6 +57,9 @@ fn is_display(paragraph: &str) -> Option<&str> {
 
 /// Checks if paragraph is a math block, and renders this math to the chapter content if it is.
 fn render_display(math: &str, paragraph: &str, ch: &mut Chapter) {
+    // `\`s are really `\\`s, but they are escaped by pulldown-cmark. we want them present for
+    // things like matrices, so replace them back.
+    let math = math.replace(r#" \ "#, r#" \\ "#);
 
     let opts = katex::Opts::builder()
         .display_mode(true)
