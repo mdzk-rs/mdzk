@@ -73,3 +73,34 @@ fn handle_display(buf: &mut String, ch: &mut Chapter) -> Result<(), ()> {
     }
     Err(())
 }
+
+#[cfg(test)]
+mod tests {
+    // NOTE: These tests are redundant, since katex itself is pretty well tested. However, they
+    // serve as peace of mind for the time being, and can be evolved into tests that check our
+    // delimiter parsing as well.
+    #[test]
+    fn should_render() {
+        let examples = vec![
+            r#" \text{BIC} = \log N\cdot d - 2\ \text{loglik} ,"#,
+            r#"S(\beta,\lambda) = \text{RSS}(\beta) + \lambda \sum_{j=1}^p\beta_j^2 = \sum_{i=1}^N (y_i - \hat y_i)^2 + \lambda \sum_{j=1}^p\beta_j^2"#,
+            r#"Here is escaped \$"#,
+        ];
+        for ex in examples {
+            katex::render(ex).unwrap();
+        };
+    }
+
+    #[test]
+    #[should_panic]
+    fn shouldnt_render() {
+        let examples = vec![
+            r#"$ weird stuff \ matrix && entries"#,
+            r#"\wrongsin (x)"#,
+            r#"Ending with extra $"#,
+        ];
+        for ex in examples {
+            katex::render(ex).unwrap();
+        };
+    }
+}
