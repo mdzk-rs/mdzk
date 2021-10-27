@@ -30,12 +30,11 @@ impl Preprocessor for Katex {
                             }
                         }
                         Event::End(Tag::Paragraph) => {
-                            if let Ok(_) = handle_display(&mut buf, ch) {
-                                in_paragraph = false;
-                                continue
+                            in_paragraph = false;
+                            if let Some(math) = is_display(&buf) {
+                                render_display(math, &buf, ch);
                             }
                             buf.clear();
-                            in_paragraph = false;
                         }
                         _ => {}
                     }
@@ -47,31 +46,35 @@ impl Preprocessor for Katex {
     }
 }
 
-fn handle_display(buf: &mut String, ch: &mut Chapter) -> Result<(), ()> {
-    if let Some(text) = buf.strip_prefix("$$") {
-        if let Some(text) = text.strip_suffix("$$") {
-            let opts = katex::OptsBuilder::default()
-                .display_mode(true)
-                .build()
-                .unwrap(); // No idea why they return a Result. build should never fail.
-
-            match katex::render_with_opts(text, opts) {
-                Ok(math) => {
-                    ch.content = ch.content.replacen(
-                        buf.as_str(),
-                        &math,
-                        1
-                    );
-                },
-                Err(e) => {
-                    error!("Failed to render: {}\n    {}", text, e);
-                }
-            };
-            buf.clear();
-            return Ok(())
-        };
+fn is_display(paragraph: &str) -> Option<&str> {
+    if let Some(math) = paragraph.strip_prefix("$$") {
+        if let Some(math) = math.strip_suffix("$$") {
+            return Some(math)
+        }
     }
-    Err(())
+    None
+}
+
+/// Checks if paragraph is a math block, and renders this math to the chapter content if it is.
+fn render_display(math: &str, paragraph: &str, ch: &mut Chapter) {
+
+    let opts = katex::Opts::builder()
+        .display_mode(true)
+        .build()
+        .unwrap(); // No idea why they return a Result. build should never fail.
+
+    match katex::render_with_opts(&math, opts) {
+        Ok(math) => {
+            ch.content = ch.content.replacen(
+                paragraph,
+                &math,
+                1
+            );
+        },
+        Err(e) => {
+            error!("Failed to render: {}\n    {}", math, e);
+        }
+    };
 }
 
 #[cfg(test)]
