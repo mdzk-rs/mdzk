@@ -33,6 +33,8 @@ impl Preprocessor for Katex {
                             in_paragraph = false;
                             if let Some(math) = is_display(&buf) {
                                 render_display(math, &buf, ch);
+                            /* } else if let Some(maths) = has_inline(&buf) {
+ paprintln!("{:?}", maths); */
                             }
                             buf.clear();
                         }
@@ -45,6 +47,21 @@ impl Preprocessor for Katex {
         Ok(book)
     }
 }
+
+/* fn has_inline(paragraph: &str) -> Option<Vec<&str>> {
+    let mut maths = Vec::new();
+    let mut buf = paragraph.clone();
+    loop {
+        match buf.find(" $") {
+            Some(i) => {
+                maths.push(&paragraph[i..]);
+                buf = &buf[i..];
+            }
+            None => break
+        }
+    }
+    Some(maths)
+} */
 
 fn is_display(paragraph: &str) -> Option<&str> {
     if let Some(math) = paragraph.strip_prefix("$$") {
