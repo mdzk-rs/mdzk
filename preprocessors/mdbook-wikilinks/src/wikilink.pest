@@ -1,0 +1,12 @@
+link = { dest ~ ("|" ~ alias)? }
+dest = { note ~ anchor? }
+anchor = { (header | blockref) }
+
+note = { ident }
+alias = { ident_extended }
+header = { "#" ~ !"^" ~ ident }
+blockref = { "#^" ~ ident }
+
+ident = _{ (!("|" | "=" | "`" | "^" | ":" | "#" | OPEN_PUNCTUATION | CLOSE_PUNCTUATION | CONTROL | LINE_SEPARATOR | PARAGRAPH_SEPARATOR) ~ ANY)+ }
+ident_extended = _{ (!("[[" | "]]" | CONTROL | LINE_SEPARATOR | PARAGRAPH_SEPARATOR) ~ ANY)+ }
+WHITESPACE = _{ " " }
