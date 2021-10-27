@@ -1,43 +1,21 @@
-use lazy_regex::{lazy_regex, Lazy};
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+
 use mdbook::{
     book::{Book, Chapter},
     errors::Error,
-    preprocess::{CmdPreprocessor, Preprocessor, PreprocessorContext},
+    preprocess::{Preprocessor, PreprocessorContext},
     BookItem,
+    utils::id_from_content,
 };
-use regex::{Captures, Regex};
-use std::{collections::HashMap, io};
+use pest::Parser;
+use std::collections::HashMap;
+use pulldown_cmark::{CowStr, Event, escape::escape_href};
 
-static WIKILINK_REGEX: Lazy<Regex> =
-    lazy_regex!(r"\[\[(?P<link>[^\]\|]+)(?:\|(?P<title>[^\]]+))?\]\]");
-
-pub fn handle_preprocessing(pre: impl Preprocessor) -> Result<(), Error> {
-    let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
-
-    if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
-        eprintln!(
-            "Warning: The {} plugin was built against version {} of mdbook, \
-             but we're being called from version {}",
-            pre.name(),
-            mdbook::MDBOOK_VERSION,
-            ctx.mdbook_version
-        );
-    }
-
-    let processed_book = pre.run(&ctx, book)?;
-    //serde_json::to_writer_pretty(io::stderr(), &processed_book);
-    serde_json::to_writer(io::stdout(), &processed_book)?;
-
-    Ok(())
-}
-
-fn chapter(it: &BookItem) -> Option<&Chapter> {
-    if let BookItem::Chapter(ch) = it {
-        Some(ch)
-    } else {
-        None
-    }
-}
+#[derive(Parser)]
+#[grammar = "wikilink.pest"]
+pub struct WikiLinkParser;
 
 pub struct WikiLinks;
 
@@ -47,48 +25,61 @@ impl Preprocessor for WikiLinks {
     }
 
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book, Error> {
-        let mut chapters_map = HashMap::new();
-        for chapter in book.iter().filter_map(chapter) {
+        let mut path_map = HashMap::new();
+        for chapter in book.iter().filter_map(get_chapter) {
             let key = chapter.name.clone();
-            if chapter.path.is_none() {
-                continue;
+            if chapter.path.is_none() { continue; }
+            if path_map.contains_key(&key) {
+                eprintln!("Duplicated page title found: {} at {:?}", key, chapter.path);
             }
-            if chapters_map.contains_key(&key) {
-                eprintln!("duplicated page title found: {} at {:?}", key, chapter.path);
-            }
-            chapters_map.insert(key, chapter.path.as_ref().unwrap().clone());
+            path_map.insert(key, chapter.path.as_ref().unwrap().clone());
         }
 
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
-                chapter.content = WIKILINK_REGEX
-                    .replace_all(&chapter.content, |it: &Captures| -> String {
-                        let key = it.name("link").unwrap().as_str().trim();
-                        if !chapters_map.contains_key(key) {
-                            return (maud::html! {
-                                span.missing-link style="color:darkred;" {
-                                   (key)
-                                }
-                            })
-                            .into_string();
-                        }
-                        let title = it
-                            .name("title")
-                            .map(|x| x.as_str().trim().to_string())
-                            .unwrap_or(key.to_string());
-                        let diff_path = pathdiff::diff_paths(
-                            chapters_map.get(key).unwrap(),
-                            chapter.path.as_ref().unwrap().parent().unwrap(),
-                        )
-                        .unwrap();
+                for_each_link(&chapter.content.clone(), |link_text| {
+                    let mut link = match WikiLinkParser::parse(Rule::link, link_text) {
+                        Ok(parsed) => parsed,
+                        Err(e) => {
+                            eprintln!("Failed parsing wikilink internals: {}", e);
+                            return
+                        },
+                    }.next()
+                     .unwrap()
+                     .into_inner();
 
-                        return format!(
-                            "[{}](<{}>)",
-                            title,
-                            escape_special_chars(&diff_path.to_string_lossy())
-                        );
-                    })
-                    .to_string();
+                    // Handle destination
+                    let mut dest = link.next().unwrap().into_inner();
+                    let note = dest.next().unwrap().as_str();
+                    let cmark_link = if !path_map.contains_key(note) {
+                        format!(
+                            "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>", 
+                            note
+                        )
+                    } else {
+                        let mut href = pathdiff::diff_paths(
+                            path_map.get(note).unwrap(),
+                            chapter.path.as_ref().unwrap().parent().unwrap(),
+                        ).unwrap().to_string_lossy().to_string(); // Gotta love Rust <3
+
+                        // Handle anchor
+                        // TODO: Blockrefs are currently not handled here
+                        if let Some(anchor) = dest.next() {
+                            let header_kebab = id_from_content(&anchor.as_str()[1..]);
+                            href.push_str(&format!("#{}", header_kebab));
+                        }
+
+                        // Handle link text
+                        let title = match link.next() {
+                            Some(alias) => alias.as_str(),
+                            None => note.as_ref(),
+                        };
+                        format!("[{}](<{}>)", title, escape_special_chars(&href))
+                    };
+
+                    chapter.content = chapter.content
+                        .replacen(&format!("[[{}]]", link_text), &cmark_link, 1);
+                });
             }
         });
 
@@ -96,56 +87,149 @@ impl Preprocessor for WikiLinks {
     }
 }
 
+fn for_each_link(content: &str, mut handle_link: impl FnMut(&str)) {
+    enum Currently {
+        OutsideLink,
+        MaybeOpen,
+        MaybeInsideLink,
+        MaybeClose,
+        Ignore,
+    }
+
+    let parser = pulldown_cmark::Parser::new(content);
+
+    let mut buffer = String::new();
+    let mut current = Currently::OutsideLink;
+    for event in parser {
+        match event {
+            // Ignore KaTeX spans
+            Event::Html(CowStr::Borrowed("<span class=\"katex-inline\">")) => current = Currently::Ignore,
+            Event::Html(CowStr::Borrowed("</span>")) => current = Currently::OutsideLink,
+
+            Event::Text(CowStr::Borrowed("[")) => {
+                match current {
+                    Currently::OutsideLink => current = Currently::MaybeOpen,
+                    Currently::MaybeOpen => current = Currently::MaybeInsideLink,
+                    Currently::MaybeInsideLink => current = Currently::OutsideLink,
+                    Currently::MaybeClose => {
+                        buffer.clear();
+                        current = Currently::OutsideLink;
+                    }
+                    Currently::Ignore => {}
+                }
+            }
+
+            Event::Text(CowStr::Borrowed("]")) => {
+                match current {
+                    Currently::MaybeOpen => current = Currently::OutsideLink,
+                    Currently::MaybeInsideLink => current = Currently::MaybeClose,
+                    Currently::MaybeClose => {
+                        handle_link(&buffer.trim());
+                        buffer.clear();
+                        current = Currently::OutsideLink;
+                    }
+                    Currently::OutsideLink => {},
+                    Currently::Ignore => {}
+                }
+            }
+
+            Event::Text(ref text) => {
+                if let Currently::MaybeInsideLink = current {
+                    if buffer.is_empty() {
+                        buffer.push_str(text);
+                    } else {
+                        // Buffer contains something, which means a newline or something else
+                        // split it up. Clear buffer and don't consider this a link.
+                        buffer.clear();
+                        current = Currently::OutsideLink;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 /// Escape characters for usage in URLs
 fn escape_special_chars(text: &str) -> String {
-    text.replace(" ", "%20")
-        .replace("<", "%3C")
-        .replace(">", "%3E")
-        .replace('?', "%3F")
+    let mut buf = String::new();
+    escape_href(&mut buf, text).ok();
+    buf
+}
+
+fn get_chapter(it: &BookItem) -> Option<&Chapter> {
+    if let BookItem::Chapter(ch) = it {
+        Some(ch)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::WIKILINK_REGEX;
+    use super::*;
 
     #[test]
-    fn extract_link_regex() {
-        let cases = [
-            ("[[Link]]", "Link"),
-            ("[[🪴 Sowing<Your>Garden]]", "🪴 Sowing<Your>Garden"),
-            (
-                "[[/Templates/🪴 Sowing<Your>Garden]]",
-                "/Templates/🪴 Sowing<Your>Garden",
-            ),
-        ];
+    fn detect_these() {
+        let content = r#"This is a note with four links:
 
-        for (case, expected) in &cases {
-            let got = WIKILINK_REGEX
-                .captures(case)
-                .unwrap()
-                .name("link")
-                .unwrap()
-                .as_str();
-            assert_eq!(got.trim(), *expected);
-        }
+This one [[link]], this one [[ link#header ]], this one [[   link | a bit more complex]], and this one [[     link#header | more 😭 complex]].
+
+> This is a [[link in a blockquote]]
+
+- List item
+- Second list item with [[list link]]
+
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Tables can also have [[table links]] | more stuff |"#;
+
+        let mut links = vec![];
+        for_each_link(content, |link_text| { links.push(link_text.to_owned()); });
+
+        assert_eq!(links, vec![
+                   "link",
+                   "link#header",
+                   "link | a bit more complex",
+                   "link#header | more 😭 complex",
+                   "link in a blockquote",
+                   "list link",
+                   "table links"
+        ]);
     }
 
     #[test]
-    fn extract_title_regex() {
-        let cases = [
-            ("[[Link | My New Link]]", "My New Link"),
-            ("[[🪴 Sowing<Your>Garden | 🪴 Emoji Link]]", "🪴 Emoji Link"),
-            ("[[🪴 Sowing<Your>Garden | 🪴/Emoji/Link]]", "🪴/Emoji/Link"),
-        ];
+    fn dont_detect_these() {
+        let content = r#"Here are some non-correct links:
 
-        for (case, expected) in &cases {
-            let got = WIKILINK_REGEX
-                .captures(case)
-                .unwrap()
-                .name("title")
-                .unwrap()
-                .as_str();
-            assert_eq!(got.trim(), *expected)
-        }
+First a link [[with
+newline]]
+
+Then a link `inside [[inline code]]`, or inside <span class="katex-inline">inline [[math]]</span>. What about \[\[escaped brackets\]\]?
+
+<div class="katex-display">
+    f(x) = \text{[[display link]]}
+</div>
+
+```rust
+let link = "[[link_in_code]]".to_owned();
+```
+
+<p>
+  This is some raw HTML. We don't want [[html links]] detected here.
+</p>"#;
+
+        let mut links = Vec::<String>::new();
+        for_each_link(content, |link_text| { links.push(link_text.to_owned()); });
+
+        assert!(links.is_empty(), "Got links: {:?}", links);
+    }
+
+    #[test]
+    fn escapel_special_chars() {
+        assert_eq!(
+            escape_special_chars("w3ir∂ førmättÎñg"),
+            "w3ir%E2%88%82%20f%C3%B8rm%C3%A4tt%C3%8E%C3%B1g"
+        )
     }
 }

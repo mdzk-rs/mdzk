@@ -5,8 +5,18 @@
 ### New features
 
 - New `generate-summary` key at the `[mdzk]` section on `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
-
 - New `draft` option on the frontmatter. Putting `draft: true` or `draft = true` won't render your note on the final book.
+
+### Enhancements
+
+- Removed several dangerous `unwrap`s, to make the codebase more robust.
+- The Nix build now supports Apple Silicon as well.
+- Dependencies have been cleaned up, leading to a slightly smaller binary size.
+- New version of mdbook-wiklinks (0.4.0), that replaces regexes in favor of a combination of [pulldown-cmark's](https://docs.rs/pulldown-cmark) iteration and a custom [Pest](https://pest.rs/) parser. This should decrease build times drastically.
+
+### Bug fixes
+
+- [#24](https://github.com/mdzk-rs/mdzk/issues/24): `mdzk.backlinks-header` in the config had no defuault value, which made mdzk panic when it was not set. This is now fixed.
 
 ## 0.4.2 (2020-09-24)
 
