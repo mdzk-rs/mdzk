@@ -38,11 +38,15 @@ impl Preprocessor for WikiLinks {
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
                 for_each_link(&chapter.content.clone(), |link_text| {
-                    let mut link = WikiLinkParser::parse(Rule::link, link_text)
-                        .expect("Unsuccessful parse")
-                        .next()
-                        .unwrap()
-                        .into_inner();
+                    let mut link = match WikiLinkParser::parse(Rule::link, link_text) {
+                        Ok(parsed) => parsed,
+                        Err(e) => {
+                            eprintln!("Failed parsing wikilink internals: {}", e);
+                            return
+                        },
+                    }.next()
+                     .unwrap()
+                     .into_inner();
 
                     // Handle destination
                     let mut dest = link.next().unwrap().into_inner();
