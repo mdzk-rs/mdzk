@@ -15,6 +15,7 @@ use serde::Deserialize;
 struct Config {
     title: Option<String>,
     date: Option<String>,
+    draft: Option<bool>,
 }
 
 pub struct FrontMatter;
@@ -31,6 +32,10 @@ impl Preprocessor for FrontMatter {
                 let content = ch.content.clone();
 
                 let mut handle_front_matter = |config: Config| {
+                    if let Some(true) = config.draft {
+                        ch.path = None
+                    }
+
                     // Remove metadata from content
                     ch.content = re.replace_all(&ch.content, "").to_string();
 
