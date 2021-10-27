@@ -11,6 +11,7 @@
 - Removed several dangerous `unwrap`s, to make the codebase more robust.
 - The Nix build now supports Apple Silicon as well.
 - Dependencies have been cleaned up, leading to a slightly smaller binary size.
+- New version of mdbook-wiklinks (0.4.0), that replaces regexes in favor of a combination of [pulldown-cmark's](https://docs.rs/pulldown-cmark) iteration and a custom [Pest](https://pest.rs/) parser. This should decrease build times drastically.
 
 ### Bug fixes
 
