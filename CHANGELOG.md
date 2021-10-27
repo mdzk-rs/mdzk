@@ -5,7 +5,9 @@
 ### New features
 
 - New `generate-summary` key at the `[mdzk]` section on `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
-- New `draft` option on the frontmatter. Putting `draft: true` or `draft = true` won't render your note on the final book.
+- New `draft` option in the front matter. Setting this to `true` will skip rendering for that note.
+
+    **NOTE**: Beware that the note will still show up in the index, as that is how mdBook handles draft chapters. We will probably change this behaviour as soon as we release our custom renderer. If you want to hide a note completely from your vault, use the `ignore` field in `mdzk.toml`.
 
 ### Enhancements
 

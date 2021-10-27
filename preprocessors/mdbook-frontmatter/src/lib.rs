@@ -32,6 +32,7 @@ impl Preprocessor for FrontMatter {
                 let content = ch.content.clone();
 
                 let mut handle_front_matter = |config: Config| {
+                    // Set as draft chapter
                     if let Some(true) = config.draft {
                         ch.path = None
                     }
