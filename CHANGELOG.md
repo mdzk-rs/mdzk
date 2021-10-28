@@ -2,13 +2,23 @@
 
 ## 0.4.3 (Unreleased)
 
-### Enhancements
-
-- Removed `unwrap`s to make the codebase more robust.
-
 ### New features
 
 - New `generate-summary` key at the `[mdzk]` section on `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
+- New `draft` option in the front matter. Setting this to `true` will skip rendering for that note.
+
+    **NOTE**: Beware that the note will still show up in the index, as that is how mdBook handles draft chapters. We will probably change this behaviour as soon as we release our custom renderer. If you want to hide a note completely from your vault, use the `ignore` field in `mdzk.toml`.
+
+### Enhancements
+
+- Removed several dangerous `unwrap`s, to make the codebase more robust.
+- The Nix build now supports Apple Silicon as well.
+- Dependencies have been cleaned up, leading to a slightly smaller binary size.
+- New version of mdbook-wiklinks (0.4.0), that replaces regexes in favor of a combination of [pulldown-cmark's](https://docs.rs/pulldown-cmark) iteration and a custom [Pest](https://pest.rs/) parser. This should decrease build times drastically.
+
+### Bug fixes
+
+- [#24](https://github.com/mdzk-rs/mdzk/issues/24): `mdzk.backlinks-header` in the config had no defuault value, which made mdzk panic when it was not set. This is now fixed.
 
 ## 0.4.2 (2020-09-24)
 

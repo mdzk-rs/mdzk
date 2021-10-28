@@ -38,19 +38,30 @@ impl Preprocessor for WikiLinks {
         book.for_each_mut(|it| {
             if let BookItem::Chapter(chapter) = it {
                 for_each_link(&chapter.content.clone(), |link_text| {
-                    let mut link = WikiLinkParser::parse(Rule::link, link_text)
-                        .expect("Unsuccessful parse")
-                        .next()
-                        .unwrap()
-                        .into_inner();
+                    let mut link = match WikiLinkParser::parse(Rule::link, link_text) {
+                        Ok(parsed) => parsed,
+                        Err(e) => {
+                            eprintln!("Failed parsing wikilink internals: {}", e);
+                            return
+                        },
+                    }.next()
+                     .unwrap()
+                     .into_inner();
 
                     // Handle destination
                     let mut dest = link.next().unwrap().into_inner();
                     let note = dest.next().unwrap().as_str();
+
+                    // Handle link text
+                    let title = match link.next() {
+                        Some(alias) => alias.as_str(),
+                        None => note.as_ref(),
+                    };
+
                     let cmark_link = if !path_map.contains_key(note) {
                         format!(
                             "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>", 
-                            note
+                            title
                         )
                     } else {
                         let mut href = pathdiff::diff_paths(
@@ -65,11 +76,6 @@ impl Preprocessor for WikiLinks {
                             href.push_str(&format!("#{}", header_kebab));
                         }
 
-                        // Handle link text
-                        let title = match link.next() {
-                            Some(alias) => alias.as_str(),
-                            None => note.as_ref(),
-                        };
                         format!("[{}](<{}>)", title, escape_special_chars(&href))
                     };
 
