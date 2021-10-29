@@ -1,7 +1,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{Event, Tag};
+use pulldown_cmark::{Event, Tag, Parser};
 
 const KATEX_CSS: &str = r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">"#;
 const KATEX_JS: &str = r#"<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.20/dist/katex.min.js" integrity="sha384-ov99pRO2tAc0JuxTVzf63RHHeQTJ0CIawbDZFiFTzB07aqFZwEu2pz4uzqL+5OPG" crossorigin="anonymous"></script>"#;
@@ -9,7 +9,9 @@ const RENDER_SCRIPT: &str = r#"<script>
 document.addEventListener('DOMContentLoaded', function() {
     var math = document.querySelectorAll("[class^=katex]");
     for (var i = 0; i < math.length; i++) {
-      katex.render(math[i].textContent, math[i]);
+      // Convert escaped ampersands before rendering
+      var toRender = math[i].textContent.replace(/&amp;/g, '&');
+      katex.render(toRender, math[i]);
     }
 }, false)
 </script>"#;
@@ -25,13 +27,16 @@ impl Preprocessor for Katex {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
                 let copy = ch.content.clone();
-                let parser = pulldown_cmark::Parser::new(&copy);
+                let parser = Parser::new(&copy);
                 let mut buf = String::new();
                 let mut render_math = false;
                 for event in parser {
                     match event {
                         Event::Start(Tag::Paragraph)
+                        | Event::Start(Tag::Heading(_))
                         | Event::Start(Tag::List(_))
+                        | Event::Start(Tag::Item)
+                        | Event::Start(Tag::Table(_))
                         | Event::Start(Tag::BlockQuote) => {
                             render_math = true;
                         }
@@ -41,7 +46,10 @@ impl Preprocessor for Katex {
                             }
                         }
                         Event::End(Tag::Paragraph)
+                        | Event::End(Tag::Heading(_))
                         | Event::End(Tag::List(_))
+                        | Event::End(Tag::Item)
+                        | Event::End(Tag::Table(_))
                         | Event::End(Tag::BlockQuote) => {
                             handle_math(&buf, ch);
                             buf.clear();
