@@ -84,7 +84,13 @@ fn handle_math(text: &str, ch: &mut Chapter) {
             None => return // No dollars, do early return
         };
         for split in splits {
-            if escaped || split.starts_with(" ") || split.ends_with(" ") {
+            if split.is_empty() {
+                continue
+            } else if escaped
+            || split.starts_with(" ")
+            || split.ends_with(" ")
+            || split.chars().next().unwrap().is_numeric()
+            {
                 if split.ends_with("\\") {
                     escaped = true;
                 } else {
