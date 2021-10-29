@@ -62,9 +62,7 @@ fn has_inline(paragraph: &str) -> Option<Vec<&str>> {
             if split.ends_with("\\") {
                 escaped = true
             }
-        } else if paragraph.ends_with(split) { // Hacky way of finding if this is the last split
-            continue
-        } else {
+        } else if !paragraph.ends_with(split) { // Hacky way of checking if this is the last split
             maths.push(split);
         }
     }
