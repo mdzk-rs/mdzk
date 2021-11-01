@@ -30,7 +30,16 @@ impl Config {
             .read_to_string(&mut buffer)
             .context("Couldn't read the file")?;
 
-        Config::from_str(&buffer)
+        let mut conf = Config::from_str(&buffer).unwrap();
+
+        if let Some(preprocessors) = conf.rest.get_mut("preprocessor").and_then(Value::as_table_mut) {
+            for (name, _) in preprocessors.iter() {
+                conf.build.preprocessors.push(name.to_owned());
+            }
+            preprocessors.clear();
+        }
+
+        Ok(conf)
     }
 }
 
@@ -50,7 +59,7 @@ impl FromStr for Config {
 
     /// Load an mdzk configuration from some string.
     fn from_str(src: &str) -> Result<Self> {
-        toml::from_str(src).with_context(|| "Invalid configuration file")
+        toml::from_str(src).context("Invalid configuration file")
     }
 }
 
@@ -197,6 +206,7 @@ pub struct BuildConfig {
     pub build_dir: PathBuf,
     pub create_missing: bool,
     pub disable_default_preprocessors: bool,
+    pub preprocessors: Vec<String>,
 }
 
 impl Default for BuildConfig {
@@ -205,6 +215,7 @@ impl Default for BuildConfig {
             build_dir: PathBuf::from(BUILD_DIR),
             create_missing: true,
             disable_default_preprocessors: false,
+            preprocessors: vec![],
         }
     }
 }
