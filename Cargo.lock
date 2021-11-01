@@ -918,7 +918,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-backlinks"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "clap",
  "lazy-regex",
@@ -932,7 +932,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-frontmatter"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "chrono",
  "clap",
@@ -946,7 +946,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-readme"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "lazy-regex",
  "log",
