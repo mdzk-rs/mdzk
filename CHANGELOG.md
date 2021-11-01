@@ -4,7 +4,8 @@
 
 ### New features
 
-- New `generate-summary` key at the `[mdzk]` section on `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
+- New `generate-summary` key at the `[mdzk]` section in `mdzk.toml` that controls whether mdzk will generate your summary file automatically or not. The default value is `true`.
+- New `preprocessors` field under the `[build]` section in `mdzk.toml`. This lets you define [mdBook preprocessors](https://rust-lang.github.io/mdBook/format/configuration/preprocessors.html) to be run after the default preprocessors. Order is preserved.
 - New `draft` option in the front matter. Setting this to `true` will skip rendering for that note.
 
     **NOTE**: Beware that the note will still show up in the index, as that is how mdBook handles draft chapters. We will probably change this behaviour as soon as we release our custom renderer. If you want to hide a note completely from your vault, use the `ignore` field in `mdzk.toml`.
@@ -17,6 +18,10 @@
 - New version of mdbook-wiklinks (0.4.0), that replaces regexes in favor of a combination of [pulldown-cmark's](https://docs.rs/pulldown-cmark) iteration and a custom [Pest](https://pest.rs/) parser. This should decrease build times drastically.
 
 ### Bug fixes
+
+- [#38](https://github.com/mdzk-rs/mdzk/issues): User-defined preprocessors (through the mdBook-style `preprocessor.<name>` pattern in the config file) would sometimes interfere with mdzk's default preprocessors. This fix converts all of these preprocessor-statements into the `preprocessors` field mentioned above, which mdzk can handle the order of.
+    
+    **NOTE**: To simplify compatibility between mdzk and mdbook, we assume the preprocessor has a command on the form `mdbook-<name>`. Other preprocessors are simply not supported yet. Fields are ignored, so you can only turn preprocessors on or off.
 
 - [#24](https://github.com/mdzk-rs/mdzk/issues/24): `mdzk.backlinks-header` in the config had no defuault value, which made mdzk panic when it was not set. This is now fixed.
 
