@@ -1,7 +1,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{Event, Tag, Parser};
+use pulldown_cmark::{Event, Tag, Parser, Options};
 
 const KATEX_CSS: &str = r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">"#;
 const KATEX_JS: &str = r#"<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.20/dist/katex.min.js" integrity="sha384-ov99pRO2tAc0JuxTVzf63RHHeQTJ0CIawbDZFiFTzB07aqFZwEu2pz4uzqL+5OPG" crossorigin="anonymous"></script>"#;
@@ -27,28 +27,16 @@ impl Preprocessor for Katex {
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
                 let copy = ch.content.clone();
-                let parser = Parser::new(&copy);
+
+                let mut opts = Options::empty();
+                opts.insert(Options::ENABLE_TABLES);
+                opts.insert(Options::ENABLE_FOOTNOTES);
+                let parser = Parser::new_ext(&copy, opts);
                 let mut buf = String::new();
                 let mut render_math = false;
                 for event in parser {
                     match event {
-                        Event::Start(Tag::Paragraph)
-                        | Event::Start(Tag::Heading(_))
-                        | Event::Start(Tag::List(_))
-                        | Event::Start(Tag::Item)
-                        | Event::Start(Tag::Table(_))
-                        | Event::Start(Tag::BlockQuote) => {
-                            render_math = true;
-                        }
-                        Event::Text(text) => {
-                            if render_math {
-                                buf.push_str(&text);
-                                if let Some(new_buf) = inline(&buf) {
-                                    replace(ch, &buf, &new_buf);
-                                    buf.clear()
-                                }
-                            }
-                        }
+                        // Respect formatting
                         Event::Start(Tag::Emphasis)
                         | Event::End(Tag::Emphasis) => if render_math {
                             buf.push_str("*")
@@ -57,12 +45,44 @@ impl Preprocessor for Katex {
                         | Event::End(Tag::Strong) => if render_math {
                             buf.push_str("**")
                         }
+
+                        // Clear buffer when code is hit
                         Event::Code(_) => buf.clear(),
+
+                        // Don't render inside HTML
+                        Event::Html(_) => render_math = !render_math,
+
+                        // Start math rendering
+                        Event::Start(Tag::Paragraph)
+                        | Event::Start(Tag::Heading(_))
+                        | Event::Start(Tag::List(_))
+                        | Event::Start(Tag::Item)
+                        | Event::Start(Tag::Table(_))
+                        | Event::Start(Tag::TableHead)
+                        | Event::Start(Tag::TableCell)
+                        | Event::Start(Tag::BlockQuote) => {
+                            render_math = true;
+                        }
+                        // If rendering math, push text events to buffer
+                        Event::Text(text) => {
+                            if render_math {
+                                buf.push_str(&text);
+                                if let Some(new_buf) = inline(&buf) {
+                                    // If inline math is found within this text event, render it
+                                    // and clear buffer.
+                                    replace(ch, &buf, &new_buf);
+                                    buf.clear()
+                                }
+                            }
+                        }
+                        // Stop math rendering
                         Event::End(Tag::Paragraph)
                         | Event::End(Tag::Heading(_))
                         | Event::End(Tag::List(_))
                         | Event::End(Tag::Item)
                         | Event::End(Tag::Table(_))
+                        | Event::End(Tag::TableHead)
+                        | Event::End(Tag::TableCell)
                         | Event::End(Tag::BlockQuote) => {
                             if let Some(display) = display(&buf) {
                                 replace(ch, &buf, &display);
@@ -72,6 +92,7 @@ impl Preprocessor for Katex {
                             buf.clear();
                             render_math = false;
                         }
+
                         _ => {}
                     }
                 }
