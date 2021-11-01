@@ -43,15 +43,32 @@ impl Preprocessor for Katex {
                         Event::Text(text) => {
                             if render_math {
                                 buf.push_str(&text);
+                                if let Some(new_buf) = inline(&buf) {
+                                    replace(ch, &buf, &new_buf);
+                                    buf.clear()
+                                }
                             }
                         }
+                        Event::Start(Tag::Emphasis)
+                        | Event::End(Tag::Emphasis) => if render_math {
+                            buf.push_str("*")
+                        }
+                        Event::Start(Tag::Strong)
+                        | Event::End(Tag::Strong) => if render_math {
+                            buf.push_str("**")
+                        }
+                        Event::Code(_) => buf.clear(),
                         Event::End(Tag::Paragraph)
                         | Event::End(Tag::Heading(_))
                         | Event::End(Tag::List(_))
                         | Event::End(Tag::Item)
                         | Event::End(Tag::Table(_))
                         | Event::End(Tag::BlockQuote) => {
-                            handle_math(&buf, ch);
+                            if let Some(display) = display(&buf) {
+                                replace(ch, &buf, &display);
+                            } else if let Some(new_text) = inline(&buf) {
+                                replace(ch, &buf, &new_text);
+                            }
                             buf.clear();
                             render_math = false;
                         }
@@ -67,42 +84,61 @@ impl Preprocessor for Katex {
     }
 }
 
-fn handle_math(text: &str, ch: &mut Chapter) {
-    let text = &text.replace(r#" \ "#, r#" \\ "#);
-    if let Some(math) = text.strip_prefix("$$") {
-        if let Some(math) = math.strip_suffix("$$") {
-            ch.content = ch.content.replacen(
-                text,
-                &format!("<div class=\"katex-display\">{}</div>", math),
+fn inline(text: &str) -> Option<String> {
+    let mut out = text.to_string();
+    let mut splits = text.split("$");
+    let mut escaped = match splits.next() {
+        Some(first_split) => first_split.ends_with("\\"),
+        None => return None // No dollars, do early return
+    };
+
+    for split in splits {
+        if split.is_empty() {
+            escaped = true; // Two $s after each other. Do not consider inline.
+            continue
+        } else if escaped
+        || split.starts_with(" ")
+        || split.ends_with(" ")
+        || split.chars().next().unwrap().is_numeric()
+        {
+            if split.ends_with("\\") {
+                escaped = true;
+            } else {
+                escaped = false;
+            }
+        } else if !text.ends_with(split) { // Hacky way of checking if this is the last split
+            out = out.replacen(
+                &format!("${}$", split),
+                &format!("<span class=\"katex-inline\">{}</span>", split),
                 1
             );
         }
+    }
+
+    if out != text {
+        Some(out)
     } else {
-        let mut splits = text.split("$");
-        let mut escaped = match splits.next() {
-            Some(first_split) => first_split.ends_with("\\"),
-            None => return // No dollars, do early return
-        };
-        for split in splits {
-            if split.is_empty() {
-                continue
-            } else if escaped
-            || split.starts_with(" ")
-            || split.ends_with(" ")
-            || split.chars().next().unwrap().is_numeric()
-            {
-                if split.ends_with("\\") {
-                    escaped = true;
-                } else {
-                    escaped = false;
-                }
-            } else if !text.ends_with(split) { // Hacky way of checking if this is the last split
-                ch.content = ch.content.replacen(
-                    &format!("${}$", split),
-                    &format!("<span class=\"katex-inline\">{}</span>", split),
-                    1
-                );
-            }
+        None
+    }
+}
+
+fn display(text: &str) -> Option<String> {
+    if let Some(math) = text.strip_prefix("$$") {
+        if let Some(math) = math.strip_suffix("$$") {
+            return Some(text.replacen(
+                text,
+                &format!("<div class=\"katex-display\">{}</div>", math),
+                1
+            ))
         }
     }
+    None
+}
+
+fn fix(text: impl std::ops::Deref<Target = str>) -> String {
+    text.replace(r#" \ "#, r#" \\ "#)
+}
+
+fn replace(ch: &mut Chapter, old: &str, new: &str) {
+    ch.content = ch.content.replacen(&fix(old), &fix(new), 1);
 }
