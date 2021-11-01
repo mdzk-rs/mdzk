@@ -5,7 +5,7 @@ use crate::{
 
 use crate::katex::Katex;
 use anyhow::Context;
-use mdbook::{book::parse_summary, errors::*, MDBook};
+use mdbook::{preprocess::CmdPreprocessor, book::parse_summary, errors::*, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
 use mdbook_readme::ReadmePreprocessor;
@@ -39,18 +39,25 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let summary = parse_summary(&summary_content).context("Summary parsing failed")?;
     debug!("Parsed summary.");
 
+    // Cloning some values to avoid cloning the whole config
     let disable_default_preprocessors = config.build.disable_default_preprocessors;
+    let preprocessors = config.build.preprocessors.clone();
+
     let mut zk = MDBook::load_with_config_and_summary(root, config.into(), summary)?;
     info!("Successfully loaded mdzk in: {:?}", zk.root);
 
-    if !disable_default_preprocessors {
+    if disable_default_preprocessors {
+        info!("Running without default mdzk preprocessors.")
+    } else {
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(Katex);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(WikiLinks);
         zk.with_preprocessor(ReadmePreprocessor);
-    } else {
-        info!("Running without default mdzk preprocessors.")
+    }
+
+    for p in preprocessors {
+        zk.with_preprocessor(CmdPreprocessor::new(p.to_owned(), format!("mdbook-{}", p))); 
     }
 
     Ok(zk)
