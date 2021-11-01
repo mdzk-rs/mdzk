@@ -956,7 +956,7 @@ dependencies = [
 
 [[package]]
 name = "mdbook-wikilinks"
-version = "0.3.5"
+version = "0.4.0"
 dependencies = [
  "clap",
  "mdbook",
@@ -970,7 +970,7 @@ dependencies = [
 
 [[package]]
 name = "mdzk"
-version = "0.4.2"
+version = "0.4.3"
 dependencies = [
  "ammonia",
  "anyhow",
