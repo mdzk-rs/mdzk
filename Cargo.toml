@@ -54,7 +54,7 @@ toml = "0.5.8"
 mdbook-backlinks = { path = "preprocessors/mdbook-backlinks", version = "0.2.6" }
 mdbook-frontmatter = { path = "preprocessors/mdbook-frontmatter", version = "0.0.3" }
 mdbook-readme = { path = "preprocessors/mdbook-readme", version = "0.0.3" }
-mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks", version = "0.3.5" }
+mdbook-wikilinks = { path = "preprocessors/mdbook-wikilinks", version = "0.4.0" }
 
 # Feature: Search
 ammonia = "3.1.2"
