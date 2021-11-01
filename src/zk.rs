@@ -50,9 +50,9 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         info!("Running without default mdzk preprocessors.")
     } else {
         zk.with_preprocessor(FrontMatter);
-        zk.with_preprocessor(Katex);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(WikiLinks);
+        zk.with_preprocessor(Katex);
         zk.with_preprocessor(ReadmePreprocessor);
     }
 

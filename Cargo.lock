@@ -989,7 +989,6 @@ dependencies = [
  "mdbook-wikilinks",
  "notify",
  "pulldown-cmark 0.8.0",
- "regex",
  "serde",
  "serde_json",
  "structopt",
