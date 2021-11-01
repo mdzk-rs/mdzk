@@ -8,10 +8,18 @@ mdzk is a plain text Zettelkasten system that is based on the mdBook API. It con
 
 ### Cargo
 
-You can install mdzk with Cargo by running.
+You can install mdzk with Cargo by running
 
 ```
 $ cargo install mdzk
+```
+
+### Homebrew
+
+mdzk is available in [Homebrew](https://brew.sh/). Install by running
+
+```
+$ brew install mdzk
 ```
 
 ### Nix
@@ -34,4 +42,4 @@ We are still figuring out the exact user interface, so there would not be much h
 
 - **Supported characters**:
 
-    These characters are disallowed in note filenames: `=`, <code>\`</code>, `^`, `#`, `|`, `:`, `/`, `[` and `]`. `$` is supported, but not recommended, as it might intefere with the KaTeX math delimiters. If you want to use `$` in code snippets you would need to escape it with `\` first. Example: `echo \$HOME`.
+    These characters are disallowed in note filenames: `=`, <code>\`</code>, `^`, `#`, `|`, `:`, `/`, `[` and `]`.
