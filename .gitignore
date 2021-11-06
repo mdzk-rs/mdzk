@@ -6,6 +6,7 @@ result
 # docs
 .obsidian
 out
+**/public
 
 # editors
 .idea

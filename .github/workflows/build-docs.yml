@@ -1,11 +1,6 @@
 name: Build and publish docs
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - docs/**
+on: [pull_request]
 
 jobs:
   build-and-deploy:
@@ -14,23 +9,34 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.1
 
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Install Rust 🦀
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
 
-      - name: Install mdzk 📝
-        uses: actions-rs/install@master
-        with:
-          crate: mdzk
+      - name: Build mdzk 📝
+        run: cargo build
 
       - name: Build 🔧
         run: |
           cd docs
-          mdzk build
+          ../target/debug/mdzk build
 
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./docs/public
+          destination_dir: docs
