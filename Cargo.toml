@@ -7,7 +7,7 @@ authors = [
     "Leo Silva Souza <leovano@protonmail.com>",
     "Xiangru Lian <admin@mail.xrlian.com>",
 ]
-edition = "2018"
+edition = "2021"
 description = "Plain text Zettelkasten based on mdBook"
 homepage = "https://github.com/mdzk-rs/mdzk"
 repository = "https://github.com/mdzk-rs/mdzk"
