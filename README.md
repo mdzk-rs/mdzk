@@ -38,6 +38,10 @@ On the [Releases](https://github.com/mdzk-rs/mdzk/releases) page, you can find p
 
 We are still figuring out the exact user interface, so there would not be much help in a "getting started" guide just yet. mdzk works very much like [mdBook](https://rust-lang.github.io/mdBook/cli/index.html), so you can use their guide for the time being. We hope to provide a full documentation very soon...
 
+For now you can get started by executing the `mdzk init` command, it will create the basic directory structure and provide you with an example configuration file, so you can focus on your notes.
+
+Also make sure your top-level header is defined as `[mdzk]` otherwise errors will raise.
+
 ## Important notes
 
 - **Supported characters**:
