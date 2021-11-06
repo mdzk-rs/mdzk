@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.4.3 (Unreleased)
+## Unreleased
+
+### Enhacements
+
+- mdzk now checks whether you updated your `mdzk.toml` correctly or not. A error will pop up if it finds a `[book]` on
+your `mdzk.toml` file.
+
+## 0.4.3
 
 ### New features
 

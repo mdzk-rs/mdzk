@@ -25,12 +25,17 @@ impl Config {
     /// Load an mdzk configuration file from a path.
     pub fn from_disk<P: AsRef<Path>>(path: P) -> Result<Config> {
         let mut buffer = String::new();
-        File::open(path)
-            .context("Unable to open the configuration file")?
+        File::open(&path)
+            .with_context(|| format!("Unable to open {:?}.", path.as_ref()))?
             .read_to_string(&mut buffer)
-            .context("Couldn't read the file")?;
+            .context("Couldn't read the configuration file")?;
 
-        let mut conf = Config::from_str(&buffer).unwrap();
+        let mut conf = Config::from_str(&buffer)
+            .with_context(|| format!("Unable to load the configuration file {:?}", path.as_ref()))?;
+
+        if conf.rest.get_mut("book").is_some() {
+            warn!("Found a '[book]' section on your 'mdzk.toml' file. You might want to replace it with '[mdzk]' ;-)")
+        }
 
         if let Some(preprocessors) = conf
             .rest
@@ -63,7 +68,8 @@ impl FromStr for Config {
 
     /// Load an mdzk configuration from some string.
     fn from_str(src: &str) -> Result<Self> {
-        toml::from_str(src).context("Invalid configuration file")
+        toml::from_str(src)
+            .with_context(|| format!("Invalid TOML:\n{}", src))
     }
 }
 
