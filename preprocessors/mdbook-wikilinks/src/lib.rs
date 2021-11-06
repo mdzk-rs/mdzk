@@ -55,7 +55,7 @@ impl Preprocessor for WikiLinks {
                     // Handle link text
                     let title = match link.next() {
                         Some(alias) => alias.as_str(),
-                        None => note.as_ref(),
+                        None => note,
                     };
 
                     let cmark_link = if !path_map.contains_key(note) {
@@ -126,7 +126,7 @@ fn for_each_link(content: &str, mut handle_link: impl FnMut(&str)) {
                     Currently::MaybeOpen => current = Currently::OutsideLink,
                     Currently::MaybeInsideLink => current = Currently::MaybeClose,
                     Currently::MaybeClose => {
-                        handle_link(&buffer.trim());
+                        handle_link(buffer.trim());
                         buffer.clear();
                         current = Currently::OutsideLink;
                     }
