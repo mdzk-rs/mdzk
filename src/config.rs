@@ -32,6 +32,10 @@ impl Config {
 
         let mut conf = Config::from_str(&buffer).unwrap();
 
+        if let Some(_) = conf.rest.get_mut("book") {
+            panic!("Found a '[book]' section on your 'mdzk.toml' file. You might want to replace it with '[mdzk]' ;-)")
+        }
+
         if let Some(preprocessors) = conf
             .rest
             .get_mut("preprocessor")
