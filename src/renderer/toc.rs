@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;
+use std::cmp::Ordering;
 
 use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
 use pulldown_cmark::{html, Event, Parser};
@@ -80,22 +81,24 @@ impl HelperDef for RenderToc {
                     level - 1 < fold_level as usize
                 };
 
-            if level > current_level {
-                while level > current_level {
-                    out.write("<li>")?;
-                    out.write("<ol class=\"section\">")?;
-                    current_level += 1;
-                }
-                write_li_open_tag(out, is_expanded, false)?;
-            } else if level < current_level {
-                while level < current_level {
-                    out.write("</ol>")?;
-                    out.write("</li>")?;
-                    current_level -= 1;
-                }
-                write_li_open_tag(out, is_expanded, false)?;
-            } else {
-                write_li_open_tag(out, is_expanded, item.get("section").is_none())?;
+            match level.cmp(&current_level) {
+                Ordering::Greater => {
+                    while level > current_level {
+                        out.write("<li>")?;
+                        out.write("<ol class=\"section\">")?;
+                        current_level += 1;
+                    }
+                    write_li_open_tag(out, is_expanded, false)?;
+                },
+                Ordering::Less => {
+                    while level < current_level {
+                        out.write("</ol>")?;
+                        out.write("</li>")?;
+                        current_level -= 1;
+                    }
+                    write_li_open_tag(out, is_expanded, false)?;
+                },
+                Ordering::Equal => write_li_open_tag(out, is_expanded, item.get("section").is_none())?,
             }
 
             // Part title
@@ -149,9 +152,8 @@ impl HelperDef for RenderToc {
                 // Render only inline code blocks
 
                 // filter all events that are not inline code blocks
-                let parser = Parser::new(name).filter(|event| match *event {
-                    Event::Code(_) | Event::Html(_) | Event::Text(_) => true,
-                    _ => false,
+                let parser = Parser::new(name).filter(|event| {
+                    matches!(*event, Event::Code(_) | Event::Html(_) | Event::Text(_))
                 });
 
                 // render markdown to html

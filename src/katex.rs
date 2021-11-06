@@ -39,7 +39,7 @@ impl Preprocessor for Katex {
                         // Respect formatting
                         Event::Start(Tag::Emphasis)
                         | Event::End(Tag::Emphasis) => if render_math {
-                            buf.push_str("*")
+                            buf.push('*')
                         }
                         Event::Start(Tag::Strong)
                         | Event::End(Tag::Strong) => if render_math {
@@ -107,9 +107,9 @@ impl Preprocessor for Katex {
 
 fn inline(text: &str) -> Option<String> {
     let mut out = text.to_string();
-    let mut splits = text.split("$");
+    let mut splits = text.split('$');
     let mut escaped = match splits.next() {
-        Some(first_split) => first_split.ends_with("\\"),
+        Some(first_split) => first_split.ends_with('\\'),
         None => return None // No dollars, do early return
     };
 
@@ -118,11 +118,11 @@ fn inline(text: &str) -> Option<String> {
             escaped = true; // Two $s after each other. Do not consider inline.
             continue
         } else if escaped
-        || split.starts_with(" ")
-        || split.ends_with(" ")
+        || split.starts_with(' ')
+        || split.ends_with(' ')
         || split.chars().next().unwrap().is_numeric()
         {
-            if split.ends_with("\\") {
+            if split.ends_with('\\') {
                 escaped = true;
             } else {
                 escaped = false;

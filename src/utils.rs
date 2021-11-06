@@ -162,7 +162,7 @@ pub fn write_file(path: &Path, bytes: &[u8]) -> Result<()> {
 pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
     path.into()
         .parent()
-        .unwrap_or(&Path::new(""))
+        .unwrap_or_else(|| Path::new(""))
         .components()
         .fold(String::new(), |mut s, c| {
             match c {
