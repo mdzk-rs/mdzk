@@ -1,0 +1,23 @@
+[mdzk]
+authors = ["mdzk-rs"]
+language = "en"
+multilingual = false
+src = "src"
+title = "mdzk documentation"
+generate-summary = false
+ignore = [
+    ".obsidian/"
+]
+
+[build]
+build-dir = "public"
+
+[output.html]
+git-repository-icon = "fa-github"
+git-repository-url = "https://github.com/mdzk-rs/mdzk/docs"
+edit-url-template = "https://github.com/mdzk-rs/mdzk/docs/edit/master/{path}"
+no-section-label = true
+site-url = "https://mdzk.app/docs"
+
+[output.html.fold]
+enable = true
