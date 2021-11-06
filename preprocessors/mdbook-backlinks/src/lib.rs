@@ -2,7 +2,6 @@ use lazy_regex::{lazy_regex, Lazy};
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pathdiff;
 use regex::Regex;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -26,7 +25,7 @@ impl Preprocessor for Backlinks {
         for item in book.iter() {
             if let BookItem::Chapter(ch) = item {
                 // Skip if source_path is None (because nothing to link to)
-                if let Some(_) = &ch.source_path {
+                if ch.source_path.is_some() {
                     // Loop over the internal links found in the chapter
                     for link in find_links(&ch.content, &index) {
                         // Push current chapter into Vec corresponding to the chapter it links to
@@ -58,7 +57,7 @@ impl Preprocessor for Backlinks {
             if let BookItem::Chapter(ch) = item {
                 if let Some(source_path) = &ch.source_path {
                     if let Some(backlinks) = index.get(source_path) {
-                        if backlinks.len() >= 1 {
+                        if !backlinks.is_empty() {
                             ch.content += &backlink_prefix;
                         };
 
@@ -86,7 +85,7 @@ impl Preprocessor for Backlinks {
 fn find_links(content: &str, index: &HashMap<PathBuf, Vec<Chapter>>) -> Vec<PathBuf> {
     let mut links: Vec<PathBuf> = Vec::new();
 
-    for cap in WIKILINK_REGEX.captures_iter(&content) {
+    for cap in WIKILINK_REGEX.captures_iter(content) {
         if let Some(dest) = cap.get(1) {
             let mut path = PathBuf::from(dest.as_str());
             path.set_extension("md");
