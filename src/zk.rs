@@ -22,8 +22,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     };
     debug!("Found root: {:?}", root);
 
-    let config: Config = Config::from_disk(root.join(CONFIG_FILE))
-        .with_context(|| format!("Could not load config file {:?}", root.join(CONFIG_FILE)))?;
+    let config: Config = Config::from_disk(root.join(CONFIG_FILE))?;
     debug!("Successfully loaded config.");
 
     if config.mdzk.generate_summary.unwrap_or(true) {
