@@ -1,7 +1,7 @@
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;
-use std::cmp::Ordering;
 
 use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
 use pulldown_cmark::{html, Event, Parser};
@@ -89,7 +89,7 @@ impl HelperDef for RenderToc {
                         current_level += 1;
                     }
                     write_li_open_tag(out, is_expanded, false)?;
-                },
+                }
                 Ordering::Less => {
                     while level < current_level {
                         out.write("</ol>")?;
@@ -97,8 +97,10 @@ impl HelperDef for RenderToc {
                         current_level -= 1;
                     }
                     write_li_open_tag(out, is_expanded, false)?;
-                },
-                Ordering::Equal => write_li_open_tag(out, is_expanded, item.get("section").is_none())?,
+                }
+                Ordering::Equal => {
+                    write_li_open_tag(out, is_expanded, item.get("section").is_none())?
+                }
             }
 
             // Part title

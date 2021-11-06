@@ -5,7 +5,7 @@ use crate::{
 
 use crate::katex::Katex;
 use anyhow::Context;
-use mdbook::{preprocess::CmdPreprocessor, book::parse_summary, errors::*, MDBook};
+use mdbook::{book::parse_summary, errors::*, preprocess::CmdPreprocessor, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
 use mdbook_readme::ReadmePreprocessor;
@@ -57,7 +57,7 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     }
 
     for p in preprocessors {
-        zk.with_preprocessor(CmdPreprocessor::new(p.to_owned(), format!("mdbook-{}", p))); 
+        zk.with_preprocessor(CmdPreprocessor::new(p.to_owned(), format!("mdbook-{}", p)));
     }
 
     Ok(zk)

@@ -2,7 +2,7 @@
 use crate::{CONFIG_FILE, SUMMARY_FILE};
 
 use ignore::gitignore::Gitignore;
-use mdbook::{MDBook, errors::*};
+use mdbook::{errors::*, MDBook};
 use notify::Watcher;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};

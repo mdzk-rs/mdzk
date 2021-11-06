@@ -2,8 +2,8 @@ use mdbook_wikilinks::WikiLinks;
 
 use clap::{App, Arg, SubCommand};
 use mdbook::{
-    preprocess::{CmdPreprocessor, Preprocessor},
     errors::Error,
+    preprocess::{CmdPreprocessor, Preprocessor},
 };
 use std::io;
 

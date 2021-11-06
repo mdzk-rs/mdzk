@@ -10,7 +10,7 @@ use mdbook::{
     MDBook,
 };
 use std::net::{SocketAddr, ToSocketAddrs};
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use tokio::sync::broadcast;
 use toml;
 use warp::ws::Message;
@@ -89,7 +89,8 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
 
 fn update_config(book: &mut MDBook, livereload_url: &str) -> Result<()> {
     book.config.set("output.html.site-url", "/")?;
-    book.config.set("output.html.livereload-url", &livereload_url)?;
+    book.config
+        .set("output.html.livereload-url", &livereload_url)?;
     Ok(())
 }
 

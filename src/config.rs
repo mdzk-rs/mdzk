@@ -32,7 +32,11 @@ impl Config {
 
         let mut conf = Config::from_str(&buffer).unwrap();
 
-        if let Some(preprocessors) = conf.rest.get_mut("preprocessor").and_then(Value::as_table_mut) {
+        if let Some(preprocessors) = conf
+            .rest
+            .get_mut("preprocessor")
+            .and_then(Value::as_table_mut)
+        {
             for (name, _) in preprocessors.iter() {
                 conf.build.preprocessors.push(name.to_owned());
             }

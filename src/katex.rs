@@ -1,7 +1,7 @@
 use mdbook::book::{Book, BookItem, Chapter};
 use mdbook::errors::Error;
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use pulldown_cmark::{Event, Tag, Parser, Options};
+use pulldown_cmark::{Event, Options, Parser, Tag};
 
 const KATEX_CSS: &str = r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">"#;
 const KATEX_JS: &str = r#"<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.20/dist/katex.min.js" integrity="sha384-ov99pRO2tAc0JuxTVzf63RHHeQTJ0CIawbDZFiFTzB07aqFZwEu2pz4uzqL+5OPG" crossorigin="anonymous"></script>"#;
@@ -37,13 +37,15 @@ impl Preprocessor for Katex {
                 for event in parser {
                     match event {
                         // Respect formatting
-                        Event::Start(Tag::Emphasis)
-                        | Event::End(Tag::Emphasis) => if render_math {
-                            buf.push('*')
+                        Event::Start(Tag::Emphasis) | Event::End(Tag::Emphasis) => {
+                            if render_math {
+                                buf.push('*')
+                            }
                         }
-                        Event::Start(Tag::Strong)
-                        | Event::End(Tag::Strong) => if render_math {
-                            buf.push_str("**")
+                        Event::Start(Tag::Strong) | Event::End(Tag::Strong) => {
+                            if render_math {
+                                buf.push_str("**")
+                            }
                         }
 
                         // Clear buffer when code is hit
@@ -110,28 +112,29 @@ fn inline(text: &str) -> Option<String> {
     let mut splits = text.split('$');
     let mut escaped = match splits.next() {
         Some(first_split) => first_split.ends_with('\\'),
-        None => return None // No dollars, do early return
+        None => return None, // No dollars, do early return
     };
 
     for split in splits {
         if split.is_empty() {
             escaped = true; // Two $s after each other. Do not consider inline.
-            continue
+            continue;
         } else if escaped
-        || split.starts_with(' ')
-        || split.ends_with(' ')
-        || split.chars().next().unwrap().is_numeric()
+            || split.starts_with(' ')
+            || split.ends_with(' ')
+            || split.chars().next().unwrap().is_numeric()
         {
             if split.ends_with('\\') {
                 escaped = true;
             } else {
                 escaped = false;
             }
-        } else if !text.ends_with(split) { // Hacky way of checking if this is the last split
+        } else if !text.ends_with(split) {
+            // Hacky way of checking if this is the last split
             out = out.replacen(
                 &format!("${}$", split),
                 &format!("<span class=\"katex-inline\">{}</span>", split),
-                1
+                1,
             );
         }
     }
@@ -149,8 +152,8 @@ fn display(text: &str) -> Option<String> {
             return Some(text.replacen(
                 text,
                 &format!("<div class=\"katex-display\">{}</div>", math),
-                1
-            ))
+                1,
+            ));
         }
     }
     None

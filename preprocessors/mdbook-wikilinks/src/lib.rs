@@ -6,12 +6,12 @@ use mdbook::{
     book::{Book, Chapter},
     errors::Error,
     preprocess::{Preprocessor, PreprocessorContext},
-    BookItem,
     utils::id_from_content,
+    BookItem,
 };
 use pest::Parser;
+use pulldown_cmark::{escape::escape_href, CowStr, Event};
 use std::collections::HashMap;
-use pulldown_cmark::{CowStr, Event, escape::escape_href};
 
 #[derive(Parser)]
 #[grammar = "wikilink.pest"]
@@ -28,7 +28,9 @@ impl Preprocessor for WikiLinks {
         let mut path_map = HashMap::new();
         for chapter in book.iter().filter_map(get_chapter) {
             let key = chapter.name.clone();
-            if chapter.path.is_none() { continue; }
+            if chapter.path.is_none() {
+                continue;
+            }
             if path_map.contains_key(&key) {
                 eprintln!("Duplicated page title found: {} at {:?}", key, chapter.path);
             }
@@ -42,11 +44,12 @@ impl Preprocessor for WikiLinks {
                         Ok(parsed) => parsed,
                         Err(e) => {
                             eprintln!("Failed parsing wikilink internals: {}", e);
-                            return
-                        },
-                    }.next()
-                     .unwrap()
-                     .into_inner();
+                            return;
+                        }
+                    }
+                    .next()
+                    .unwrap()
+                    .into_inner();
 
                     // Handle destination
                     let mut dest = link.next().unwrap().into_inner();
@@ -60,14 +63,17 @@ impl Preprocessor for WikiLinks {
 
                     let cmark_link = if !path_map.contains_key(note) {
                         format!(
-                            "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>", 
+                            "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>",
                             title
                         )
                     } else {
                         let mut href = pathdiff::diff_paths(
                             path_map.get(note).unwrap(),
                             chapter.path.as_ref().unwrap().parent().unwrap(),
-                        ).unwrap().to_string_lossy().to_string(); // Gotta love Rust <3
+                        )
+                        .unwrap()
+                        .to_string_lossy()
+                        .to_string(); // Gotta love Rust <3
 
                         // Handle anchor
                         // TODO: Blockrefs are currently not handled here
@@ -79,8 +85,10 @@ impl Preprocessor for WikiLinks {
                         format!("[{}](<{}>)", title, escape_special_chars(&href))
                     };
 
-                    chapter.content = chapter.content
-                        .replacen(&format!("[[{}]]", link_text), &cmark_link, 1);
+                    chapter.content =
+                        chapter
+                            .content
+                            .replacen(&format!("[[{}]]", link_text), &cmark_link, 1);
                 });
             }
         });
@@ -105,35 +113,33 @@ fn for_each_link(content: &str, mut handle_link: impl FnMut(&str)) {
     for event in parser {
         match event {
             // Ignore KaTeX spans
-            Event::Html(CowStr::Borrowed("<span class=\"katex-inline\">")) => current = Currently::Ignore,
+            Event::Html(CowStr::Borrowed("<span class=\"katex-inline\">")) => {
+                current = Currently::Ignore
+            }
             Event::Html(CowStr::Borrowed("</span>")) => current = Currently::OutsideLink,
 
-            Event::Text(CowStr::Borrowed("[")) => {
-                match current {
-                    Currently::OutsideLink => current = Currently::MaybeOpen,
-                    Currently::MaybeOpen => current = Currently::MaybeInsideLink,
-                    Currently::MaybeInsideLink => current = Currently::OutsideLink,
-                    Currently::MaybeClose => {
-                        buffer.clear();
-                        current = Currently::OutsideLink;
-                    }
-                    Currently::Ignore => {}
+            Event::Text(CowStr::Borrowed("[")) => match current {
+                Currently::OutsideLink => current = Currently::MaybeOpen,
+                Currently::MaybeOpen => current = Currently::MaybeInsideLink,
+                Currently::MaybeInsideLink => current = Currently::OutsideLink,
+                Currently::MaybeClose => {
+                    buffer.clear();
+                    current = Currently::OutsideLink;
                 }
-            }
+                Currently::Ignore => {}
+            },
 
-            Event::Text(CowStr::Borrowed("]")) => {
-                match current {
-                    Currently::MaybeOpen => current = Currently::OutsideLink,
-                    Currently::MaybeInsideLink => current = Currently::MaybeClose,
-                    Currently::MaybeClose => {
-                        handle_link(buffer.trim());
-                        buffer.clear();
-                        current = Currently::OutsideLink;
-                    }
-                    Currently::OutsideLink => {},
-                    Currently::Ignore => {}
+            Event::Text(CowStr::Borrowed("]")) => match current {
+                Currently::MaybeOpen => current = Currently::OutsideLink,
+                Currently::MaybeInsideLink => current = Currently::MaybeClose,
+                Currently::MaybeClose => {
+                    handle_link(buffer.trim());
+                    buffer.clear();
+                    current = Currently::OutsideLink;
                 }
-            }
+                Currently::OutsideLink => {}
+                Currently::Ignore => {}
+            },
 
             Event::Text(ref text) => {
                 if let Currently::MaybeInsideLink = current {
@@ -187,17 +193,22 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
 | Tables can also have [[table links]] | more stuff |"#;
 
         let mut links = vec![];
-        for_each_link(content, |link_text| { links.push(link_text.to_owned()); });
+        for_each_link(content, |link_text| {
+            links.push(link_text.to_owned());
+        });
 
-        assert_eq!(links, vec![
-                   "link",
-                   "link#header",
-                   "link | a bit more complex",
-                   "link#header | more 😭 complex",
-                   "link in a blockquote",
-                   "list link",
-                   "table links"
-        ]);
+        assert_eq!(
+            links,
+            vec![
+                "link",
+                "link#header",
+                "link | a bit more complex",
+                "link#header | more 😭 complex",
+                "link in a blockquote",
+                "list link",
+                "table links"
+            ]
+        );
     }
 
     #[test]
@@ -222,7 +233,9 @@ let link = "[[link_in_code]]".to_owned();
 </p>"#;
 
         let mut links = Vec::<String>::new();
-        for_each_link(content, |link_text| { links.push(link_text.to_owned()); });
+        for_each_link(content, |link_text| {
+            links.push(link_text.to_owned());
+        });
 
         assert!(links.is_empty(), "Got links: {:?}", links);
     }
