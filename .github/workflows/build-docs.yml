@@ -26,8 +26,8 @@ jobs:
 
       - name: Build 🔧
         run: |
-        cd docs
-        mdzk build
+          cd docs
+          mdzk build
 
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
