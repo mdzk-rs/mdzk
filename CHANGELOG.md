@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.4.4 (Unreleased)
 
-### Enhacements
+### Bug fixes
 
-- mdzk now checks whether you updated your `mdzk.toml` correctly or not. A error will pop up if it finds a `[book]` on
-your `mdzk.toml` file.
+- mdzk will not panic on invalid TOML anymore, but rather print an error message coupled with the configuration content and a description of what part of it is invalid.
+- [#40](https://github.com/mdzk-rs/mdzk/pull/40): mdzk now checks whether you updated your `mdzk.toml` correctly or not. If a `[book]` section is found in your `mdzk.toml` file, a warning will appear that prompts the user to change it to `[mdzk]`.
 
-## 0.4.3
+## 0.4.3 (2020-11-01)
 
 ### New features
 
