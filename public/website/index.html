@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Metadata related to embedding -->
+    <meta content="mdzk" property="og:title" />
+    <meta
+      content="A lovingly designed tool for your Zettelkasten needs"
+      property="og:description"
+    />
+    <meta content="https://mdzk.app" property="og:url" />
+    <meta content="https://mdzk.app/mdzk.svg" property="og:image" />
+    <meta content="#ff0000" data-react-helmet="true" name="theme-color" />
+
     <title>mdzk</title>
 
     <!-- CSS -->
@@ -28,7 +39,12 @@
       <div class="container">
         <img src="mdzk.svg" />
         <p>A lovingly designed tool for your Zettelkasten needs</p>
-        <p><code>cargo install mdzk</code></p>
+        <p>
+          <code>
+            See install instructions at
+            <a href="http://mdzk.app/docs">mdzk.app/docs</a>
+          </code>
+        </p>
       </div>
     </section>
 
@@ -40,18 +56,19 @@
         </div>
         <p>
           mdzk works with plain text files in an extended version of the
-          well-defined and widely used <a href="https://commonmark.org">CommonMark</a>
-          Markdown specification. The included extensions are made to make
-          your note-taking process as simple, readable and quick as possible.
+          well-defined and widely used
+          <a href="https://commonmark.org">CommonMark</a> Markdown
+          specification. The included extensions are made to make your
+          note-taking process as simple, readable and quick as possible.
           Everything is compatible with the flavor of Markdown used by the
           hugely popular editor, <a href="https://obsidian.md">Obsidian</a>.
         </p>
         <p>
-          Using Markdown ensures that your notes are future-proof beyond
-          the lifetime of mdzk itself. They remain human-readable, can
-          be version controlled and are editable in close to every text editor
-          there is. mdzk gives you a local web server with live updating, which
-          makes editing a breeze, no matter what editor you prefer.
+          Using Markdown ensures that your notes are future-proof beyond the
+          lifetime of mdzk itself. They remain human-readable, can be version
+          controlled and are editable in close to every text editor there is.
+          mdzk gives you a local web server with live updating, which makes
+          editing a breeze, no matter what editor you prefer.
         </p>
       </div>
     </section>
