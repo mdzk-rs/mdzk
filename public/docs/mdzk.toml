@@ -10,7 +10,7 @@ ignore = [
 ]
 
 [build]
-build-dir = "public"
+build-dir = "html"
 
 [output.html]
 git-repository-icon = "fa-github"
