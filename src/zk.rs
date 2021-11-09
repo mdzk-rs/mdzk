@@ -4,8 +4,8 @@ use crate::{
 };
 
 use crate::katex::Katex;
-use anyhow::Context;
-use mdbook::{book::parse_summary, errors::*, preprocess::CmdPreprocessor, MDBook};
+use anyhow::{anyhow, Context, Result};
+use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
 use mdbook_readme::ReadmePreprocessor;
@@ -14,13 +14,18 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
+pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook> {
     let root = match dir {
         Some(path) => path,
         None => find_mdzk_root()
-            .ok_or_else(|| Error::msg("Could not find the root of your Zettelkasten"))?,
+            .ok_or(anyhow!(r#"Could not find an mdzk.
+
+If your mdzk is not located in this directory or any if it's parents, consider
+specifying the path with e.g. `mdzk <command> [<path>]`. If you have not created
+an mdzk yet, you can initialize one with `mdzk init`."#))?,
     };
-    info!("Found mdzk in {:?}.", root);
+
+    info!("Loading mdzk in {:?}.", root);
 
     let config: Config = Config::from_disk(root.join(CONFIG_FILE))?;
     info!("Loaded configuration.");
@@ -43,7 +48,6 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let preprocessors = config.build.preprocessors.clone();
 
     let mut zk = MDBook::load_with_config_and_summary(root, config.into(), summary)?;
-    info!("Loaded mdzk.");
 
     if disable_default_preprocessors {
         info!("Running without default mdzk preprocessors.")

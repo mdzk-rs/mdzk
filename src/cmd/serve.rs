@@ -1,9 +1,9 @@
+use anyhow::{anyhow, Result};
 use crate::renderer::HtmlMdzk;
 use crate::{cmd::watch, load_zk};
 use futures_util::sink::SinkExt;
 use futures_util::StreamExt;
 use mdbook::{
-    errors::*,
     renderer::{HtmlHandlebars, MarkdownRenderer},
     utils,
     utils::fs::get_404_output_file,
@@ -19,7 +19,7 @@ use warp::Filter;
 /// The HTTP endpoint for the websocket used to trigger reloads when a file changes.
 const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 
-pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) -> Result<(), Error> {
+pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) -> Result<()> {
     let mut zk = load_zk(dir)?;
 
     let address = format!("{}:{}", bind, port.to_string());
@@ -36,7 +36,7 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
     let sockaddr: SocketAddr = address
         .to_socket_addrs()?
         .next()
-        .ok_or_else(|| Error::msg("no address found for ".to_string() + &address))?;
+        .ok_or_else(|| anyhow!("no address found for ".to_string() + &address))?;
     let build_dir = zk.build_dir_for("html");
     let input_404 = zk
         .config
@@ -55,7 +55,7 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
     });
 
     let serving_url = format!("http://{}", address);
-    info!("Serving on: {}", serving_url);
+    info!("Serving your mdzk on: {}.", serving_url);
 
     /* if open_browser {
         open(serving_url);
@@ -63,7 +63,6 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
 
     watch::trigger_on_change(&zk, move |paths, book_dir: &Path| -> Result<()> {
         info!("Files changed: {:?}", paths);
-        info!("Building book...");
 
         let mut new_zk = load_zk(Some(book_dir.to_path_buf()))?;
         update_config(&mut new_zk, &livereload_url)?;
@@ -74,7 +73,7 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
         };
 
         if let Err(e) = result {
-            error!("Unable to load the book");
+            error!("Unable to load the mdzk");
             utils::log_backtrace(&e);
         } else {
             let _ = tx.send(Message::text("reload"));
