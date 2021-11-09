@@ -24,20 +24,20 @@ pub fn init(dir: Option<PathBuf>) -> Result<()> {
     }
 
     // Create directory structure
-    // debug!("Creating directory tree");
+    debug!("Creating directory tree");
     fs::create_dir_all(&root)?;
     fs::create_dir_all(&root.join(&config.mdzk.src))
         .context("Could not create source directory.")?;
     info!("Created a directory to put your notes.");
 
     // Create gitignore
-    // debug!("Creating .gitignore");
+    debug!("Creating .gitignore");
     let mut f = File::create(root.join(".gitignore"))?;
     writeln!(f, "{}", config.build.build_dir.display())?;
     info!("Generated a gitignore.");
 
     // Create config file
-    // debug!("Writing {}", CONFIG_FILE);
+    debug!("Writing {}", CONFIG_FILE);
     let config_path = root.join(CONFIG_FILE);
     let config_bytes = toml::to_vec(&config).context("Unable to serialize the config")?;
     File::create(config_path)

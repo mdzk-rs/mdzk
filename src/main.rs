@@ -57,6 +57,8 @@ fn main() {
 fn run() -> Result<()> {
     let args = Mdzk::from_args();
 
+    mdzk::log::set_max_level(args.log_level);
+
     match args.cmd {
         Command::Build { dir, renderer } => build(dir, renderer),
         Command::Init { dir } => init(dir),
