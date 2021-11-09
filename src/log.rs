@@ -1,25 +1,55 @@
-use colored::{Colorize, ColoredString};
-
 #[macro_export]
-macro_rules! mdzk_error {
-    ($($arg:tt)*) => {
-        mdzk::msg::lay_out_text(&format!($($arg)*), "E".red())
-    }
+macro_rules! error {
+    ($($arg:tt)*) => ({
+        let text = format!($($arg)*);
+        let mut lines = text.lines();
+        if let Some(line) = lines.next() {
+            eprintln!("  \x1B[31mE\x1B[0m {}", line);
+            for line in lines {
+                eprintln!("  \x1B[90m│\x1B[0m {}", line);
+            }
+        }
+    })
 }
 
 #[macro_export]
-macro_rules! mdzk_warning {
-    ($($arg:tt)*) => {
-        mdzk::msg::lay_out_text(&format!($($arg)*), "W".yellow())
-    }
+macro_rules! warn {
+    ($($arg:tt)*) => ({
+        let text = format!($($arg)*);
+        let mut lines = text.lines();
+        if let Some(line) = lines.next() {
+            eprintln!("  \x1B[33mW\x1B[0m {}", line);
+            for line in lines {
+                eprintln!("  \x1B[90m│\x1B[0m {}", line);
+            }
+        }
+    })
 }
 
-pub fn lay_out_text(text: &str, icon: ColoredString) {
-    let mut lines = text.lines();
-    eprintln!("  {} {}", icon, lines.next().unwrap());
-    for line in lines {
-        eprintln!("  {} {}", "│".bright_black(), line);
-    }
-    eprintln!("  {}", "│".bright_black());
-    // eprintln!("  {}", "╵".bright_black());
+#[macro_export]
+macro_rules! info {
+    ($($arg:tt)*) => ({
+        let text = format!($($arg)*);
+        let mut lines = text.lines();
+        if let Some(line) = lines.next() {
+            println!("  \x1B[90m│ {}\x1B[0m", line);
+            for line in lines {
+                println!("  \x1B[90m│ {}\x1B[0m", line);
+            }
+        }
+    }) 
+}
+
+#[macro_export]
+macro_rules! debug {
+    ($($arg:tt)*) => ({
+        let text = format!($($arg)*);
+        let mut lines = text.lines();
+        if let Some(line) = lines.next() {
+            println!("  D {}", line);
+            for line in lines {
+                println!("  \x1B[90m│\x1B[0m {}", line);
+            }
+        }
+    })
 }
