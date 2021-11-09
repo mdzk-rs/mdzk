@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate log;
+pub mod log;
 
 pub mod cmd;
 pub mod config;
