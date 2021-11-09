@@ -41,6 +41,20 @@ macro_rules! info {
 }
 
 #[macro_export]
+macro_rules! success {
+    ($($arg:tt)*) => ({
+        let text = format!($($arg)*);
+        let mut lines = text.lines();
+        if let Some(line) = lines.next() {
+            println!("  \x1B[32m✓\x1B[0m {}", line);
+            for line in lines {
+                println!("  \x1B[90m│ {}\x1B[0m", line);
+            }
+        }
+    }) 
+}
+
+#[macro_export]
 macro_rules! debug {
     ($($arg:tt)*) => ({
         let text = format!($($arg)*);
