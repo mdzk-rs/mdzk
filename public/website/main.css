@@ -1,0 +1,113 @@
+/* Base */
+:root {
+  --transition-length: 80ms;
+  --text-color: 0, 0, 0;
+  --link-color: 60, 110, 237;
+  --bg-color: 255, 255, 255;
+  --accent-color: 100, 180, 255;
+  --max-width: 1200px;
+}
+
+/* Cooler selection color */
+::selection,
+::-moz-selection {
+  background: rgb(var(--text-color));
+  color: rgb(var(--bg-color));
+}
+
+/* HTML and body */
+html,
+body {
+  margin: 0 auto;
+  height: 100%;
+  font-family: "Inter";
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+body {
+  color: rgb(var(--text-color));
+  background-color: rgb(var(--bg-color));
+  min-width: 10vw;
+  max-width: 95vw;
+}
+
+/* HTML elements */
+code {
+  padding: 0.2em 0.4em;
+  font-size: 80%;
+  font-family: "IBM Plex Mono";
+  background: rgba(130, 130, 130, 0.1);
+  border-radius: 3px;
+}
+
+/* Link styling */
+a {
+  position: relative;
+  color: rgb(var(--text-color));
+  text-decoration-color: rgb(var(--text-color));
+  transition: text-decoration-color var(--transition-length);
+}
+
+a:hover {
+  text-decoration-color: rgba(var(--text-color), 0);
+}
+
+section {
+  margin: 0 auto;
+  height: 100vh;
+  max-width: calc(var(--max-width) * 0.7);
+  display: flex;
+  align-items: center;
+}
+
+img {
+  max-width: 80vw;
+  height: 5em;
+  transition: transform calc(var(--transition-length) * 2) ease;
+}
+
+img:hover {
+  transform: scale(1.1);
+}
+
+.container {
+  width: 500px;
+}
+
+.align-center {
+  justify-content: center;
+  text-align: center;
+}
+
+.align-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.align-left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.header {
+  display: flex;
+}
+
+.header img {
+  padding: 0px 20px 0px 0px;
+}
+
+.header h1 {
+  font-size: 1.8em;
+}
+
+/* oh god... */
+.last-header {
+    flex-direction: row-reverse;
+}
+
+.last-header img {
+    padding: 0px 0px 0px 20px;
+}
