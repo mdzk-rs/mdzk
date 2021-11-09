@@ -14,5 +14,7 @@ pub fn build(dir: Option<PathBuf>, renderer: String) -> Result<()> {
         _ => zk.execute_build_process(&HtmlHandlebars)?,
     }
 
+    success!("Successfully built mdzk!");
+
     Ok(())
 }

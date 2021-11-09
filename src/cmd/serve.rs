@@ -114,9 +114,7 @@ async fn serve_zk(
         .map(|ws: warp::ws::Ws, mut rx: broadcast::Receiver<Message>| {
             ws.on_upgrade(move |ws| async move {
                 let (mut user_ws_tx, _user_ws_rx) = ws.split();
-                trace!("websocket got connection");
                 if let Ok(m) = rx.recv().await {
-                    trace!("notify of reload");
                     let _ = user_ws_tx.send(m).await;
                 }
             })

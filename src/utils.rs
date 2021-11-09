@@ -131,7 +131,7 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
     let mut summary_file = File::create(book_source.join(SUMMARY_FILE))?;
     write!(summary_file, "# Summary\n\n{}", summary)?;
 
-    debug!("Updated summary file.");
+    info!("Updated summary file.");
 
     Ok(())
 }

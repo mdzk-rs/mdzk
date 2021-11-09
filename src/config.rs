@@ -69,7 +69,7 @@ impl FromStr for Config {
     /// Load an mdzk configuration from some string.
     fn from_str(src: &str) -> Result<Self> {
         toml::from_str(src)
-            .with_context(|| format!("Invalid TOML:\n{}", src))
+            .with_context(|| format!("Invalid TOML:\n\n{}\n", src))
     }
 }
 

@@ -72,7 +72,6 @@ impl Renderer for HtmlMdzk {
         );
 
         // Render out each note
-        trace!("mdzk render");
         for item in book.iter() {
             if let BookItem::Chapter(ref ch) = *item {
                 if !ch.is_draft_chapter() {

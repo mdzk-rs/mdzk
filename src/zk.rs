@@ -20,10 +20,10 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
         None => find_mdzk_root()
             .ok_or_else(|| Error::msg("Could not find the root of your Zettelkasten"))?,
     };
-    debug!("Found root: {:?}", root);
+    info!("Found mdzk in {:?}.", root);
 
     let config: Config = Config::from_disk(root.join(CONFIG_FILE))?;
-    debug!("Successfully loaded config.");
+    info!("Loaded configuration.");
 
     if config.mdzk.generate_summary.unwrap_or(true) {
         update_summary(&config, &root)?;
@@ -32,18 +32,18 @@ pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook, Error> {
     let summary_file = config.mdzk.src.join(SUMMARY_FILE);
     let mut summary_content = String::new();
     File::open(&summary_file)
-        .with_context(|| format!("Couldn't open {:?}", summary_file))?
+        .with_context(|| format!("Couldn't open {:?}.", summary_file))?
         .read_to_string(&mut summary_content)?;
 
-    let summary = parse_summary(&summary_content).context("Summary parsing failed")?;
-    debug!("Parsed summary.");
+    let summary = parse_summary(&summary_content).context("Summary parsing failed.")?;
+    info!("Parsed summary.");
 
     // Cloning some values to avoid cloning the whole config
     let disable_default_preprocessors = config.build.disable_default_preprocessors;
     let preprocessors = config.build.preprocessors.clone();
 
     let mut zk = MDBook::load_with_config_and_summary(root, config.into(), summary)?;
-    info!("Successfully loaded mdzk in: {:?}", zk.root);
+    info!("Loaded mdzk.");
 
     if disable_default_preprocessors {
         info!("Running without default mdzk preprocessors.")
