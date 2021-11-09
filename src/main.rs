@@ -1,8 +1,5 @@
-use env_logger::Builder;
-
-use mdbook::errors::Error;
+use anyhow::Result;
 use mdzk::{build, init, serve};
-use std::io::Write;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -51,10 +48,16 @@ enum Command {
     },
 }
 
-fn main() -> Result<(), Error> {
+fn main() {
+    if let Err(e) = run() {
+        mdzk::log::handle_anyhow_error(e);
+    }
+}
+
+fn run() -> Result<()> {
     let args = Mdzk::from_args();
 
-    init_logger(args.log_level);
+    mdzk::log::set_max_level(args.log_level);
 
     match args.cmd {
         Command::Build { dir, renderer } => build(dir, renderer),
@@ -66,27 +69,4 @@ fn main() -> Result<(), Error> {
             renderer,
         } => serve(dir, port, bind, renderer),
     }
-}
-
-fn init_logger(log_level: usize) {
-    let mut builder = Builder::new();
-
-    builder.filter(
-        None,
-        match log_level {
-            0 => log::LevelFilter::Off,
-            1 => log::LevelFilter::Error,
-            2 => log::LevelFilter::Warn,
-            3 => log::LevelFilter::Info,
-            4 => log::LevelFilter::Debug,
-            5 => log::LevelFilter::Trace,
-            _ => log::LevelFilter::Info,
-        },
-    );
-
-    builder.format(|formatter, record| {
-        writeln!(formatter, "{:8>} - {}", record.level(), record.args())
-    });
-
-    builder.init();
 }
