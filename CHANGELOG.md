@@ -2,6 +2,10 @@
 
 ## 0.4.4 (Unreleased)
 
+### Enhancements
+
+- New custom made user interface, for a friendlier look. Expect more informative messages from this update and on.
+
 ### Bug fixes
 
 - mdzk will not panic on invalid TOML anymore, but rather print an error message coupled with the configuration content and a description of what part of it is invalid.
