@@ -1,3 +1,4 @@
+mod katex;
 mod wikilinks;
 
 use anyhow::Result;
@@ -51,7 +52,9 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                         &wikilink.cmark(ch.path.as_ref().unwrap().parent().unwrap(), &path_map),
                         1,
                     );
-                })
+                });
+
+                katex::render(ch);
             }
         });
 

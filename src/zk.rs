@@ -3,7 +3,6 @@ use crate::{
     Config, CONFIG_FILE, SUMMARY_FILE,
 };
 
-use crate::katex::Katex;
 use crate::preprocess::MdzkPreprocessor;
 use anyhow::{anyhow, Context, Result};
 use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
@@ -55,7 +54,6 @@ an mdzk yet, you can initialize one with `mdzk init`."#))?,
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(MdzkPreprocessor);
-        zk.with_preprocessor(Katex);
         zk.with_preprocessor(ReadmePreprocessor);
     }
 
