@@ -936,20 +936,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-wikilinks"
-version = "0.4.0"
-dependencies = [
- "clap",
- "mdbook",
- "pathdiff",
- "pest",
- "pest_derive",
- "pulldown-cmark 0.8.0",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "mdzk"
 version = "0.4.3"
 dependencies = [
@@ -965,7 +951,6 @@ dependencies = [
  "mdbook-backlinks",
  "mdbook-frontmatter",
  "mdbook-readme",
- "mdbook-wikilinks",
  "notify",
  "pathdiff",
  "pest",
@@ -1393,7 +1378,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ffade02495f22453cd593159ea2f59827aae7f53fa8323f756799b670881dcf8"
 dependencies = [
  "bitflags",
- "getopts",
  "memchr",
  "unicase",
 ]

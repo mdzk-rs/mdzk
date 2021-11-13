@@ -10,7 +10,6 @@ use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
 use mdbook_readme::ReadmePreprocessor;
-use mdbook_wikilinks::WikiLinks;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
