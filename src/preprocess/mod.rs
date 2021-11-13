@@ -19,6 +19,38 @@ impl Preprocessor for MdzkPreprocessor {
     }
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
+        let wikilinks = match ctx.config.get("mdzk.wikilinks") {
+            Some(toml::Value::Boolean(false)) => {
+                info!("Wikilink parsing is disabled.");
+                false
+            },
+            _ => true
+        };
+
+        let math = match ctx.config.get("mdzk.math") {
+            Some(toml::Value::Boolean(false)) => {
+                info!("Math rendering is disabled.");
+                false
+            }
+            _ => true,
+        };
+
+        let readme = match ctx.config.get("mdzk.readme") {
+            Some(toml::Value::Boolean(false)) => {
+                info!("\"README.md\" to \"index.md\" conversion disabled.");
+                false
+            }
+            _ => true,
+        };
+
+        let front_matter = match ctx.config.get("mdzk.front-matter") {
+            Some(toml::Value::Boolean(false)) => {
+                info!("Front matter parsing is disabled.");
+                false
+            }
+            _ => true,
+        };
+
         // Populate hashmap of each chapter's path.
         let mut path_map = HashMap::new();
         for chapter in book.iter().filter_map(get_chapter) {
@@ -41,31 +73,39 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
 
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
-                wikilinks::for_each_wikilink(&ch.content.clone(), |link_text| {
-                    let wikilink = match wikilinks::WikiLink::from(link_text) {
-                        Ok(wl) => wl,
-                        Err(e) => {
-                            warn!("{}", e);
-                            return
-                        },
-                    };
+                if wikilinks {
+                    wikilinks::for_each_wikilink(&ch.content.clone(), |link_text| {
+                        let wikilink = match wikilinks::WikiLink::from(link_text) {
+                            Ok(wl) => wl,
+                            Err(e) => {
+                                warn!("{}", e);
+                                return
+                            },
+                        };
 
-                    ch.content = ch.content.replacen(
-                        &format!("[[{}]]", link_text),
-                        &wikilink.cmark(ch.path.as_ref().unwrap().parent().unwrap(), &path_map),
-                        1,
-                    );
-                });
+                        ch.content = ch.content.replacen(
+                            &format!("[[{}]]", link_text),
+                            &wikilink.cmark(ch.path.as_ref().unwrap().parent().unwrap(), &path_map),
+                            1,
+                        );
+                    });
+                }
 
-                katex::render(ch);
+                if math {
+                    katex::render(ch);
+                }
 
-                readme::convert_readme(
-                    ch,
-                    ctx.root.join(&ctx.config.book.src),
-                    regex!(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)"),
-                );
+                if readme {
+                    readme::convert_readme(
+                        ch,
+                        ctx.root.join(&ctx.config.book.src),
+                        regex!(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)"),
+                    )
+                }
 
-                frontmatter::handle(ch);
+                if front_matter {
+                    frontmatter::handle(ch);
+                }
             }
         });
 
