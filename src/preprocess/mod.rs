@@ -1,7 +1,9 @@
 mod katex;
+pub mod readme;
 mod wikilinks;
 
 use anyhow::Result;
+use lazy_regex::regex;
 use mdbook::{
     book::{Book, BookItem, Chapter},
     preprocess::{Preprocessor, PreprocessorContext},
@@ -15,7 +17,7 @@ impl Preprocessor for MdzkPreprocessor {
         "mdzk"
     }
 
-    fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
+    fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
         // Populate hashmap of each chapter's path.
         let mut path_map = HashMap::new();
         for chapter in book.iter().filter_map(get_chapter) {
@@ -55,6 +57,14 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                 });
 
                 katex::render(ch);
+
+                readme::convert_readme(
+                    ch,
+                    ctx.root.join(&ctx.config.book.src),
+                    regex!(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)"),
+                )
+
+        ;
             }
         });
 

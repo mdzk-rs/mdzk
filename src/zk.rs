@@ -8,7 +8,6 @@ use anyhow::{anyhow, Context, Result};
 use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
 use mdbook_backlinks::Backlinks;
 use mdbook_frontmatter::FrontMatter;
-use mdbook_readme::ReadmePreprocessor;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -54,7 +53,6 @@ an mdzk yet, you can initialize one with `mdzk init`."#))?,
         zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(MdzkPreprocessor);
-        zk.with_preprocessor(ReadmePreprocessor);
     }
 
     for p in preprocessors {

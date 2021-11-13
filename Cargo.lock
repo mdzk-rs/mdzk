@@ -926,16 +926,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-readme"
-version = "0.0.4"
-dependencies = [
- "lazy-regex",
- "log",
- "mdbook",
- "regex",
-]
-
-[[package]]
 name = "mdzk"
 version = "0.4.3"
 dependencies = [
@@ -950,12 +940,12 @@ dependencies = [
  "mdbook",
  "mdbook-backlinks",
  "mdbook-frontmatter",
- "mdbook-readme",
  "notify",
  "pathdiff",
  "pest",
  "pest_derive",
  "pulldown-cmark 0.8.0",
+ "regex",
  "serde",
  "serde_json",
  "structopt",
