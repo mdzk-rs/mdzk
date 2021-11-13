@@ -42,7 +42,7 @@ ignore = "0.4"
 lazy-regex = "2.2.1"
 mdbook = { version = "0.4.12", default-features = false }
 notify = "4.0.17"
-pulldown-cmark = { version = "0.8.0", default-features = false }
+pulldown-cmark = { version = "0.8.0", default-features = false, features = ["simd"] }
 serde = "1.0.130"
 serde_json = "1.0.68"
 structopt = "0.3.23"
