@@ -72,6 +72,7 @@ pub fn for_each_wikilink(content: &str, mut handle_link: impl FnMut(&str)) {
 #[grammar = "preprocess/wikilink.pest"]
 pub struct WikiLinkParser;
 
+#[derive(Debug, PartialEq)]
 pub struct WikiLink {
     pub note: String,
     pub anchor: Option<String>,
@@ -89,9 +90,9 @@ impl WikiLink {
         let mut dest = link.next().unwrap().into_inner();
 
         Ok(Self {
-            note: dest.next().unwrap().to_string(),
-            anchor: dest.next().map(|x| x.to_string()),
-            alias: link.next().map(|x| x.to_string()),
+            note: dest.next().unwrap().as_str().to_owned(),
+            anchor: dest.next().map(|x| x.as_str()[1..].to_owned()),
+            alias: link.next().map(|x| x.as_str().to_owned()),
         })
     }
 
@@ -121,7 +122,7 @@ impl WikiLink {
             // Handle anchor
             // TODO: Blockrefs are currently not handled here
             if let Some(anchor) = &self.anchor {
-                let header_kebab = id_from_content(&anchor.as_str()[1..]);
+                let header_kebab = id_from_content(&anchor.as_str());
                 href.push_str(&format!("#{}", header_kebab));
             }
 
@@ -196,5 +197,30 @@ let link = "[[link_in_code]]".to_owned();
         });
 
         assert!(links.is_empty(), "Got links: {:?}", links);
+    }
+
+    #[test]
+    fn test_parse_link() {
+        let cases = vec![
+            (
+                WikiLink {
+                    note: "This is note".to_owned(),
+                    alias: Some("Some alias".to_owned()),
+                    anchor: None,
+                },
+                "This is note|Some alias"
+            ),
+            (
+                WikiLink {
+                    note: "Tïtlæ fôr nøte".to_owned(),
+                    alias: None,
+                    anchor: Some("^id1234".to_owned()),
+                },
+                "Tïtlæ fôr nøte#^id1234"
+            )
+        ];
+        for (want, from) in cases {
+            assert_eq!(want, WikiLink::from(from).unwrap());
+        }
     }
 }
