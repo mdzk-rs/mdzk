@@ -912,25 +912,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-frontmatter"
-version = "0.0.4"
-dependencies = [
- "chrono",
- "clap",
- "gray_matter",
- "lazy-regex",
- "mdbook",
- "semver",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "mdzk"
 version = "0.4.3"
 dependencies = [
  "ammonia",
  "anyhow",
+ "chrono",
  "elasticlunr-rs",
  "futures-util",
  "gray_matter",
@@ -939,7 +926,6 @@ dependencies = [
  "lazy-regex",
  "mdbook",
  "mdbook-backlinks",
- "mdbook-frontmatter",
  "notify",
  "pathdiff",
  "pest",

@@ -1,3 +1,4 @@
+mod frontmatter;
 mod katex;
 pub mod readme;
 mod wikilinks;
@@ -62,9 +63,9 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                     ch,
                     ctx.root.join(&ctx.config.book.src),
                     regex!(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)"),
-                )
+                );
 
-        ;
+                frontmatter::handle(ch);
             }
         });
 
