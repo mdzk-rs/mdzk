@@ -2,6 +2,7 @@ use crate::{Config, CONFIG_FILE, SUMMARY_FILE};
 
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use mdbook::errors::*;
+use pulldown_cmark::escape::escape_href;
 use std::cmp::Ordering;
 use std::fs::{self, File};
 use std::io::Write;
@@ -136,11 +137,11 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-/// String escapes for HTML entity.
+/// Escape characters for usage in URLs
 fn escape_special_chars(text: &str) -> String {
-    text.replace(' ', "%20")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
+    let mut buf = String::new();
+    escape_href(&mut buf, text).ok();
+    buf
 }
 
 /// Ease-of-use function for creating a file and writing bytes to it
