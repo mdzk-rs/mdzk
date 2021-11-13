@@ -14,12 +14,15 @@ use std::path::PathBuf;
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook> {
     let root = match dir {
         Some(path) => path,
-        None => find_mdzk_root()
-            .ok_or(anyhow!(r#"Could not find an mdzk.
+        None => find_mdzk_root().ok_or_else(|| {
+            anyhow!(
+                r#"Could not find an mdzk.
 
 If your mdzk is not located in this directory or any if it's parents, consider
 specifying the path with e.g. `mdzk <command> [<path>]`. If you have not created
-an mdzk yet, you can initialize one with `mdzk init`."#))?,
+an mdzk yet, you can initialize one with `mdzk init`."#
+            )
+        })?,
     };
 
     info!("Loading mdzk in {:?}.", root);

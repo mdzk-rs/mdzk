@@ -8,9 +8,7 @@ pub fn convert_readme(ch: &mut Chapter, source_dir: PathBuf, re: &Regex) {
             let index_md = source_dir.join(path.with_file_name("index.md"));
             if index_md.exists() {
                 let file_name = path.file_name().unwrap_or_default();
-                let parent_dir = index_md
-                    .parent()
-                    .unwrap_or_else(|| index_md.as_ref());
+                let parent_dir = index_md.parent().unwrap_or_else(|| index_md.as_ref());
 
                 warn!(
                     r#"It seems that there are both {:?} and "index.md" under {:?}.
@@ -20,8 +18,7 @@ conflicts. Consider moving one of the files to another directory or
 give it another name.
 
 "#,
-                    file_name,
-                    parent_dir
+                    file_name, parent_dir
                 );
             }
 

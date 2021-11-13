@@ -30,8 +30,9 @@ impl Config {
             .read_to_string(&mut buffer)
             .context("Couldn't read the configuration file")?;
 
-        let mut conf = Config::from_str(&buffer)
-            .with_context(|| format!("Unable to load the configuration file {:?}", path.as_ref()))?;
+        let mut conf = Config::from_str(&buffer).with_context(|| {
+            format!("Unable to load the configuration file {:?}", path.as_ref())
+        })?;
 
         if conf.rest.get_mut("book").is_some() {
             warn!("Found a '[book]' section on your 'mdzk.toml' file. You might want to replace it with '[mdzk]' ;-)")
@@ -68,8 +69,7 @@ impl FromStr for Config {
 
     /// Load an mdzk configuration from some string.
     fn from_str(src: &str) -> Result<Self> {
-        toml::from_str(src)
-            .with_context(|| format!("Invalid TOML:\n\n{}\n", src))
+        toml::from_str(src).with_context(|| format!("Invalid TOML:\n\n{}\n", src))
     }
 }
 
@@ -82,17 +82,11 @@ impl From<Config> for mdbook::Config {
             .set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone())
             .ok();
         config
-            .set("mdzk.front-matter", conf.build.front_matter.clone())
+            .set("mdzk.front-matter", conf.build.front_matter)
             .ok();
-        config
-            .set("mdzk.math", conf.build.math.clone())
-            .ok();
-        config
-            .set("mdzk.readme", conf.build.readme.clone())
-            .ok();
-        config
-            .set("mdzk.wikilinks", conf.build.wikilinks.clone())
-            .ok();
+        config.set("mdzk.math", conf.build.math).ok();
+        config.set("mdzk.readme", conf.build.readme).ok();
+        config.set("mdzk.wikilinks", conf.build.wikilinks).ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();

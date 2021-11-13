@@ -1,8 +1,7 @@
 use chrono::prelude::*;
 use gray_matter::{
     engine::{Engine, TOML, YAML},
-    Matter,
-    ParsedEntityStruct,
+    Matter, ParsedEntityStruct,
 };
 use mdbook::book::Chapter;
 use serde::Deserialize;
@@ -43,7 +42,9 @@ pub fn handle(ch: &mut Chapter) {
                 // Timezone is not specified, use local timezone
                 let datetime = Local.from_local_datetime(&naive_datetime).unwrap();
                 datetime.format(format).to_string()
-            } else if let Ok(naive_datetime) = NaiveDateTime::parse_from_str(&datestring, "%Y-%m-%dT%H:%M") {
+            } else if let Ok(naive_datetime) =
+                NaiveDateTime::parse_from_str(&datestring, "%Y-%m-%dT%H:%M")
+            {
                 // Timezone and seconds are not specified.
                 let datetime = Local.from_local_datetime(&naive_datetime).unwrap();
                 datetime.format(format).to_string()
@@ -69,5 +70,5 @@ pub fn handle(ch: &mut Chapter) {
 
 fn parse_matter<T: Engine>(content: &str) -> Option<ParsedEntityStruct<FrontMatter>> {
     let matter: Matter<T> = Matter::new();
-    Some(matter.parse_with_struct::<FrontMatter>(content)?)
+    matter.parse_with_struct::<FrontMatter>(content)
 }

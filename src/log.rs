@@ -105,11 +105,7 @@ macro_rules! debug {
 
 pub fn handle_anyhow_error(e: Error) {
     fn begin_line_with(i: usize) -> String {
-        if i == 0 {
-            "- "
-        } else {
-            "  "
-        }.to_owned()
+        if i == 0 { "- " } else { "  " }.to_owned()
     }
 
     if e.chain().len() == 1 {

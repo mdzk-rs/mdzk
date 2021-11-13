@@ -23,8 +23,8 @@ impl Preprocessor for MdzkPreprocessor {
             Some(toml::Value::Boolean(false)) => {
                 info!("Wikilink parsing is disabled.");
                 false
-            },
-            _ => true
+            }
+            _ => true,
         };
 
         let math = match ctx.config.get("mdzk.math") {
@@ -57,14 +57,17 @@ impl Preprocessor for MdzkPreprocessor {
             if chapter.path.is_some() {
                 let key = chapter.name.clone();
                 if path_map.contains_key(&key) {
-                    warn!(r#"Duplicated page title found:
+                    warn!(
+                        r#"Duplicated page title found:
 
 - {} ({:?})
 - {} ({:?})
 
 If links do not properly specify paths, they might lead to the wrong note..."#,
-                        key, chapter.path,
-                        key, path_map.get(&key),
+                        key,
+                        chapter.path,
+                        key,
+                        path_map.get(&key),
                     );
                 }
                 path_map.insert(key, chapter.path.as_ref().unwrap().clone());
@@ -79,8 +82,8 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                             Ok(wl) => wl,
                             Err(e) => {
                                 warn!("{}", e);
-                                return
-                            },
+                                return;
+                            }
                         };
 
                         ch.content = ch.content.replacen(

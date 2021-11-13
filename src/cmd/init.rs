@@ -1,6 +1,6 @@
 use crate::{utils, Config, BUILD_DIR, CONFIG_FILE, DEFAULT_ZK_TITLE, SRC_DIR};
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::PathBuf;
@@ -45,13 +45,16 @@ pub fn init(dir: Option<PathBuf>) -> Result<()> {
         .write_all(&config_bytes)
         .context("Unable to write to the configuration file.")?;
 
-    success!(r#"Your mdzk is now initialized!
+    success!(
+        r#"Your mdzk is now initialized!
 
 To start using mdzk, write some notes in {:?} or move your existing notes there.
 You can then run `mdzk serve` to start a webserver with live updating.
 
 If you need more help, you can always run `mdzk help` or view the documentation
-online at https://mdzk.app/docs."#, config.mdzk.src);
+online at https://mdzk.app/docs."#,
+        config.mdzk.src
+    );
 
     Ok(())
 }

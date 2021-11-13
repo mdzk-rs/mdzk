@@ -1,5 +1,5 @@
-use anyhow::Result;
 use crate::utils::escape_special_chars;
+use anyhow::Result;
 use mdbook::utils::id_from_content;
 use pest::Parser;
 use pulldown_cmark::{CowStr, Event};
@@ -98,7 +98,7 @@ impl WikiLink {
 
     pub fn title(&self) -> &str {
         if let Some(alias) = &self.alias {
-            &alias
+            alias
         } else {
             &self.note
         }
@@ -111,18 +111,15 @@ impl WikiLink {
                 self.title()
             )
         } else {
-            let mut href = pathdiff::diff_paths(
-                path_map.get(&self.note).unwrap(),
-                cur_path,
-            )
-            .unwrap()
-            .to_string_lossy()
-            .to_string(); // Gotta love Rust <3
+            let mut href = pathdiff::diff_paths(path_map.get(&self.note).unwrap(), cur_path)
+                .unwrap()
+                .to_string_lossy()
+                .to_string(); // Gotta love Rust <3
 
             // Handle anchor
             // TODO: Blockrefs are currently not handled here
             if let Some(anchor) = &self.anchor {
-                let header_kebab = id_from_content(&anchor.as_str());
+                let header_kebab = id_from_content(anchor.as_str());
                 href.push_str(&format!("#{}", header_kebab));
             }
 
@@ -130,7 +127,6 @@ impl WikiLink {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -208,7 +204,7 @@ let link = "[[link_in_code]]".to_owned();
                     alias: Some("Some alias".to_owned()),
                     anchor: None,
                 },
-                "This is note|Some alias"
+                "This is note|Some alias",
             ),
             (
                 WikiLink {
@@ -216,8 +212,8 @@ let link = "[[link_in_code]]".to_owned();
                     alias: None,
                     anchor: Some("^id1234".to_owned()),
                 },
-                "Tïtlæ fôr nøte#^id1234"
-            )
+                "Tïtlæ fôr nøte#^id1234",
+            ),
         ];
         for (want, from) in cases {
             assert_eq!(want, WikiLink::from(from).unwrap());
