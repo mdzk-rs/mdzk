@@ -55,7 +55,7 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
     });
 
     let serving_url = format!("http://{}", address);
-    info!("Serving your mdzk on: {}.", serving_url);
+    success!("Serving your mdzk on: {}.", serving_url);
 
     /* if open_browser {
         open(serving_url);
