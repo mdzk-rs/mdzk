@@ -111,7 +111,7 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
                         depth,
                         "",
                         file_stem,
-                        escape_special_chars(dir_file.to_str().unwrap())
+                        dir_file.to_str().unwrap()
                     )
                 } else {
                     // Directory has no equally named file
@@ -123,7 +123,7 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
                     depth,
                     "",
                     file_stem,
-                    escape_special_chars(stripped_path.to_str().unwrap())
+                    stripped_path.to_str().unwrap()
                 )
             }
         })
