@@ -18,7 +18,7 @@ impl Preprocessor for MdzkPreprocessor {
         // Populate hashmap of each chapter's path.
         let mut path_map = HashMap::new();
         for chapter in book.iter().filter_map(get_chapter) {
-            if !chapter.path.is_none() {
+            if chapter.path.is_some() {
                 let key = chapter.name.clone();
                 if path_map.contains_key(&key) {
                     warn!(r#"Duplicated page title found:
@@ -34,6 +34,26 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                 path_map.insert(key, chapter.path.as_ref().unwrap().clone());
             }
         }
+
+        book.for_each_mut(|item| {
+            if let BookItem::Chapter(ch) = item {
+                wikilinks::for_each_wikilink(&ch.content.clone(), |link_text| {
+                    let wikilink = match wikilinks::WikiLink::from(link_text) {
+                        Ok(wl) => wl,
+                        Err(e) => {
+                            warn!("{}", e);
+                            return
+                        },
+                    };
+
+                    ch.content = ch.content.replacen(
+                        &format!("[[{}]]", link_text),
+                        &wikilink.cmark(ch.path.as_ref().unwrap().parent().unwrap(), &path_map),
+                        1,
+                    );
+                })
+            }
+        });
 
         Ok(book)
     }

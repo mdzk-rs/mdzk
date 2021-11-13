@@ -138,7 +138,7 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
 }
 
 /// Escape characters for usage in URLs
-fn escape_special_chars(text: &str) -> String {
+pub fn escape_special_chars(text: &str) -> String {
     let mut buf = String::new();
     escape_href(&mut buf, text).ok();
     buf
@@ -172,4 +172,17 @@ pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
             }
             s
         })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_escape_special_chars() {
+        assert_eq!(
+            escape_special_chars("w3ir∂ førmättÎñg"),
+            "w3ir%E2%88%82%20f%C3%B8rm%C3%A4tt%C3%8E%C3%B1g"
+        )
+    }
 }

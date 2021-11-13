@@ -1,9 +1,14 @@
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+
 #[macro_use]
 pub mod log;
 
 pub mod cmd;
 pub mod config;
 pub mod katex;
+pub mod preprocess;
 pub mod renderer;
 pub mod utils;
 pub mod zk;
