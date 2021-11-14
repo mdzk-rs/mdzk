@@ -2,6 +2,7 @@ use crate::{Config, CONFIG_FILE, SUMMARY_FILE};
 
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use mdbook::errors::*;
+use pulldown_cmark::escape::escape_href;
 use std::cmp::Ordering;
 use std::fs::{self, File};
 use std::io::Write;
@@ -110,7 +111,7 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
                         depth,
                         "",
                         file_stem,
-                        escape_special_chars(dir_file.to_str().unwrap())
+                        dir_file.to_str().unwrap()
                     )
                 } else {
                     // Directory has no equally named file
@@ -122,7 +123,7 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
                     depth,
                     "",
                     file_stem,
-                    escape_special_chars(stripped_path.to_str().unwrap())
+                    stripped_path.to_str().unwrap()
                 )
             }
         })
@@ -136,11 +137,11 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-/// String escapes for HTML entity.
-fn escape_special_chars(text: &str) -> String {
-    text.replace(' ', "%20")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
+/// Escape characters for usage in URLs
+pub fn escape_special_chars(text: &str) -> String {
+    let mut buf = String::new();
+    escape_href(&mut buf, text).ok();
+    buf
 }
 
 /// Ease-of-use function for creating a file and writing bytes to it
@@ -171,4 +172,17 @@ pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
             }
             s
         })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_escape_special_chars() {
+        assert_eq!(
+            escape_special_chars("w3ir∂ førmättÎñg"),
+            "w3ir%E2%88%82%20f%C3%B8rm%C3%A4tt%C3%8E%C3%B1g"
+        )
+    }
 }

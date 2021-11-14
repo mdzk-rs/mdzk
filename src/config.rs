@@ -30,8 +30,9 @@ impl Config {
             .read_to_string(&mut buffer)
             .context("Couldn't read the configuration file")?;
 
-        let mut conf = Config::from_str(&buffer)
-            .with_context(|| format!("Unable to load the configuration file {:?}", path.as_ref()))?;
+        let mut conf = Config::from_str(&buffer).with_context(|| {
+            format!("Unable to load the configuration file {:?}", path.as_ref())
+        })?;
 
         if conf.rest.get_mut("book").is_some() {
             warn!("Found a '[book]' section on your 'mdzk.toml' file. You might want to replace it with '[mdzk]' ;-)")
@@ -68,8 +69,7 @@ impl FromStr for Config {
 
     /// Load an mdzk configuration from some string.
     fn from_str(src: &str) -> Result<Self> {
-        toml::from_str(src)
-            .with_context(|| format!("Invalid TOML:\n\n{}\n", src))
+        toml::from_str(src).with_context(|| format!("Invalid TOML:\n\n{}\n", src))
     }
 }
 
@@ -77,9 +77,16 @@ impl From<Config> for mdbook::Config {
     fn from(conf: Config) -> Self {
         let mut config = mdbook::Config::default();
 
+        // Explicitly set some values in the book config
         config
             .set("mdzk.backlinks-header", conf.mdzk.backlinks_header.clone())
             .ok();
+        config
+            .set("mdzk.front-matter", conf.build.front_matter)
+            .ok();
+        config.set("mdzk.math", conf.build.math).ok();
+        config.set("mdzk.readme", conf.build.readme).ok();
+        config.set("mdzk.wikilinks", conf.build.wikilinks).ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
@@ -216,6 +223,10 @@ pub struct BuildConfig {
     pub build_dir: PathBuf,
     pub create_missing: bool,
     pub disable_default_preprocessors: bool,
+    pub front_matter: bool,
+    pub math: bool,
+    pub readme: bool,
+    pub wikilinks: bool,
     pub preprocessors: Vec<String>,
 }
 
@@ -225,6 +236,10 @@ impl Default for BuildConfig {
             build_dir: PathBuf::from(BUILD_DIR),
             create_missing: true,
             disable_default_preprocessors: false,
+            front_matter: true,
+            math: true,
+            readme: true,
+            wikilinks: true,
             preprocessors: vec![],
         }
     }

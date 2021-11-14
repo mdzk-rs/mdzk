@@ -3,13 +3,10 @@ use crate::{
     Config, CONFIG_FILE, SUMMARY_FILE,
 };
 
-use crate::katex::Katex;
+use crate::preprocess::MdzkPreprocessor;
 use anyhow::{anyhow, Context, Result};
 use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
 use mdbook_backlinks::Backlinks;
-use mdbook_frontmatter::FrontMatter;
-use mdbook_readme::ReadmePreprocessor;
-use mdbook_wikilinks::WikiLinks;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -17,12 +14,15 @@ use std::path::PathBuf;
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook> {
     let root = match dir {
         Some(path) => path,
-        None => find_mdzk_root()
-            .ok_or(anyhow!(r#"Could not find an mdzk.
+        None => find_mdzk_root().ok_or_else(|| {
+            anyhow!(
+                r#"Could not find an mdzk.
 
 If your mdzk is not located in this directory or any if it's parents, consider
 specifying the path with e.g. `mdzk <command> [<path>]`. If you have not created
-an mdzk yet, you can initialize one with `mdzk init`."#))?,
+an mdzk yet, you can initialize one with `mdzk init`."#
+            )
+        })?,
     };
 
     info!("Loading mdzk in {:?}.", root);
@@ -52,11 +52,8 @@ an mdzk yet, you can initialize one with `mdzk init`."#))?,
     if disable_default_preprocessors {
         info!("Running without default mdzk preprocessors.")
     } else {
-        zk.with_preprocessor(FrontMatter);
         zk.with_preprocessor(Backlinks);
-        zk.with_preprocessor(WikiLinks);
-        zk.with_preprocessor(Katex);
-        zk.with_preprocessor(ReadmePreprocessor);
+        zk.with_preprocessor(MdzkPreprocessor);
     }
 
     for p in preprocessors {

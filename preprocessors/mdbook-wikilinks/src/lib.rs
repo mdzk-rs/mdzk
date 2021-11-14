@@ -241,7 +241,7 @@ let link = "[[link_in_code]]".to_owned();
     }
 
     #[test]
-    fn escapel_special_chars() {
+    fn test_escape_special_chars() {
         assert_eq!(
             escape_special_chars("w3ir∂ førmättÎñg"),
             "w3ir%E2%88%82%20f%C3%B8rm%C3%A4tt%C3%8E%C3%B1g"
