@@ -219,4 +219,42 @@ let link = "[[link_in_code]]".to_owned();
             assert_eq!(want, WikiLink::from(from).unwrap());
         }
     }
+
+    #[test]
+    fn test_cmark_link() {
+        let cases = vec![
+            (
+                "[Some alias](<../../This%20is%20note.md>)",
+                WikiLink {
+                    note: "This is note".to_owned(),
+                    alias: Some("Some alias".to_owned()),
+                    anchor: None,
+                },
+            ),
+            (
+                "[Tïtlæ fôr nøte](<../../T%C3%AFtl%C3%A6%20f%C3%B4r%20n%C3%B8te.md#id1234>)",
+                WikiLink {
+                    note: "Tïtlæ fôr nøte".to_owned(),
+                    alias: None,
+                    anchor: Some("^id1234".to_owned()),
+                },
+            ),
+            (
+                "<span class=\"missing-link\" style=\"color:darkred;\">This is missing note</span>",
+                WikiLink {
+                    note: "Missing note".to_owned(),
+                    alias: Some("This is missing note".to_owned()),
+                    anchor: Some("header".to_owned()),
+                },
+            ),
+        ];
+
+        let mut path_map = HashMap::new();
+        path_map.insert("This is note".to_owned(), PathBuf::from("This is note.md"));
+        path_map.insert("Tïtlæ fôr nøte".to_owned(), PathBuf::from("Tïtlæ fôr nøte.md"));
+
+        for (want, from) in cases {
+            assert_eq!(want, from.cmark(Path::new("sub/subsub"), &path_map))
+        }
+    }
 }

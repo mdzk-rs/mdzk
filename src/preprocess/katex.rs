@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false)
 </script>"#;
 
-pub fn render(ch: &mut Chapter) {
+pub fn run(ch: &mut Chapter) {
     let copy = ch.content.clone();
 
     let mut opts = Options::empty();

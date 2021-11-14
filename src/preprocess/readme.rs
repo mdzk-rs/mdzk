@@ -2,7 +2,7 @@ use mdbook::book::Chapter;
 use regex::{Captures, Regex};
 use std::path::{Path, PathBuf};
 
-pub fn convert_readme(ch: &mut Chapter, source_dir: PathBuf, re: &Regex) {
+pub fn run(ch: &mut Chapter, source_dir: PathBuf, re: &Regex) {
     if let Some(ref mut path) = ch.path {
         if is_readme_file(&path) {
             let index_md = source_dir.join(path.with_file_name("index.md"));

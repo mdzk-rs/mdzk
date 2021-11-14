@@ -95,11 +95,11 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                 }
 
                 if math {
-                    katex::render(ch);
+                    katex::run(ch);
                 }
 
                 if readme {
-                    readme::convert_readme(
+                    readme::run(
                         ch,
                         ctx.root.join(&ctx.config.book.src),
                         regex!(r"(?i)\[(.*?)\]\(<?README(?:(?:\.md)|(?:\.markdown))>?\)"),
@@ -107,7 +107,7 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                 }
 
                 if front_matter {
-                    frontmatter::handle(ch);
+                    frontmatter::run(ch);
                 }
             }
         });

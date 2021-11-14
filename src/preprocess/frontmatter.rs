@@ -13,7 +13,7 @@ struct FrontMatter {
     draft: Option<bool>,
 }
 
-pub fn handle(ch: &mut Chapter) {
+pub fn run(ch: &mut Chapter) {
     let content = ch.content.clone();
 
     let mut handle_front_matter = |parsed: ParsedEntityStruct<FrontMatter>| {
