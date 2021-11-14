@@ -225,6 +225,11 @@ pre > .result {
     margin-top: 10px;
 }
 
+pre > code.language-markdown {
+    white-space: normal;
+    padding-right: 35px;
+}
+
 /* Search */
 
 #searchresults a {
