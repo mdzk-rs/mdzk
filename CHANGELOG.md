@@ -1,10 +1,27 @@
 # Changelog
 
-## 0.4.4 (Unreleased)
+## 0.5.0 (Unreleased)
+
+### New features
+
+- [#55](https://github.com/mdzk-rs/mdzk/pull/55): You can now turn off each preprocessor feature of mdzk separately. This is done with the following configuration values:
+
+    ```toml
+    [build]
+    # ...
+    front-matter = false
+    math = false
+    readme = false
+    math = false
+    ```
+
+    More about these features and what they do, can be found in the [documentation](https://mdzk.app/docs).
 
 ### Enhancements
 
+- [#54](https://github.com/mdzk-rs/mdzk/issues/54): Our separate preprocessor crates are now moved to within the mdzk crate. This allows us to avoid iterating over the vault multiple times, which drastically increases the efficiency.
 - [#45](https://github.com/mdzk-rs/mdzk/issues/45): New custom made user interface, for a friendlier look. Expect more informative messages from this update and on.
+- Enabled pulldown-cmark's SIMD accelerated scanners.
 
 ### Bug fixes
 
