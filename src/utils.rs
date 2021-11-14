@@ -174,6 +174,45 @@ pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
         })
 }
 
+pub fn diff_paths<T, F>(to: T, from: F) -> Option<PathBuf>
+where
+    T: AsRef<Path>,
+    F: AsRef<Path>,
+{
+    let to = to.as_ref();
+    let from = from.as_ref();
+
+    match (to.is_absolute(), from.is_absolute()) {
+        (true, false) => Some(PathBuf::from(to)),
+        (false, true) => None,
+        _ => {
+            let mut to_iter = to.components();
+            let mut from_iter = from.components();
+            let mut components = vec![];
+            loop {
+                match (to_iter.next(), from_iter.next()) {
+                    (None, None) => break,
+                    (Some(_), None) => {
+                        components.extend(to.components());
+                        break
+                    }
+                    (None, _) => components.push(Component::ParentDir),
+                    (Some(a), Some(b)) if components.is_empty() && a == b => {},
+                    (Some(a), Some(Component::CurDir)) => components.push(a),
+                    (Some(_), Some(Component::ParentDir)) => return None,
+                    (Some(_), Some(_)) => {
+                        components.push(Component::ParentDir);
+                        components.extend(std::iter::repeat(Component::ParentDir).take(from_iter.count() + 1));
+                        components.extend(to.components());
+                        break
+                    }
+                }
+            }
+            Some(components.iter().map(|comp| comp.as_os_str()).collect())
+        },
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

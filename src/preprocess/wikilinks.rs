@@ -1,4 +1,4 @@
-use crate::utils::escape_special_chars;
+use crate::utils::{escape_special_chars, diff_paths};
 use anyhow::Result;
 use mdbook::utils::id_from_content;
 use pest::Parser;
@@ -112,13 +112,15 @@ impl WikiLink {
         Ok(Self {
             path,
             title: title.to_owned(),
-            anchor: dest.next().map(|x| x.as_str()[1..].to_owned()),
+            anchor: dest.next().map(|x| id_from_content(&x.as_str()[1..])),
         })
     }
 
-    pub fn cmark(&self, cur_path: &Path) -> String {
+    pub fn cmark<P>(&self, cur_path: P) -> String
+    where P: AsRef<Path>
+    {
         if let Some(path) = &self.path {
-            let mut href = pathdiff::diff_paths(path, cur_path)
+            let mut href = diff_paths(path, cur_path.as_ref())
                 .unwrap()
                 .to_string_lossy()
                 .to_string(); // Gotta love Rust <3
@@ -126,8 +128,7 @@ impl WikiLink {
             // Handle anchor
             // TODO: Blockrefs are currently not handled here
             if let Some(anchor) = &self.anchor {
-                let header_kebab = id_from_content(anchor.as_str());
-                href.push_str(&format!("#{}", header_kebab));
+                href.push_str(&format!("#{}", anchor));
             }
 
             format!("[{}](<{}>)", self.title, escape_special_chars(&href))

@@ -927,7 +927,6 @@ dependencies = [
  "mdbook",
  "mdbook-backlinks",
  "notify",
- "pathdiff",
  "pest",
  "pest_derive",
  "pulldown-cmark 0.8.0",
