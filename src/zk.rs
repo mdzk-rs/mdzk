@@ -34,7 +34,7 @@ an mdzk yet, you can initialize one with `mdzk init`."#
         update_summary(&config, &root)?;
     };
 
-    let summary_file = config.mdzk.src.join(SUMMARY_FILE);
+    let summary_file = root.join(&config.mdzk.src).join(SUMMARY_FILE);
     let mut summary_content = String::new();
     File::open(&summary_file)
         .with_context(|| format!("Couldn't open {:?}.", summary_file))?
