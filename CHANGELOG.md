@@ -27,6 +27,7 @@
 
 - [#41](https://github.com/mdzk-rs/mdzk/pull/41): mdzk will not panic on invalid TOML anymore, but rather print an error message coupled with the configuration content and a description of what part of it is invalid.
 - [#40](https://github.com/mdzk-rs/mdzk/pull/40): mdzk now checks whether you updated your `mdzk.toml` correctly or not. If a `[book]` section is found in your `mdzk.toml` file, a warning will appear that prompts the user to change it to `[mdzk]`.
+- When loading the mdzk from another directory than the root directory, parsing the summary would throw an error, as the path to it was not absolute. This is now fixed, which means you can build an mdzk located anywhere, from anywhere.
 
 ## 0.4.3 (2020-11-01)
 
