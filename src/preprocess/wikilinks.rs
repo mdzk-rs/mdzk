@@ -76,7 +76,8 @@ pub struct WikiLinkParser;
 pub struct WikiLink {
     pub path: Option<PathBuf>,
     pub title: String,
-    pub anchor: Option<String>,
+    pub header: Option<String>,
+    pub blockref: Option<String>,
 }
 
 impl WikiLink {
@@ -102,6 +103,16 @@ impl WikiLink {
             note
         };
 
+        // Handle header and blockref
+        let (header, blockref) = match dest.next() {
+            Some(anchor) => match anchor.into_inner().next() {
+                Some(x) if x.as_rule() == Rule::header => (Some(id_from_content(x.as_str())), None),
+                Some(x) if x.as_rule() == Rule::blockref => (None, Some(id_from_content(x.as_str()))),
+                _ => panic!("WHAT?!"),
+            },
+            None => (None, None),
+        };
+
         // Find path
         let path = if index.is_empty() {
             Some(PathBuf::from(note))
@@ -112,7 +123,8 @@ impl WikiLink {
         Ok(Self {
             path,
             title: title.to_owned(),
-            anchor: dest.next().map(|x| id_from_content(&x.as_str()[1..])),
+            header,
+            blockref,
         })
     }
 
@@ -127,8 +139,8 @@ impl WikiLink {
 
             // Handle anchor
             // TODO: Blockrefs are currently not handled here
-            if let Some(anchor) = &self.anchor {
-                href.push_str(&format!("#{}", anchor));
+            if let Some(header) = &self.header {
+                href.push_str(&format!("#{}", header));
             }
 
             format!("[{}](<{}>)", self.title, escape_special_chars(&href))
@@ -215,7 +227,8 @@ let link = "[[link_in_code]]".to_owned();
                 WikiLink {
                     path: Some(PathBuf::from("This is note")),
                     title: "Some alias".to_owned(),
-                    anchor: None,
+                    header: None,
+                    blockref: None,
                 },
                 "This is note|Some alias",
             ),
@@ -223,9 +236,19 @@ let link = "[[link_in_code]]".to_owned();
                 WikiLink {
                     path: Some(PathBuf::from("Tïtlæ fôr nøte")),
                     title: "Tïtlæ fôr nøte".to_owned(),
-                    anchor: Some("^id1234".to_owned()),
+                    header: None,
+                    blockref: Some("id1234".to_owned()),
                 },
                 "Tïtlæ fôr nøte#^id1234",
+            ),
+            (
+                WikiLink {
+                    path: Some(PathBuf::from("🔈 Music")),
+                    title: "🔈 Music".to_owned(),
+                    header: Some("header-with-spaces".to_owned()),
+                    blockref: None,
+                },
+                "🔈 Music#Header with spaces",
             ),
         ];
         for (want, from) in cases {
@@ -246,7 +269,7 @@ let link = "[[link_in_code]]".to_owned();
             ),
             (
                 "[Tïtlæ fôr nøte](<../../T%C3%AFtl%C3%A6%20f%C3%B4r%20n%C3%B8te.md#id1234>)",
-                WikiLink::from_with_index("Tïtlæ fôr nøte#^id1234", &index).unwrap(),
+                WikiLink::from_with_index("Tïtlæ fôr nøte#id1234", &index).unwrap(),
             ),
             (
                 "<span class=\"missing-link\" style=\"color:darkred;\">This is missing note</span>",
