@@ -174,6 +174,9 @@ pub fn path_to_root<P: Into<PathBuf>>(path: P) -> String {
         })
 }
 
+// Slightly modified version of pathdiff::diff_paths:
+// https://github.com/Manishearth/pathdiff/blob/08fabb3b2864a19d1b870d0d1fe887abad351930/src/lib.rs#L34-L77
+/// Returns a relative path from `from` to `to`.
 pub fn diff_paths<T, F>(to: T, from: F) -> Option<PathBuf>
 where
     T: AsRef<Path>,
@@ -192,18 +195,19 @@ where
             loop {
                 match (to_iter.next(), from_iter.next()) {
                     (None, None) => break,
-                    (Some(_), None) => {
-                        components.extend(to.components());
+                    (Some(a), None) => {
+                        components.push(a);
+                        components.extend(to_iter);
                         break
                     }
                     (None, _) => components.push(Component::ParentDir),
                     (Some(a), Some(b)) if components.is_empty() && a == b => {},
                     (Some(a), Some(Component::CurDir)) => components.push(a),
                     (Some(_), Some(Component::ParentDir)) => return None,
-                    (Some(_), Some(_)) => {
-                        components.push(Component::ParentDir);
+                    (Some(a), Some(_)) => {
                         components.extend(std::iter::repeat(Component::ParentDir).take(from_iter.count() + 1));
-                        components.extend(to.components());
+                        components.push(a);
+                        components.extend(to_iter);
                         break
                     }
                 }
@@ -223,5 +227,71 @@ mod tests {
             escape_special_chars("w3ir∂ førmättÎñg"),
             "w3ir%E2%88%82%20f%C3%B8rm%C3%A4tt%C3%8E%C3%B1g"
         )
+    }
+
+    // Diff paths
+    fn assert_diff_paths(path: &str, base: &str, expected: Option<&str>) {
+        assert_eq!(diff_paths(path, base), expected.map(|s| s.into()));
+    }
+
+    #[test]
+    fn test_absolute() {
+        assert_diff_paths("/foo", "/bar", Some("../foo"));
+        assert_diff_paths("/foo", "bar", Some("/foo"));
+        assert_diff_paths("foo", "/bar", None);
+        assert_diff_paths("foo", "bar", Some("../foo"));
+    }
+
+    #[test]
+    fn test_identity() {
+        assert_diff_paths(".", ".", Some(""));
+        assert_diff_paths("../foo", "../foo", Some(""));
+        assert_diff_paths("./foo", "./foo", Some(""));
+        assert_diff_paths("/foo", "/foo", Some(""));
+        assert_diff_paths("foo", "foo", Some(""));
+
+        assert_diff_paths("../foo/bar/baz", "../foo/bar/baz", Some("".into()));
+        assert_diff_paths("foo/bar/baz", "foo/bar/baz", Some(""));
+    }
+
+    #[test]
+    fn test_subset() {
+        assert_diff_paths("foo", "fo", Some("../foo"));
+        assert_diff_paths("fo", "foo", Some("../fo"));
+    }
+
+    #[test]
+    fn test_empty() {
+        assert_diff_paths("", "", Some(""));
+        assert_diff_paths("foo", "", Some("foo"));
+        assert_diff_paths("", "foo", Some(".."));
+    }
+
+    #[test]
+    fn test_relative() {
+        assert_diff_paths("../foo", "../bar", Some("../foo"));
+        assert_diff_paths("../foo", "../foo/bar/baz", Some("../.."));
+        assert_diff_paths("../foo/bar/baz", "../foo", Some("bar/baz"));
+
+        assert_diff_paths("foo/bar/baz", "foo", Some("bar/baz"));
+        assert_diff_paths("foo/bar/baz", "foo/bar", Some("baz"));
+        assert_diff_paths("foo/bar/baz", "foo/bar/baz", Some(""));
+        assert_diff_paths("foo/bar/baz", "foo/bar/baz/", Some(""));
+
+        assert_diff_paths("foo/bar/baz/", "foo", Some("bar/baz"));
+        assert_diff_paths("foo/bar/baz/", "foo/bar", Some("baz"));
+        assert_diff_paths("foo/bar/baz/", "foo/bar/baz", Some(""));
+        assert_diff_paths("foo/bar/baz/", "foo/bar/baz/", Some(""));
+
+        assert_diff_paths("foo/bar/baz", "foo/", Some("bar/baz"));
+        assert_diff_paths("foo/bar/baz", "foo/bar/", Some("baz"));
+        assert_diff_paths("foo/bar/baz", "foo/bar/baz", Some(""));
+    }
+
+    #[test]
+    fn test_current_directory() {
+        assert_diff_paths(".", "foo", Some("../."));
+        assert_diff_paths("foo", ".", Some("foo"));
+        assert_diff_paths("/foo", "/.", Some("foo"));
     }
 }
