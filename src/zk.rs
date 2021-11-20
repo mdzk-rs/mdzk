@@ -4,12 +4,12 @@ use crate::{
 };
 
 use crate::preprocess::MdzkPreprocessor;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
 use mdbook_backlinks::Backlinks;
 use std::fs::File;
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub fn load_zk(dir: Option<PathBuf>) -> Result<MDBook> {
     let root = match dir {
@@ -29,6 +29,14 @@ an mdzk yet, you can initialize one with `mdzk init`."#
 
     let config: Config = Config::from_disk(root.join(CONFIG_FILE))?;
     info!("Loaded configuration.");
+
+    if config.mdzk.src == Path::new("..") {
+        bail!(
+            r#"Source directory ".." is not supported.
+Notes must be available somewhere inside {:?}"#,
+            root
+        );
+    }
 
     if config.mdzk.generate_summary.unwrap_or(true) {
         update_summary(&config, &root)?;
