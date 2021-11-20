@@ -55,11 +55,13 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
     let book_source = root.join(&config.mdzk.src);
 
     let mut overrides = OverrideBuilder::new(&book_source);
-    for ignore in config.mdzk.ignore.iter() {
-        if let Some(s) = ignore.strip_prefix('!') {
-            overrides.add(s)?;
-        } else {
-            overrides.add(&format!("!{}", ignore))?;
+    if let Some(ref ignores) = config.mdzk.ignore {
+        for ignore in ignores.iter() {
+            if let Some(s) = ignore.strip_prefix('!') {
+                overrides.add(s)?;
+            } else {
+                overrides.add(&format!("!{}", ignore))?;
+            }
         }
     }
 
@@ -198,22 +200,24 @@ where
                     (Some(a), None) => {
                         components.push(a);
                         components.extend(to_iter);
-                        break
+                        break;
                     }
                     (None, _) => components.push(Component::ParentDir),
-                    (Some(a), Some(b)) if components.is_empty() && a == b => {},
+                    (Some(a), Some(b)) if components.is_empty() && a == b => {}
                     (Some(a), Some(Component::CurDir)) => components.push(a),
                     (Some(_), Some(Component::ParentDir)) => return None,
                     (Some(a), Some(_)) => {
-                        components.extend(std::iter::repeat(Component::ParentDir).take(from_iter.count() + 1));
+                        components.extend(
+                            std::iter::repeat(Component::ParentDir).take(from_iter.count() + 1),
+                        );
                         components.push(a);
                         components.extend(to_iter);
-                        break
+                        break;
                     }
                 }
             }
             Some(components.iter().map(|comp| comp.as_os_str()).collect())
-        },
+        }
     }
 }
 

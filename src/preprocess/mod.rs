@@ -86,7 +86,6 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                     }
                     path_map.insert(key, ch.path.as_ref().unwrap().clone());
                 }
-
             }
         });
 
@@ -96,13 +95,14 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                 // Parse and convert all wikilinks to CommonMark
                 if wikilinks {
                     wikilinks::for_each_wikilink(&ch.content.clone(), |link_text| {
-                        let wikilink = match wikilinks::WikiLink::from_with_index(link_text, &path_map) {
-                            Ok(wl) => wl,
-                            Err(e) => {
-                                warn!("{}", e);
-                                return;
-                            }
-                        };
+                        let wikilink =
+                            match wikilinks::WikiLink::from_with_index(link_text, &path_map) {
+                                Ok(wl) => wl,
+                                Err(e) => {
+                                    warn!("{}", e);
+                                    return;
+                                }
+                            };
 
                         ch.content = ch.content.replacen(
                             &format!("[[{}]]", link_text),

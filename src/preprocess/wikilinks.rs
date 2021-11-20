@@ -1,4 +1,4 @@
-use crate::utils::{escape_special_chars, diff_paths};
+use crate::utils::{diff_paths, escape_special_chars};
 use anyhow::Result;
 use mdbook::utils::id_from_content;
 use pest::Parser;
@@ -98,7 +98,7 @@ impl WikiLink {
 
         // Handle alias
         let title = if let Some(alias) = link.next() {
-            alias.as_str() 
+            alias.as_str()
         } else {
             note
         };
@@ -107,7 +107,9 @@ impl WikiLink {
         let (header, blockref) = match dest.next() {
             Some(anchor) => match anchor.into_inner().next() {
                 Some(x) if x.as_rule() == Rule::header => (Some(id_from_content(x.as_str())), None),
-                Some(x) if x.as_rule() == Rule::blockref => (None, Some(id_from_content(x.as_str()))),
+                Some(x) if x.as_rule() == Rule::blockref => {
+                    (None, Some(id_from_content(x.as_str())))
+                }
                 _ => panic!("WHAT?!"),
             },
             None => (None, None),
@@ -129,7 +131,8 @@ impl WikiLink {
     }
 
     pub fn cmark<P>(&self, cur_path: P) -> String
-    where P: AsRef<Path>
+    where
+        P: AsRef<Path>,
     {
         if let Some(path) = &self.path {
             let mut href = diff_paths(path, cur_path.as_ref())
@@ -260,7 +263,10 @@ let link = "[[link_in_code]]".to_owned();
     fn test_cmark_link() {
         let mut index = HashMap::new();
         index.insert("This is note".to_owned(), PathBuf::from("This is note.md"));
-        index.insert("Tïtlæ fôr nøte".to_owned(), PathBuf::from("Tïtlæ fôr nøte.md"));
+        index.insert(
+            "Tïtlæ fôr nøte".to_owned(),
+            PathBuf::from("Tïtlæ fôr nøte.md"),
+        );
 
         let cases = vec![
             (
@@ -273,7 +279,8 @@ let link = "[[link_in_code]]".to_owned();
             ),
             (
                 "<span class=\"missing-link\" style=\"color:darkred;\">This is missing note</span>",
-                WikiLink::from_with_index("Missing note#header | This is missing note", &index).unwrap(),
+                WikiLink::from_with_index("Missing note#header | This is missing note", &index)
+                    .unwrap(),
             ),
         ];
 

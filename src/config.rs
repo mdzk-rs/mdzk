@@ -176,7 +176,7 @@ pub struct MdzkConfig {
     /// The source directory of the vault, relative to the location of the config file.
     pub src: PathBuf,
     /// A list of patterns to ignore notes. Based on gitignore syntax.
-    pub ignore: Vec<String>,
+    pub ignore: Option<Vec<String>>,
     /// Whether the vault is multilingual or not.
     pub multilingual: bool,
     /// The language of the vault.
@@ -194,7 +194,7 @@ impl Default for MdzkConfig {
             authors: Vec::new(),
             description: None,
             src: PathBuf::from(SRC_DIR),
-            ignore: Vec::new(),
+            ignore: None,
             multilingual: false,
             language: Some("en".to_string()),
             backlinks_header: None,
