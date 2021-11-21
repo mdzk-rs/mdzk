@@ -6,13 +6,17 @@ use toml::Value;
 
 pub fn insert_backlinks(
     ch: &mut Chapter,
-    backlinks_map: &HashMap<PathBuf, Vec<(PathBuf, String)>>,
+    backlinks_map: &mut HashMap<PathBuf, Vec<(PathBuf, String)>>,
     pre: &str,
 ) {
     if let Some(path) = &ch.path {
-        if let Some(backlinks) = backlinks_map.get(path) {
+        if let Some(backlinks) = backlinks_map.get_mut(path) {
             if !backlinks.is_empty() {
+                backlinks.sort_unstable();
+                backlinks.dedup();
+
                 ch.content.push_str(pre);
+
                 for (dest, name) in backlinks.iter() {
                     let diff_path = diff_paths(dest, path.parent().unwrap()).unwrap();
                     ch.content.push_str(&format!(
