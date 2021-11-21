@@ -443,21 +443,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gitignore"
-version = "1.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78aa90e4620c1498ac434c06ba6e521b525794bbdacf085d490cc794b4a2f9a4"
-dependencies = [
- "glob",
-]
-
-[[package]]
-name = "glob"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
-
-[[package]]
 name = "globset"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -870,19 +855,14 @@ version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a51c4913f8aa6eb9468b639e9b91c5b1a8c0441f356307d2071f128a548822db"
 dependencies = [
- "ammonia",
  "anyhow",
  "chrono",
  "clap",
- "elasticlunr-rs",
  "env_logger",
- "futures-util",
- "gitignore",
  "handlebars",
  "lazy_static",
  "log",
  "memchr",
- "notify",
  "opener",
  "pulldown-cmark 0.7.2",
  "regex",
@@ -891,24 +871,8 @@ dependencies = [
  "serde_json",
  "shlex",
  "tempfile",
- "tokio",
  "toml",
  "topological-sort",
- "warp",
-]
-
-[[package]]
-name = "mdbook-backlinks"
-version = "0.2.7"
-dependencies = [
- "clap",
- "lazy-regex",
- "mdbook",
- "pathdiff",
- "regex",
- "semver",
- "serde_json",
- "toml",
 ]
 
 [[package]]
@@ -925,7 +889,6 @@ dependencies = [
  "ignore",
  "lazy-regex",
  "mdbook",
- "mdbook-backlinks",
  "notify",
  "pest",
  "pest_derive",
@@ -1151,12 +1114,6 @@ dependencies = [
  "smallvec",
  "winapi 0.3.9",
 ]
-
-[[package]]
-name = "pathdiff"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8835116a5c179084a830efb3adc117ab007512b535bc1a21c991d3b32a6b44dd"
 
 [[package]]
 name = "percent-encoding"
@@ -1536,12 +1493,6 @@ name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
-
-[[package]]
-name = "semver"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
 
 [[package]]
 name = "serde"
