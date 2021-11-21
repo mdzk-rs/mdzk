@@ -4,7 +4,11 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use toml::Value;
 
-pub fn insert_backlinks(ch: &mut Chapter, backlinks_map: &HashMap<PathBuf, Vec<(PathBuf, String)>>, pre: &str) {
+pub fn insert_backlinks(
+    ch: &mut Chapter,
+    backlinks_map: &HashMap<PathBuf, Vec<(PathBuf, String)>>,
+    pre: &str,
+) {
     if let Some(path) = &ch.path {
         if let Some(backlinks) = backlinks_map.get(path) {
             if !backlinks.is_empty() {

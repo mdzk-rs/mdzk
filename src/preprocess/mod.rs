@@ -26,10 +26,7 @@ impl Preprocessor for MdzkPreprocessor {
             ctx.config.get("mdzk.wikilinks"),
             "Wikilink parsing is disabled.",
         );
-        let math = get_toml_value(
-            ctx.config.get("mdzk.math"),
-            "Math rendering is disabled.",
-        );
+        let math = get_toml_value(ctx.config.get("mdzk.math"), "Math rendering is disabled.");
         let readme = get_toml_value(
             ctx.config.get("mdzk.readme"),
             "\"README.md\" to \"index.md\" conversion disabled.",
@@ -38,11 +35,7 @@ impl Preprocessor for MdzkPreprocessor {
             ctx.config.get("mdzk.front-matter"),
             "Front matter parsing is disabled.",
         );
-        let backlinks = get_toml_value(
-            ctx.config.get("mdzk.backlinks"),
-            "Backlinks disabled.",
-        );
-
+        let backlinks = get_toml_value(ctx.config.get("mdzk.backlinks"), "Backlinks disabled.");
 
         // First iteration
         let mut path_map = HashMap::new();
@@ -148,7 +141,7 @@ fn get_toml_value(val: Option<&Value>, message: &str) -> bool {
         Some(toml::Value::Boolean(false)) => {
             info!("{}", message);
             false
-        },
+        }
         _ => true,
     }
 }
