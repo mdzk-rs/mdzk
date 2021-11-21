@@ -1,9 +1,8 @@
+mod backlinks;
 mod frontmatter;
 mod katex;
 pub mod readme;
 mod wikilinks;
-
-use crate::utils::diff_paths;
 
 use anyhow::Result;
 use lazy_regex::regex;
@@ -12,6 +11,7 @@ use mdbook::{
     preprocess::{Preprocessor, PreprocessorContext},
 };
 use std::collections::HashMap;
+use toml::Value;
 
 pub struct MdzkPreprocessor;
 
@@ -22,34 +22,27 @@ impl Preprocessor for MdzkPreprocessor {
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
         // Check which preprocessors are toggled on
-        let wikilinks = match ctx.config.get("mdzk.wikilinks") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("Wikilink parsing is disabled.");
-                false
-            }
-            _ => true,
-        };
-        let math = match ctx.config.get("mdzk.math") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("Math rendering is disabled.");
-                false
-            }
-            _ => true,
-        };
-        let readme = match ctx.config.get("mdzk.readme") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("\"README.md\" to \"index.md\" conversion disabled.");
-                false
-            }
-            _ => true,
-        };
-        let front_matter = match ctx.config.get("mdzk.front-matter") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("Front matter parsing is disabled.");
-                false
-            }
-            _ => true,
-        };
+        let wikilinks = get_toml_value(
+            ctx.config.get("mdzk.wikilinks"),
+            "Wikilink parsing is disabled.",
+        );
+        let math = get_toml_value(
+            ctx.config.get("mdzk.math"),
+            "Math rendering is disabled.",
+        );
+        let readme = get_toml_value(
+            ctx.config.get("mdzk.readme"),
+            "\"README.md\" to \"index.md\" conversion disabled.",
+        );
+        let front_matter = get_toml_value(
+            ctx.config.get("mdzk.front-matter"),
+            "Front matter parsing is disabled.",
+        );
+        let backlinks = get_toml_value(
+            ctx.config.get("mdzk.backlinks"),
+            "Backlinks disabled.",
+        );
+
 
         // First iteration
         let mut path_map = HashMap::new();
@@ -72,24 +65,26 @@ impl Preprocessor for MdzkPreprocessor {
 
                 // Populate path_map with note names and paths.
                 // Populate backlinks_map with note paths and an empty vector.
-                if ch.path.is_some() {
-                    let key = ch.name.clone();
-                    let path = ch.path.as_ref().unwrap().to_owned();
-                    if path_map.contains_key(&key) {
-                        warn!(
-                            r#"Duplicated page title found:
+                if wikilinks {
+                    if ch.path.is_some() {
+                        let key = ch.name.clone();
+                        let path = ch.path.as_ref().unwrap().to_owned();
+                        if path_map.contains_key(&key) {
+                            warn!(
+                                r#"Duplicated page title found:
 
 - {} ({:?})
 - {0} ({:?})
 
 If links do not properly specify paths, they might lead to the wrong note..."#,
-                            key,
-                            path,
-                            path_map.get(&key),
-                        );
+                                key,
+                                path,
+                                path_map.get(&key),
+                            );
+                        }
+                        path_map.insert(key, path.clone());
+                        backlinks_map.insert(path, Vec::new());
                     }
-                    path_map.insert(key, path.clone());
-                    backlinks_map.insert(path, Vec::new());
                 }
             }
         });
@@ -109,9 +104,12 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                                 }
                             };
 
-                        if let Some(ref path) = wikilink.path {
-                            if let Some(backlinks) = backlinks_map.get_mut(path) {
-                                backlinks.push((ch.path.clone().unwrap(), ch.name.clone()));
+                        // Popoulate backlinks_map with this chapter
+                        if backlinks {
+                            if let Some(ref path) = wikilink.path {
+                                if let Some(backlinks) = backlinks_map.get_mut(path) {
+                                    backlinks.push((ch.path.clone().unwrap(), ch.name.clone()));
+                                }
                             }
                         }
 
@@ -130,29 +128,27 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
             }
         });
 
-        // Third iteration
-        book.for_each_mut(|item| {
-            if let BookItem::Chapter(ch) = item {
-                if let Some(path) = &ch.path {
-                    if let Some(backlinks) = backlinks_map.get(path) {
-                        if !backlinks.is_empty() {
-                            ch.content.push('\n');
-                            // ch.content += &backlink_prefix;
-                            for (dest, name) in backlinks.iter() {
-                                let diff_path = diff_paths(dest, path).unwrap();
-                                ch.content.push_str(&format!(
-                                    "\n> - [{}](<{}>)",
-                                    name,
-                                    diff_path.to_string_lossy()
-                                ));
-                            }
-                        };
+        if backlinks {
+            let prefix = backlinks::prefix(&ctx.config);
 
-                    }
+            // Third iteration
+            book.for_each_mut(|item| {
+                if let BookItem::Chapter(ch) = item {
+                    backlinks::insert_backlinks(ch, &backlinks_map, &prefix);
                 }
-            }
-        });
+            });
+        }
 
         Ok(book)
+    }
+}
+
+fn get_toml_value(val: Option<&Value>, message: &str) -> bool {
+    match val {
+        Some(toml::Value::Boolean(false)) => {
+            info!("{}", message);
+            false
+        },
+        _ => true,
     }
 }
