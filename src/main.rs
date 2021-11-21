@@ -50,7 +50,8 @@ enum Command {
 
 fn main() {
     if let Err(e) = run() {
-        mdzk::log::handle_anyhow_error(e);
+        mdzk::error!("{}{}", e, mdzk::log::format_chain(e.chain()));
+        std::process::exit(1);
     }
 }
 

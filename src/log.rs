@@ -1,4 +1,3 @@
-use anyhow::Error;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// The maximum logging level, stored statically in the memory as an atomic usize.
@@ -9,9 +8,9 @@ static MAX_LOG_LEVEL: AtomicUsize = AtomicUsize::new(0);
 /// The loggin levels use the following nomenclature:
 ///
 /// - 0: Off
-/// - 1: Error and success
-/// - 2: Warning
-/// - 3: Info and success
+/// - 1: Error
+/// - 2: Warning and success
+/// - 3: Info
 /// - >4: Debug
 #[inline]
 pub fn set_max_level(level: usize) {
@@ -42,7 +41,7 @@ macro_rules! error {
 #[macro_export]
 macro_rules! success {
     ($($arg:tt)*) => ({
-        if $crate::log::max_level() >= 1 {
+        if $crate::log::max_level() >= 2 {
             let text = format!($($arg)*);
             let mut lines = text.lines();
             if let Some(line) = lines.next() {
@@ -103,29 +102,28 @@ macro_rules! debug {
     })
 }
 
-pub fn handle_anyhow_error(e: Error) {
+/// Formats an anyhow error chain in the following way:
+///
+///     - Chainlink 1 string
+///       New line
+///     - Chainlink 2 string
+pub fn format_chain(chain: anyhow::Chain) -> String {
+    let mut out = String::new();
+
     fn begin_line_with(i: usize) -> String {
         if i == 0 { "- " } else { "  " }.to_owned()
     }
 
-    if e.chain().len() == 1 {
-        error!("{}", e);
-    } else {
-        let rest = e
-            .chain()
-            .skip(1)
-            .map(|chain| {
-                chain
-                    .to_string()
-                    .lines()
-                    .enumerate()
-                    .map(|(i, line)| begin_line_with(i) + line)
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            })
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        error!("{}\n\n\x1B[4mCaused by:\x1B[0m\n\n{}", e, rest);
+    if chain.len() > 1 {
+        out.push_str("\nCaused by:\n");
+        for link in chain.skip(1) {
+            for (i, line) in link.to_string().lines().enumerate() {
+                out.push('\n');
+                out.push_str(&begin_line_with(i));
+                out.push_str(line);
+            }
+        }
     }
+
+    out
 }
