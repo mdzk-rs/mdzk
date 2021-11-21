@@ -14,7 +14,7 @@ pub fn insert_backlinks(
             if !backlinks.is_empty() {
                 ch.content.push_str(pre);
                 for (dest, name) in backlinks.iter() {
-                    let diff_path = diff_paths(dest, path).unwrap();
+                    let diff_path = diff_paths(dest, path.parent().unwrap()).unwrap();
                     ch.content.push_str(&format!(
                         "\n> - [{}](<{}>)",
                         name,
