@@ -58,26 +58,24 @@ impl Preprocessor for MdzkPreprocessor {
 
                 // Populate path_map with note names and paths.
                 // Populate backlinks_map with note paths and an empty vector.
-                if wikilinks {
-                    if ch.path.is_some() {
-                        let key = ch.name.clone();
-                        let path = ch.path.as_ref().unwrap().to_owned();
-                        if path_map.contains_key(&key) {
-                            warn!(
-                                r#"Duplicated page title found:
+                if wikilinks && ch.path.is_some() {
+                    let key = ch.name.clone();
+                    let path = ch.path.as_ref().unwrap().to_owned();
+                    if path_map.contains_key(&key) {
+                        warn!(
+                            r#"Duplicated page title found:
 
 - {} ({:?})
 - {0} ({:?})
 
 If links do not properly specify paths, they might lead to the wrong note..."#,
-                                key,
-                                path,
-                                path_map.get(&key),
-                            );
-                        }
-                        path_map.insert(key, path.clone());
-                        backlinks_map.insert(path, Vec::new());
+                            key,
+                            path,
+                            path_map.get(&key),
+                        );
                     }
+                    path_map.insert(key, path.clone());
+                    backlinks_map.insert(path, Vec::new());
                 }
             }
         });
