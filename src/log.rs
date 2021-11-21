@@ -104,9 +104,11 @@ macro_rules! debug {
 
 /// Formats an anyhow error chain in the following way:
 ///
-///     - Chainlink 1 string
-///       New line
-///     - Chainlink 2 string
+/// ```ignore
+/// - Chainlink 1 string
+///   New line
+/// - Chainlink 2 string
+/// ```
 pub fn format_chain(chain: anyhow::Chain) -> String {
     let mut out = String::new();
 
