@@ -136,14 +136,15 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                 if let Some(path) = &ch.path {
                     if let Some(backlinks) = backlinks_map.get(path) {
                         if !backlinks.is_empty() {
+                            ch.content.push('\n');
                             // ch.content += &backlink_prefix;
                             for (dest, name) in backlinks.iter() {
-                                let diff_path = diff_paths(dest, path.parent().unwrap()).unwrap();
-                                ch.content += &format!(
-                                    "> - [{}](<{}>)\n",
+                                let diff_path = diff_paths(dest, path).unwrap();
+                                ch.content.push_str(&format!(
+                                    "\n> - [{}](<{}>)",
                                     name,
                                     diff_path.to_string_lossy()
-                                );
+                                ));
                             }
                         };
 

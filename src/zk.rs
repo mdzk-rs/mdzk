@@ -6,7 +6,6 @@ use crate::{
 use crate::preprocess::MdzkPreprocessor;
 use anyhow::{anyhow, bail, Context, Result};
 use mdbook::{book::parse_summary, preprocess::CmdPreprocessor, MDBook};
-use mdbook_backlinks::Backlinks;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -60,7 +59,6 @@ Notes must be available somewhere inside {:?}"#,
     if disable_default_preprocessors {
         info!("Running without default mdzk preprocessors.")
     } else {
-        zk.with_preprocessor(Backlinks);
         zk.with_preprocessor(MdzkPreprocessor);
     }
 
