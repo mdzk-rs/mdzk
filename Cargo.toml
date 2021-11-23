@@ -25,11 +25,6 @@ include = [
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace]
-members = [
-    "preprocessors/mdbook-backlinks",
-]
-
 [dependencies]
 anyhow = "1.0.44"
 chrono = "0.4.19"
@@ -49,13 +44,10 @@ serde_json = "1.0.68"
 structopt = "0.3.23"
 toml = "0.5.8"
 
-# Preprocessors
-mdbook-backlinks = { path = "preprocessors/mdbook-backlinks", version = "0.2.7" }
-
 # Feature: Search
 ammonia = "3.1.2"
 elasticlunr-rs = { version = "2.3.13", default-features = false }
 
 # Feature: Serve
-tokio = { version = "1.11.0", default-features = false, features = ["macros"] }
+tokio = { version = "1.11.0", default-features = false, features = ["macros", "rt-multi-thread"] }
 warp = { version = "0.3.1", default-features = false, features = ["websocket"] }

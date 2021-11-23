@@ -1,3 +1,4 @@
+mod backlinks;
 mod frontmatter;
 mod katex;
 pub mod readme;
@@ -10,6 +11,7 @@ use mdbook::{
     preprocess::{Preprocessor, PreprocessorContext},
 };
 use std::collections::HashMap;
+use toml::Value;
 
 pub struct MdzkPreprocessor;
 
@@ -20,37 +22,24 @@ impl Preprocessor for MdzkPreprocessor {
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
         // Check which preprocessors are toggled on
-        let wikilinks = match ctx.config.get("mdzk.wikilinks") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("Wikilink parsing is disabled.");
-                false
-            }
-            _ => true,
-        };
-        let math = match ctx.config.get("mdzk.math") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("Math rendering is disabled.");
-                false
-            }
-            _ => true,
-        };
-        let readme = match ctx.config.get("mdzk.readme") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("\"README.md\" to \"index.md\" conversion disabled.");
-                false
-            }
-            _ => true,
-        };
-        let front_matter = match ctx.config.get("mdzk.front-matter") {
-            Some(toml::Value::Boolean(false)) => {
-                info!("Front matter parsing is disabled.");
-                false
-            }
-            _ => true,
-        };
+        let wikilinks = get_toml_value(
+            ctx.config.get("mdzk.wikilinks"),
+            "Wikilink parsing is disabled.",
+        );
+        let math = get_toml_value(ctx.config.get("mdzk.math"), "Math rendering is disabled.");
+        let readme = get_toml_value(
+            ctx.config.get("mdzk.readme"),
+            "\"README.md\" to \"index.md\" conversion disabled.",
+        );
+        let front_matter = get_toml_value(
+            ctx.config.get("mdzk.front-matter"),
+            "Front matter parsing is disabled.",
+        );
+        let backlinks = get_toml_value(ctx.config.get("mdzk.backlinks"), "Backlinks disabled.");
 
         // First iteration
         let mut path_map = HashMap::new();
+        let mut backlinks_map = HashMap::new();
         book.for_each_mut(|item| {
             if let BookItem::Chapter(ch) = item {
                 // Handle front matter
@@ -67,24 +56,26 @@ impl Preprocessor for MdzkPreprocessor {
                     )
                 }
 
-                // Populate index of all paths for use with wikilinks
-                if ch.path.is_some() {
+                // Populate path_map with note names and paths.
+                // Populate backlinks_map with note paths and an empty vector.
+                if wikilinks && ch.path.is_some() {
                     let key = ch.name.clone();
+                    let path = ch.path.as_ref().unwrap().to_owned();
                     if path_map.contains_key(&key) {
                         warn!(
                             r#"Duplicated page title found:
 
 - {} ({:?})
-- {} ({:?})
+- {0} ({:?})
 
 If links do not properly specify paths, they might lead to the wrong note..."#,
                             key,
-                            ch.path,
-                            key,
+                            path,
                             path_map.get(&key),
                         );
                     }
-                    path_map.insert(key, ch.path.as_ref().unwrap().clone());
+                    path_map.insert(key, path.clone());
+                    backlinks_map.insert(path, Vec::new());
                 }
             }
         });
@@ -104,6 +95,15 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
                                 }
                             };
 
+                        // Popoulate backlinks_map with this chapter
+                        if backlinks {
+                            if let Some(ref path) = wikilink.path {
+                                if let Some(backlinks) = backlinks_map.get_mut(path) {
+                                    backlinks.push((ch.path.clone().unwrap(), ch.name.clone()));
+                                }
+                            }
+                        }
+
                         ch.content = ch.content.replacen(
                             &format!("[[{}]]", link_text),
                             &wikilink.cmark(ch.path.as_ref().unwrap().parent().unwrap()),
@@ -119,6 +119,27 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
             }
         });
 
+        if backlinks {
+            let prefix = backlinks::prefix(&ctx.config);
+
+            // Third iteration
+            book.for_each_mut(|item| {
+                if let BookItem::Chapter(ch) = item {
+                    backlinks::insert_backlinks(ch, &mut backlinks_map, &prefix);
+                }
+            });
+        }
+
         Ok(book)
+    }
+}
+
+fn get_toml_value(val: Option<&Value>, message: &str) -> bool {
+    match val {
+        Some(toml::Value::Boolean(false)) => {
+            info!("{}", message);
+            false
+        }
+        _ => true,
     }
 }
