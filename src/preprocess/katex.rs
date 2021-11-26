@@ -58,12 +58,8 @@ pub fn run(ch: &mut Chapter) {
             Event::Text(text) => {
                 if render_math {
                     buf.push_str(&text);
-                    if let Some(new_buf) = inline(&buf) {
-                        // If inline math is found within this text event, render it
-                        // and clear buffer.
-                        replace(ch, &buf, &new_buf);
-                        buf.clear()
-                    }
+                    inline(ch, &buf);
+                    safeclear(&mut buf);
                 }
             }
             // Stop math rendering
@@ -77,9 +73,8 @@ pub fn run(ch: &mut Chapter) {
             | Event::End(Tag::BlockQuote) => {
                 if let Some(display) = display(&buf) {
                     replace(ch, &buf, &display);
-                } else if let Some(new_text) = inline(&buf) {
-                    replace(ch, &buf, &new_text);
-                }
+                } 
+                inline(ch, &buf);
                 buf.clear();
                 render_math = false;
             }
@@ -92,12 +87,12 @@ pub fn run(ch: &mut Chapter) {
     ch.content.push_str(&format!("\n\n{}", RENDER_SCRIPT));
 }
 
-fn inline(text: &str) -> Option<String> {
-    let mut out = text.to_string();
+fn inline(ch: &mut Chapter, text: &str) -> bool {
     let mut splits = text.split('$');
+    let mut changed = false;
     let mut escaped = match splits.next() {
         Some(first_split) => first_split.ends_with('\\'),
-        None => return None, // No dollars, do early return
+        None => return false, // No dollars, do early return
     };
 
     for split in splits {
@@ -116,19 +111,13 @@ fn inline(text: &str) -> Option<String> {
             }
         } else if !text.ends_with(split) {
             // Hacky way of checking if this is the last split
-            out = out.replacen(
+            changed = true;
+            replace(ch,
                 &format!("${}$", split),
-                &format!("<span class=\"katex-inline\">{}</span>", split),
-                1,
-            );
+                &format!("<span class=\"katex-inline\">{}</span>", split));
         }
     }
-
-    if out != text {
-        Some(out)
-    } else {
-        None
-    }
+    changed
 }
 
 fn display(text: &str) -> Option<String> {
@@ -150,4 +139,32 @@ fn fix(text: impl std::ops::Deref<Target = str>) -> String {
 
 fn replace(ch: &mut Chapter, old: &str, new: &str) {
     ch.content = ch.content.replacen(&fix(old), &fix(new), 1);
+}
+
+fn safeclear(buf: &mut String) {
+    let mut cache = String::new();
+    let mut parity = true;
+    
+    while let Some(c) = buf.pop(){
+        cache.push(c);
+    }
+    buf.clear();
+
+    while let Some(mut c) = cache.pop(){
+        if c == '\\'{
+            if !parity{
+                buf.push(c);
+            }
+            if let Some(d) = cache.pop(){
+                c = d;
+            }
+        }
+        else if c == '$'{
+            parity = !parity;
+            buf.clear();
+        }
+        if !parity {
+            buf.push(c);
+        }
+    }
 }
