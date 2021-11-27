@@ -22,29 +22,12 @@ pub fn run(ch: &mut Chapter) {
     opts.insert(Options::ENABLE_FOOTNOTES);
     let parser = Parser::new_ext(&copy, opts);
     let mut buf = String::new();
-    let mut render_math = false;
-    for event in parser {
+    for (event, range) in parser.into_offset_iter() {
         match event {
-            // Respect formatting
-            Event::Start(Tag::Emphasis) | Event::End(Tag::Emphasis) => {
-                if render_math {
-                    buf.push('*')
-                }
-            }
-            Event::Start(Tag::Strong) | Event::End(Tag::Strong) => {
-                if render_math {
-                    buf.push_str("**")
-                }
-            }
-
-            // Clear buffer when code is hit
-            Event::Code(_) => buf.clear(),
-
-            // Don't render inside HTML
-            Event::Html(_) => render_math = !render_math,
-
             // Start math rendering
             Event::Start(Tag::Paragraph)
+            | Event::Start(Tag::Emphasis)
+            | Event::Start(Tag::Strong)
             | Event::Start(Tag::Heading(_))
             | Event::Start(Tag::List(_))
             | Event::Start(Tag::Item)
@@ -52,31 +35,17 @@ pub fn run(ch: &mut Chapter) {
             | Event::Start(Tag::TableHead)
             | Event::Start(Tag::TableCell)
             | Event::Start(Tag::BlockQuote) => {
-                render_math = true;
-            }
-            // If rendering math, push text events to buffer
-            Event::Text(text) => {
-                if render_math {
-                    buf.push_str(&text);
-                    inline(ch, &buf);
-                    safeclear(&mut buf);
+                buf.push_str(&copy[range]);
+                if let Some(new_buf) = inline(&buf){
+                    replace(ch, &buf, &new_buf);
+                    buf.clear();
+                    buf.push_str(&new_buf);
                 }
-            }
-            // Stop math rendering
-            Event::End(Tag::Paragraph)
-            | Event::End(Tag::Heading(_))
-            | Event::End(Tag::List(_))
-            | Event::End(Tag::Item)
-            | Event::End(Tag::Table(_))
-            | Event::End(Tag::TableHead)
-            | Event::End(Tag::TableCell)
-            | Event::End(Tag::BlockQuote) => {
+
                 if let Some(display) = display(&buf) {
                     replace(ch, &buf, &display);
                 } 
-                inline(ch, &buf);
-                buf.clear();
-                render_math = false;
+                safeclear(&mut buf);
             }
 
             _ => {}
@@ -87,12 +56,12 @@ pub fn run(ch: &mut Chapter) {
     ch.content.push_str(&format!("\n\n{}", RENDER_SCRIPT));
 }
 
-fn inline(ch: &mut Chapter, text: &str) -> bool {
+fn inline(text: &str) -> Option<String> {
+    let mut out = text.to_string();
     let mut splits = text.split('$');
-    let mut changed = false;
     let mut escaped = match splits.next() {
         Some(first_split) => first_split.ends_with('\\'),
-        None => return false, // No dollars, do early return
+        None => return None, // No dollars, do early return
     };
 
     for split in splits {
@@ -111,26 +80,35 @@ fn inline(ch: &mut Chapter, text: &str) -> bool {
             }
         } else if !text.ends_with(split) {
             // Hacky way of checking if this is the last split
-            changed = true;
-            replace(ch,
-                &format!("${}$", split),
-                &format!("<span class=\"katex-inline\">{}</span>", split));
+            out = out.replacen(&format!("${}$", split),
+                &format!("<span class=\"katex-inline\">{}</span>", split), 1);
         }
     }
-    changed
+    if out != text{
+        Some(out)
+    }else{
+        None
+    }
 }
 
 fn display(text: &str) -> Option<String> {
-    if let Some(math) = text.strip_prefix("$$") {
-        if let Some(math) = math.strip_suffix("$$") {
-            return Some(text.replacen(
-                text,
-                &format!("<div class=\"katex-display\">{}</div>", math),
-                1,
-            ));
+    let mut out = text.to_string();
+    let splits = text.split("$$");
+
+    let mut inkatex = false;
+    for split in splits {
+        if inkatex{
+            out = out.replacen(&format!("$${}$$", split),
+                &format!("<span class=\"katex-display\">{}</span>", split), 1);
         }
+        inkatex = !inkatex;
     }
-    None
+
+    if out != text{
+        Some(out)
+    }else{
+        None
+    }
 }
 
 fn fix(text: impl std::ops::Deref<Target = str>) -> String {
