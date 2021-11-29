@@ -1,6 +1,6 @@
 use crate::utils::{diff_paths, escape_special_chars};
 use anyhow::Result;
-use mdbook::{book::Chapter, utils::id_from_content};
+use mdbook::utils::id_from_content;
 use pest::Parser;
 use pulldown_cmark::{CowStr, Event};
 use std::collections::HashMap;
@@ -64,28 +64,6 @@ pub fn for_each_wikilink(content: &str, mut handle_link: impl FnMut(&str)) {
                 }
             }
             _ => {}
-        }
-    }
-}
-
-pub fn wrap_blocks(ch: &mut Chapter) {
-    for split in ch.content.clone().split("\n\n") {
-        let last_seven: String = split.chars().rev().take(7).collect();
-        if last_seven.chars().rev().next() == Some('^')
-        && last_seven.chars().take(6).all(|c| char::is_digit(c, 36)) {
-            let id: String = last_seven.chars().rev().skip(1).collect();
-
-            let mut new_split = "<div id=\"".to_owned();
-            new_split.push_str(&id);
-            new_split.push_str("\">");
-            new_split.push_str(split.trim_end_matches(&id).trim_end_matches("^"));
-            new_split.push_str("</div>");
-
-            ch.content = ch.content.replacen(
-                split,
-                &new_split,
-                1
-            );
         }
     }
 }

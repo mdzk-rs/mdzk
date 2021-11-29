@@ -1,4 +1,5 @@
 mod backlinks;
+mod blockref;
 mod frontmatter;
 mod katex;
 pub mod readme;
@@ -59,7 +60,7 @@ impl Preprocessor for MdzkPreprocessor {
                 // Populate path_map with note names and paths.
                 // Populate backlinks_map with note paths and an empty vector.
                 if wikilinks && ch.path.is_some() {
-                    wikilinks::wrap_blocks(ch);
+                    blockref::wrap_blocks(ch);
 
                     let key = ch.name.clone();
                     let path = ch.path.as_ref().unwrap().to_owned();
