@@ -1,5 +1,5 @@
 use mdbook::book::Chapter;
-use pulldown_cmark::{Event, Options, Parser, Tag};
+use pulldown_cmark::{Event, Parser, Tag};
 
 const KATEX_CSS: &str = r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">"#;
 const KATEX_JS: &str = r#"<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.20/dist/katex.min.js" integrity="sha384-ov99pRO2tAc0JuxTVzf63RHHeQTJ0CIawbDZFiFTzB07aqFZwEu2pz4uzqL+5OPG" crossorigin="anonymous"></script>"#;
@@ -17,76 +17,45 @@ document.addEventListener('DOMContentLoaded', function() {
 pub fn run(ch: &mut Chapter) {
     let copy = ch.content.clone();
 
-    let mut opts = Options::empty();
-    opts.insert(Options::ENABLE_TABLES);
-    opts.insert(Options::ENABLE_FOOTNOTES);
-    let parser = Parser::new_ext(&copy, opts);
+    let parser = Parser::new(&copy);
     let mut buf = String::new();
-    let mut render_math = false;
-    for event in parser {
+    for (event, range) in parser.into_offset_iter() {
         match event {
-            // Respect formatting
-            Event::Start(Tag::Emphasis) | Event::End(Tag::Emphasis) => {
-                if render_math {
-                    buf.push('*')
-                }
-            }
-            Event::Start(Tag::Strong) | Event::End(Tag::Strong) => {
-                if render_math {
-                    buf.push_str("**")
-                }
-            }
-
-            // Clear buffer when code is hit
-            Event::Code(_) => buf.clear(),
-
-            // Don't render inside HTML
-            Event::Html(_) => render_math = !render_math,
-
             // Start math rendering
             Event::Start(Tag::Paragraph)
             | Event::Start(Tag::Heading(_))
             | Event::Start(Tag::List(_))
             | Event::Start(Tag::Item)
-            | Event::Start(Tag::Table(_))
-            | Event::Start(Tag::TableHead)
-            | Event::Start(Tag::TableCell)
             | Event::Start(Tag::BlockQuote) => {
-                render_math = true;
-            }
-            // If rendering math, push text events to buffer
-            Event::Text(text) => {
-                if render_math {
-                    buf.push_str(&text);
-                    if let Some(new_buf) = inline(&buf) {
-                        // If inline math is found within this text event, render it
-                        // and clear buffer.
-                        replace(ch, &buf, &new_buf);
-                        buf.clear()
-                    }
+                buf.push_str(&copy[range]);
+
+                if let Some(new_buf) = inline(&buf) {
+                    replace(ch, &buf, &new_buf);
+                    buf = new_buf;
                 }
-            }
-            // Stop math rendering
-            Event::End(Tag::Paragraph)
-            | Event::End(Tag::Heading(_))
-            | Event::End(Tag::List(_))
-            | Event::End(Tag::Item)
-            | Event::End(Tag::Table(_))
-            | Event::End(Tag::TableHead)
-            | Event::End(Tag::TableCell)
-            | Event::End(Tag::BlockQuote) => {
+
                 if let Some(display) = display(&buf) {
                     replace(ch, &buf, &display);
-                } else if let Some(new_text) = inline(&buf) {
-                    replace(ch, &buf, &new_text);
+                }
+
+                safeclear(&mut buf);
+            }
+
+            // If math is found in verbatim, replace it back to original
+            Event::Code(verbatim) => {
+                if let Some(inline) = inline(&verbatim) {
+                    replace(ch, &inline, &verbatim);
+                }
+                if let Some(display) = display(&verbatim) {
+                    replace(ch, &display, &verbatim);
                 }
                 buf.clear();
-                render_math = false;
             }
 
             _ => {}
         }
     }
+
     ch.content.push_str(&format!("\n\n{}", KATEX_CSS));
     ch.content.push_str(&format!("\n\n{}", KATEX_JS));
     ch.content.push_str(&format!("\n\n{}", RENDER_SCRIPT));
@@ -123,7 +92,6 @@ fn inline(text: &str) -> Option<String> {
             );
         }
     }
-
     if out != text {
         Some(out)
     } else {
@@ -132,16 +100,22 @@ fn inline(text: &str) -> Option<String> {
 }
 
 fn display(text: &str) -> Option<String> {
-    if let Some(math) = text.strip_prefix("$$") {
-        if let Some(math) = math.strip_suffix("$$") {
-            return Some(text.replacen(
-                text,
-                &format!("<div class=\"katex-display\">{}</div>", math),
-                1,
-            ));
-        }
+    let mut out = text.to_string();
+    let splits = text.split("$$");
+
+    for split in splits.skip(1).step_by(2) {
+        out = out.replacen(
+            &format!("$${}$$", split),
+            &format!("<span class=\"katex-display\">{}</span>", split),
+            1,
+        );
     }
-    None
+
+    if out != text {
+        Some(out)
+    } else {
+        None
+    }
 }
 
 fn fix(text: impl std::ops::Deref<Target = str>) -> String {
@@ -150,4 +124,27 @@ fn fix(text: impl std::ops::Deref<Target = str>) -> String {
 
 fn replace(ch: &mut Chapter, old: &str, new: &str) {
     ch.content = ch.content.replacen(&fix(old), &fix(new), 1);
+}
+
+fn safeclear(buf: &mut String) {
+    let mut cache = buf.clone();
+    let mut parity = true;
+    buf.clear();
+
+    while let Some(mut c) = cache.pop() {
+        if c == '\\' {
+            if !parity {
+                buf.push(c);
+            }
+            if let Some(d) = cache.pop() {
+                c = d;
+            }
+        } else if c == '$' {
+            parity = !parity;
+            buf.clear();
+        }
+        if !parity {
+            buf.push(c);
+        }
+    }
 }
