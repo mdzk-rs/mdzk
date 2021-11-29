@@ -44,3 +44,30 @@ fn blockref_id(paragraph: &str) -> Option<String> {
 fn is_id_friendly(s: char) -> bool {
      s == '_' || s == '-' || char::is_digit(s, 36)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_id_friendly() {
+        assert!(is_id_friendly('a'));
+        assert!(is_id_friendly('Z'));
+        assert!(is_id_friendly('7'));
+        assert!(is_id_friendly('-'));
+        assert!(!is_id_friendly('%'));
+        assert!(!is_id_friendly('å'));
+    }
+
+    #[test]
+    fn find_id() {
+        let cases = vec![
+            ("This is text with blockref at end ^1234fe", Some("1234fe".to_owned())),
+            ("This is text with invalid blockref at end [^fn]...", None),
+        ];
+
+        for (from, want) in cases.iter() {
+            assert_eq!(want, &blockref_id(from));
+        }
+    }
+}
