@@ -11,14 +11,10 @@ pub fn wrap_blocks(ch: &mut Chapter) {
             let new_split = format!(
                 "<div id=\"{}\">{}</div>",
                 id,
-                split.trim_end_matches(&id).trim_end_matches("^")
+                split.trim_end_matches(&id).trim_end_matches('^')
             );
 
-            ch.content = ch.content.replacen(
-                split,
-                &new_split,
-                1
-            );
+            ch.content = ch.content.replacen(split, &new_split, 1);
         }
     }
 }
@@ -29,20 +25,18 @@ fn blockref_id(paragraph: &str) -> Option<String> {
     let len = paragraph.len();
     if len > 7 {
         let mut iter = paragraph.chars().skip(len - 7);
-        if iter.next() == Some('^') {
-            if iter.clone().all(is_id_friendly) {
-                return Some(iter.collect());
-            }
+        if iter.next() == Some('^') && iter.clone().all(is_id_friendly) {
+            return Some(iter.collect());
         }
     }
     None
 }
 
 /// Check if char can be used in a blockreference ID
-/// 
+///
 /// 0-9, A-Z, a-z, _ and - are allowed
 fn is_id_friendly(s: char) -> bool {
-     s == '_' || s == '-' || char::is_digit(s, 36)
+    s == '_' || s == '-' || char::is_digit(s, 36)
 }
 
 #[cfg(test)]
@@ -62,7 +56,10 @@ mod tests {
     #[test]
     fn find_id() {
         let cases = vec![
-            ("This is text with blockref at end ^1234fe", Some("1234fe".to_owned())),
+            (
+                "This is text with blockref at end ^1234fe",
+                Some("1234fe".to_owned()),
+            ),
             ("This is text with invalid blockref at end [^fn]...", None),
         ];
 

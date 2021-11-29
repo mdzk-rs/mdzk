@@ -112,8 +112,12 @@ impl WikiLink {
         // Handle header and blockref
         let anchor = match dest.next() {
             Some(anchor) => match anchor.into_inner().next() {
-                Some(x) if x.as_rule() == Rule::header => Anchor::Header(id_from_content(x.as_str())),
-                Some(x) if x.as_rule() == Rule::blockref => Anchor::Blockref(id_from_content(x.as_str())),
+                Some(x) if x.as_rule() == Rule::header => {
+                    Anchor::Header(id_from_content(x.as_str()))
+                }
+                Some(x) if x.as_rule() == Rule::blockref => {
+                    Anchor::Blockref(id_from_content(x.as_str()))
+                }
                 _ => panic!("This should not happen..."),
             },
             None => Anchor::None,
@@ -147,7 +151,7 @@ impl WikiLink {
             // TODO: Blockrefs are currently not handled here
             match &self.anchor {
                 Anchor::Header(id) | Anchor::Blockref(id) => href.push_str(&format!("#{}", id)),
-                Anchor::None => {},
+                Anchor::None => {}
             }
 
             format!("[{}](<{}>)", self.title, escape_special_chars(&href))
