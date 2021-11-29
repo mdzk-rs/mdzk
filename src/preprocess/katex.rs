@@ -41,6 +41,16 @@ pub fn run(ch: &mut Chapter) {
                 safeclear(&mut buf);
             }
 
+            // If math is found in verbatim, replace it back to original
+            Event::Code(verbatim) => {
+                if let Some(inline) = inline(&verbatim) {
+                    replace(ch, &inline, &verbatim);
+                }
+                if let Some(display) = display(&verbatim) {
+                    replace(ch, &display, &verbatim);
+                }
+            }
+
             _ => {}
         }
     }
@@ -74,8 +84,11 @@ fn inline(text: &str) -> Option<String> {
             }
         } else if !text.ends_with(split) {
             // Hacky way of checking if this is the last split
-            out = out.replacen(&format!("${}$", split),
-                &format!("<span class=\"katex-inline\">{}</span>", split), 1);
+            out = out.replacen(
+                &format!("${}$", split),
+                &format!("<span class=\"katex-inline\">{}</span>", split),
+                1,
+            );
         }
     }
     if out != text {
@@ -90,8 +103,11 @@ fn display(text: &str) -> Option<String> {
     let splits = text.split("$$");
 
     for split in splits.skip(1).step_by(2) {
-        out = out.replacen(&format!("$${}$$", split),
-            &format!("<span class=\"katex-display\">{}</span>", split), 1);
+        out = out.replacen(
+            &format!("$${}$$", split),
+            &format!("<span class=\"katex-display\">{}</span>", split),
+            1,
+        );
     }
 
     if out != text {
