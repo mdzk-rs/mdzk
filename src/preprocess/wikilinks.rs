@@ -73,11 +73,17 @@ pub fn for_each_wikilink(content: &str, mut handle_link: impl FnMut(&str)) {
 pub struct WikiLinkParser;
 
 #[derive(Debug, PartialEq)]
+pub enum Anchor {
+    Header(String),
+    Blockref(String),
+    None,
+}
+
+#[derive(Debug, PartialEq)]
 pub struct WikiLink {
     pub path: Option<PathBuf>,
     pub title: String,
-    pub header: Option<String>,
-    pub blockref: Option<String>,
+    pub anchor: Anchor,
 }
 
 impl WikiLink {
@@ -104,15 +110,13 @@ impl WikiLink {
         };
 
         // Handle header and blockref
-        let (header, blockref) = match dest.next() {
+        let anchor = match dest.next() {
             Some(anchor) => match anchor.into_inner().next() {
-                Some(x) if x.as_rule() == Rule::header => (Some(id_from_content(x.as_str())), None),
-                Some(x) if x.as_rule() == Rule::blockref => {
-                    (None, Some(id_from_content(x.as_str())))
-                }
-                _ => panic!("WHAT?!"),
+                Some(x) if x.as_rule() == Rule::header => Anchor::Header(id_from_content(x.as_str())),
+                Some(x) if x.as_rule() == Rule::blockref => Anchor::Blockref(id_from_content(x.as_str())),
+                _ => panic!("This should not happen..."),
             },
-            None => (None, None),
+            None => Anchor::None,
         };
 
         // Find path
@@ -125,8 +129,7 @@ impl WikiLink {
         Ok(Self {
             path,
             title: title.to_owned(),
-            header,
-            blockref,
+            anchor,
         })
     }
 
@@ -142,8 +145,9 @@ impl WikiLink {
 
             // Handle anchor
             // TODO: Blockrefs are currently not handled here
-            if let Some(header) = &self.header {
-                href.push_str(&format!("#{}", header));
+            match &self.anchor {
+                Anchor::Header(id) | Anchor::Blockref(id) => href.push_str(&format!("#{}", id)),
+                Anchor::None => {},
             }
 
             format!("[{}](<{}>)", self.title, escape_special_chars(&href))
@@ -230,8 +234,7 @@ let link = "[[link_in_code]]".to_owned();
                 WikiLink {
                     path: Some(PathBuf::from("This is note")),
                     title: "Some alias".to_owned(),
-                    header: None,
-                    blockref: None,
+                    anchor: Anchor::None,
                 },
                 "This is note|Some alias",
             ),
@@ -239,8 +242,7 @@ let link = "[[link_in_code]]".to_owned();
                 WikiLink {
                     path: Some(PathBuf::from("Tïtlæ fôr nøte")),
                     title: "Tïtlæ fôr nøte".to_owned(),
-                    header: None,
-                    blockref: Some("id1234".to_owned()),
+                    anchor: Anchor::Blockref("id1234".to_owned()),
                 },
                 "Tïtlæ fôr nøte#^id1234",
             ),
@@ -248,8 +250,7 @@ let link = "[[link_in_code]]".to_owned();
                 WikiLink {
                     path: Some(PathBuf::from("🔈 Music")),
                     title: "🔈 Music".to_owned(),
-                    header: Some("header-with-spaces".to_owned()),
-                    blockref: None,
+                    anchor: Anchor::Header("header-with-spaces".to_owned()),
                 },
                 "🔈 Music#Header with spaces",
             ),
