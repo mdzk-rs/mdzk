@@ -49,6 +49,7 @@ pub fn run(ch: &mut Chapter) {
                 if let Some(display) = display(&verbatim) {
                     replace(ch, &display, &verbatim);
                 }
+                buf.clear();
             }
 
             _ => {}
