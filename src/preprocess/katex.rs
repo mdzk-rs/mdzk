@@ -1,5 +1,5 @@
 use mdbook::book::Chapter;
-use pulldown_cmark::{Event, Options, Parser, Tag};
+use pulldown_cmark::{Event, Parser, Tag};
 
 const KATEX_CSS: &str = r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">"#;
 const KATEX_JS: &str = r#"<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.20/dist/katex.min.js" integrity="sha384-ov99pRO2tAc0JuxTVzf63RHHeQTJ0CIawbDZFiFTzB07aqFZwEu2pz4uzqL+5OPG" crossorigin="anonymous"></script>"#;
@@ -17,40 +17,34 @@ document.addEventListener('DOMContentLoaded', function() {
 pub fn run(ch: &mut Chapter) {
     let copy = ch.content.clone();
 
-    let mut opts = Options::empty();
-    opts.insert(Options::ENABLE_TABLES);
-    opts.insert(Options::ENABLE_FOOTNOTES);
-    let parser = Parser::new_ext(&copy, opts);
+    let parser = Parser::new(&copy);
     let mut buf = String::new();
     for (event, range) in parser.into_offset_iter() {
         match event {
             // Start math rendering
             Event::Start(Tag::Paragraph)
-            | Event::Start(Tag::Emphasis)
-            | Event::Start(Tag::Strong)
             | Event::Start(Tag::Heading(_))
             | Event::Start(Tag::List(_))
             | Event::Start(Tag::Item)
-            | Event::Start(Tag::Table(_))
-            | Event::Start(Tag::TableHead)
-            | Event::Start(Tag::TableCell)
             | Event::Start(Tag::BlockQuote) => {
                 buf.push_str(&copy[range]);
-                if let Some(new_buf) = inline(&buf){
+
+                if let Some(new_buf) = inline(&buf) {
                     replace(ch, &buf, &new_buf);
-                    buf.clear();
-                    buf.push_str(&new_buf);
+                    buf = new_buf;
                 }
 
                 if let Some(display) = display(&buf) {
                     replace(ch, &buf, &display);
-                } 
+                }
+
                 safeclear(&mut buf);
             }
 
             _ => {}
         }
     }
+
     ch.content.push_str(&format!("\n\n{}", KATEX_CSS));
     ch.content.push_str(&format!("\n\n{}", KATEX_JS));
     ch.content.push_str(&format!("\n\n{}", RENDER_SCRIPT));
@@ -84,9 +78,9 @@ fn inline(text: &str) -> Option<String> {
                 &format!("<span class=\"katex-inline\">{}</span>", split), 1);
         }
     }
-    if out != text{
+    if out != text {
         Some(out)
-    }else{
+    } else {
         None
     }
 }
@@ -95,18 +89,14 @@ fn display(text: &str) -> Option<String> {
     let mut out = text.to_string();
     let splits = text.split("$$");
 
-    let mut inkatex = false;
-    for split in splits {
-        if inkatex{
-            out = out.replacen(&format!("$${}$$", split),
-                &format!("<span class=\"katex-display\">{}</span>", split), 1);
-        }
-        inkatex = !inkatex;
+    for split in splits.skip(1).step_by(2) {
+        out = out.replacen(&format!("$${}$$", split),
+            &format!("<span class=\"katex-display\">{}</span>", split), 1);
     }
 
-    if out != text{
+    if out != text {
         Some(out)
-    }else{
+    } else {
         None
     }
 }
@@ -120,24 +110,19 @@ fn replace(ch: &mut Chapter, old: &str, new: &str) {
 }
 
 fn safeclear(buf: &mut String) {
-    let mut cache = String::new();
+    let mut cache = buf.clone();
     let mut parity = true;
-    
-    while let Some(c) = buf.pop(){
-        cache.push(c);
-    }
     buf.clear();
 
-    while let Some(mut c) = cache.pop(){
-        if c == '\\'{
-            if !parity{
+    while let Some(mut c) = cache.pop() {
+        if c == '\\' {
+            if !parity {
                 buf.push(c);
             }
-            if let Some(d) = cache.pop(){
+            if let Some(d) = cache.pop() {
                 c = d;
             }
-        }
-        else if c == '$'{
+        } else if c == '$' {
             parity = !parity;
             buf.clear();
         }
