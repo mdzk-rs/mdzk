@@ -17,6 +17,8 @@
 
     More about these features and what they do, can be found in the [documentation](https://mdzk.app/docs).
 
+- [#39](https://github.com/mdzk-rs/mdzk/issues/39): Wikilinks now support blockreferences. Mark a paragraph with an ID by appending it with a space, a `^` and then a six-character ID. Then you can link to this paragraph, by using the syntax `[[Note^#id]]`, where `Note` is the name of the note and `id` is the ID of the paragraph. You can read more about blockreferences in [the documentation](https://mdzk.app/docs).
+
 ### Enhancements
 
 - [#54](https://github.com/mdzk-rs/mdzk/issues/54): Our separate preprocessor crates are now moved to within the mdzk crate. This allows us to avoid iterating over the vault multiple times, which drastically increases the efficiency.
