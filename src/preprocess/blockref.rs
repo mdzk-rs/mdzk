@@ -11,7 +11,7 @@ pub fn wrap_blocks(ch: &mut Chapter) {
             let new_split = format!(
                 "<div id=\"{}\">{}</div>",
                 id,
-                split.trim_end_matches(&id).trim_end_matches('^')
+                split.trim_end_matches(&format!(" ^{}", id))
             );
 
             ch.content = ch.content.replacen(split, &new_split, 1);
@@ -23,9 +23,11 @@ pub fn wrap_blocks(ch: &mut Chapter) {
 /// return the 6 digits as an id.
 fn blockref_id(paragraph: &str) -> Option<String> {
     let len = paragraph.len();
-    if len > 7 {
-        let mut iter = paragraph.chars().skip(len - 7);
-        if iter.next() == Some('^') && iter.clone().all(is_id_friendly) {
+    if len > 8 {
+        let mut iter = paragraph.chars().skip(len - 8);
+        if iter.next() == Some(' ')
+        && iter.next() == Some('^')
+        && iter.clone().all(is_id_friendly) {
             return Some(iter.collect());
         }
     }
