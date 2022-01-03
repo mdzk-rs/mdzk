@@ -23,7 +23,7 @@ pub fn run(ch: &mut Chapter) {
         match event {
             // Start math rendering
             Event::Start(Tag::Paragraph)
-            | Event::Start(Tag::Heading(_))
+            | Event::Start(Tag::Heading(..))
             | Event::Start(Tag::List(_))
             | Event::Start(Tag::Item)
             | Event::Start(Tag::BlockQuote) => {

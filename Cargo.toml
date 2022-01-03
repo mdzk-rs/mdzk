@@ -26,21 +26,21 @@ include = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.50"
+anyhow = "1.0.52"
 chrono = "0.4.19"
-futures-util = "0.3.18"
+futures-util = "0.3.19"
 gray_matter = "0.2.1"
-handlebars = "4.1.5"
+handlebars = "4.1.6"
 ignore = "0.4.18"
 lazy-regex = "2.2.2"
 mdbook = { version = "0.4.14", default-features = false }
 notify = "4.0.17"
 pest = "2.1.3"
 pest_derive = "2.1.0"
-pulldown-cmark = { version = "0.8.0", default-features = false, features = ["simd"] }
+pulldown-cmark = { version = "0.9.0", default-features = false, features = ["simd"] }
 regex = "1.5.4"
-serde = "1.0.130"
-serde_json = "1.0.72"
+serde = "1.0.133"
+serde_json = "1.0.74"
 structopt = "0.3.25"
 toml = "0.5.8"
 
@@ -49,5 +49,5 @@ ammonia = "3.1.2"
 elasticlunr-rs = { version = "2.3.14", default-features = false }
 
 # Feature: Serve
-tokio = { version = "1.14.0", default-features = false, features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.15.0", default-features = false, features = ["macros", "rt-multi-thread"] }
 warp = { version = "0.3.2", default-features = false, features = ["websocket"] }

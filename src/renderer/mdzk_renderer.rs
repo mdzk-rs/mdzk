@@ -126,6 +126,7 @@ fn render_markdown(text: &str) -> String {
     opts.insert(Options::ENABLE_FOOTNOTES);
     opts.insert(Options::ENABLE_STRIKETHROUGH);
     opts.insert(Options::ENABLE_TASKLISTS);
+    opts.insert(Options::ENABLE_HEADING_ATTRIBUTES);
     let parser = Parser::new_ext(text, opts);
     let parser = parser.map(|event| match event {
         Event::Start(Tag::Link(link_type, dest, title)) => {
