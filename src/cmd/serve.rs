@@ -22,7 +22,7 @@ const LIVE_RELOAD_ENDPOINT: &str = "__livereload";
 pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) -> Result<()> {
     let mut zk = load_zk(dir)?;
 
-    let address = format!("{}:{}", bind, port.to_string());
+    let address = format!("{}:{}", bind, port);
 
     let livereload_url = format!("ws://{}/{}", address, LIVE_RELOAD_ENDPOINT);
     update_config(&mut zk, &livereload_url)?;

@@ -33,7 +33,7 @@ impl HelperDef for RenderToc {
             .as_json()
             .as_str()
             .ok_or_else(|| RenderError::new("Type error for `path`, string expected"))?
-            .replace("\"", "");
+            .replace('\"', "");
 
         let current_section = rc
             .evaluate(ctx, "@root/section")?
@@ -123,7 +123,7 @@ impl HelperDef for RenderToc {
                     .to_str()
                     .unwrap()
                     // Hack for windows who tends to use `\` as separator instead of `/`
-                    .replace("\\", "/");
+                    .replace('\\', "/");
 
                 // Add link
                 out.write(&mdbook::utils::fs::path_to_root(&current_path))?;
