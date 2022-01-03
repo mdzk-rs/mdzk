@@ -14,9 +14,10 @@ repository = "https://github.com/mdzk-rs/mdzk"
 readme = "README.md"
 license-file = "LICENSE"
 include = [
+    "Cargo.toml", 
     "**/*.rs", 
     "**/*.hbs", 
-    "Cargo.toml", 
+    "**/*.pest", 
     "**/*.woff2",
     "**/*.js",
     "**/*.css",
