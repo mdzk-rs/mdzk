@@ -23,8 +23,37 @@ impl HtmlMdzk {
         let mut data = BTreeMap::new();
         data.insert("content", json!(html));
         data.insert("title", json!(ch.name));
-        data.insert("language", json!("en"));
+        data.insert(
+            "mdzk-title",
+            json!(ctx.config.book.title.as_ref().unwrap_or(&"".to_owned())),
+        );
+        data.insert(
+            "description",
+            json!(ctx
+                .config
+                .book
+                .description
+                .as_ref()
+                .unwrap_or(&"".to_owned())),
+        );
+        // TODO: Favicon
+        data.insert(
+            "language",
+            json!(ctx
+                .config
+                .book
+                .language
+                .as_ref()
+                .unwrap_or(&"en".to_owned())),
+        );
         data.insert("path_to_root", json!(utils::path_to_root(path)));
+
+        if let Some(toml::Value::Boolean(true)) = ctx.config.get("output.html.fold.enable") {
+            data.insert("fold-enable", json!(true));
+        }
+        if let Some(section_number) = &ch.number {
+            data.insert("section", json!(section_number));
+        }
 
         // Render output
         let out = hbs.render("index", &data)?;
@@ -145,6 +174,7 @@ fn render_markdown(text: &str) -> String {
 }
 
 fn fix(dest: CowStr) -> CowStr {
+    // TODO: Would like to avoid the usage of regexes here.
     let scheme_link_re = regex!(r"^[a-z][a-z0-9+.-]*:");
     let md_link_re = regex!(r"(?P<link>.*)\.md(?P<anchor>#.*)?");
 
