@@ -31,10 +31,10 @@ anyhow = "1.0.52"
 chrono = "0.4.19"
 futures-util = "0.3.19"
 gray_matter = "0.2.1"
-handlebars = "4.1.6"
+handlebars = "4.2.0"
 ignore = "0.4.18"
 lazy-regex = "2.2.2"
-mdbook = { version = "0.4.14", default-features = false }
+mdbook = { version = "0.4.15", default-features = false, features = ["search"] }
 notify = "4.0.17"
 pest = "2.1.3"
 pest_derive = "2.1.0"

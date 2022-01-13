@@ -465,9 +465,9 @@ dependencies = [
 
 [[package]]
 name = "handlebars"
-version = "4.1.6"
+version = "4.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "167fa173496c9eadd8749cca6f8339ac88e248f3ad2442791d0b743318a94fc0"
+checksum = "2483bce82dd3ed52509d0117e4a30a488bd608be250ed7a0185301314239ed31"
 dependencies = [
  "log",
  "pest",
@@ -823,20 +823,22 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 
 [[package]]
 name = "mdbook"
-version = "0.4.14"
+version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6e77253c46a90eb7e96b2807201dab941a4db5ea05eca5aaaf7027395f352b3"
+checksum = "241f10687eb3b4e0634b3b4e423f97c5f1efbd69dc9522e24a8b94583eeec3c6"
 dependencies = [
+ "ammonia",
  "anyhow",
  "chrono",
  "clap",
+ "elasticlunr-rs",
  "env_logger",
  "handlebars",
  "lazy_static",
  "log",
  "memchr",
  "opener",
- "pulldown-cmark 0.8.0",
+ "pulldown-cmark",
  "regex",
  "serde",
  "serde_derive",
@@ -864,7 +866,7 @@ dependencies = [
  "notify",
  "pest",
  "pest_derive",
- "pulldown-cmark 0.9.0",
+ "pulldown-cmark",
  "regex",
  "serde",
  "serde_json",
@@ -1253,23 +1255,12 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffade02495f22453cd593159ea2f59827aae7f53fa8323f756799b670881dcf8"
-dependencies = [
- "bitflags",
- "getopts",
- "memchr",
- "unicase",
-]
-
-[[package]]
-name = "pulldown-cmark"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acd16514d1af5f7a71f909a44ef253cdb712a376d7ebc8ae4a471a9be9743548"
 dependencies = [
  "bitflags",
+ "getopts",
  "memchr",
  "unicase",
 ]
