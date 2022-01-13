@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (Unreleased)
+## 0.5.0 (2022-01-03)
 
 ### New features
 
@@ -32,7 +32,7 @@
 - [#40](https://github.com/mdzk-rs/mdzk/pull/40): mdzk now checks whether you updated your `mdzk.toml` correctly or not. If a `[book]` section is found in your `mdzk.toml` file, a warning will appear that prompts the user to change it to `[mdzk]`.
 - When loading the mdzk from another directory than the root directory, parsing the summary would throw an error, as the path to it was not absolute. This is now fixed, which means you can build an mdzk located anywhere, from anywhere.
 
-## 0.4.3 (2020-11-01)
+## 0.4.3 (2021-11-01)
 
 ### New features
 
@@ -58,7 +58,7 @@
 
 - [#24](https://github.com/mdzk-rs/mdzk/issues/24): `mdzk.backlinks-header` in the config had no defuault value, which made mdzk panic when it was not set. This is now fixed.
 
-## 0.4.2 (2020-09-24)
+## 0.4.2 (2021-09-24)
 
 This is a quick update that should make compiling mdzk easier (and even possible) for Windows users.
 
@@ -72,7 +72,7 @@ We have also experienced some trouble with Windows Defender flagging pre-compile
 
 - Our dependency on [`mdbook-katex`](https://github.com/lzanini/mdbook-katex), and subsequently QuickJS, did not work well with most Windows computers. To circumvent this, KaTeX is now loaded from a CDN and handles the rendering client-side. This shouldn't lead to any significant increases in load time, but it is not ideal for offline usage. We are working on embedding KaTeX locally in the generated output, which hopefully will be included soon.
 
-## 0.4.1 (2020-09-23)
+## 0.4.1 (2021-09-23)
 
 ### Enhancements
 
