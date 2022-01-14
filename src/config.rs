@@ -87,6 +87,7 @@ impl From<Config> for mdbook::Config {
         config.set("mdzk.math", conf.build.math).ok();
         config.set("mdzk.readme", conf.build.readme).ok();
         config.set("mdzk.wikilinks", conf.build.wikilinks).ok();
+        config.set("mdzk.search", conf.mdzk.search).ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
@@ -185,6 +186,8 @@ pub struct MdzkConfig {
     pub backlinks_header: Option<String>,
     /// Whether the summary will be auto-generated or not.
     pub generate_summary: Option<bool>,
+    /// Whether search is enabled or not.
+    pub search: Option<bool>,
 }
 
 impl Default for MdzkConfig {
@@ -199,6 +202,7 @@ impl Default for MdzkConfig {
             language: Some("en".to_string()),
             backlinks_header: None,
             generate_summary: None,
+            search: None
         }
     }
 }

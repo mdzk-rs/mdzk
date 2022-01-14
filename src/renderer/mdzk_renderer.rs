@@ -144,6 +144,12 @@ impl Renderer for HtmlMdzk {
             utils::write_file(&font_path.join(font), bytes)?;
         }
 
+        if let Some(toml::Value::Boolean(false)) = ctx.config.get("mdzk.search") {
+        } else {
+            let search = mdbook::config::Search::default();
+            super::search::create_files(&search, destination, book)?;
+        }
+
         Ok(())
     }
 }

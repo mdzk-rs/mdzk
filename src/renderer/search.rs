@@ -25,17 +25,16 @@ pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> 
         warn!("searchindex.json is very large ({} bytes)", index.len());
     }
 
-    if search_config.copy_js {
-        crate::utils::write_file(&destination.join("searchindex.json"), index.as_bytes())?;
-        crate::utils::write_file(
-            &destination.join("searchindex.js"),
-            format!("Object.assign(window.search, {});", index).as_bytes(),
-        )?;
-        crate::utils::write_file(&destination.join("searcher.js"), include_bytes!("theme/js/searcher.js"))?;
-        crate::utils::write_file(&destination.join("mark.min.js"), include_bytes!("theme/js/mark.min.js"))?;
-        crate::utils::write_file(&destination.join("elasticlunr.min.js"), include_bytes!("theme/js/elasticlunr.min.js"))?;
-        debug!("Copying search files");
-    }
+    let js_dir = destination.join("js");
+    crate::utils::write_file(&destination.join("searchindex.json"), index.as_bytes())?;
+    crate::utils::write_file(
+        &destination.join("searchindex.js"),
+        format!("Object.assign(window.search, {});", index).as_bytes(),
+    )?;
+    crate::utils::write_file(&js_dir.join("searcher.js"), include_bytes!("theme/js/searcher.js"))?;
+    crate::utils::write_file(&js_dir.join("mark.min.js"), include_bytes!("theme/js/mark.min.js"))?;
+    crate::utils::write_file(&js_dir.join("elasticlunr.min.js"), include_bytes!("theme/js/elasticlunr.min.js"))?;
+    debug!("Copied search JS files");
 
     Ok(())
 }
