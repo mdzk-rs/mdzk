@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use elasticlunr::Index;
 use mdbook::{
     book::{Book, BookItem},
-    config::Search
+    config::Search,
 };
 use pulldown_cmark::*;
 use serde::Serialize;
@@ -33,9 +33,18 @@ pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> 
 
     debug!("Copying search JS files");
     let js_dir = destination.join("js");
-    crate::utils::write_file(&js_dir.join("searcher.js"), include_bytes!("theme/js/searcher.js"))?;
-    crate::utils::write_file(&js_dir.join("mark.min.js"), include_bytes!("theme/js/mark.min.js"))?;
-    crate::utils::write_file(&js_dir.join("elasticlunr.min.js"), include_bytes!("theme/js/elasticlunr.min.js"))?;
+    crate::utils::write_file(
+        &js_dir.join("searcher.js"),
+        include_bytes!("theme/js/searcher.js"),
+    )?;
+    crate::utils::write_file(
+        &js_dir.join("mark.min.js"),
+        include_bytes!("theme/js/mark.min.js"),
+    )?;
+    crate::utils::write_file(
+        &js_dir.join("elasticlunr.min.js"),
+        include_bytes!("theme/js/elasticlunr.min.js"),
+    )?;
 
     Ok(())
 }
@@ -63,8 +72,10 @@ fn write_to_json(index: Index, search_config: &Search, doc_urls: Vec<String>) ->
     }
 
     let mut fields = BTreeMap::new();
-    let mut opt = SearchOptionsField::default();
-    opt.boost = Some(search_config.boost_title);
+    let mut opt = SearchOptionsField {
+        boost: Some(search_config.boost_title),
+        ..SearchOptionsField::default()
+    };
     fields.insert("title".into(), opt);
     opt.boost = Some(search_config.boost_paragraph);
     fields.insert("body".into(), opt);
@@ -256,7 +267,9 @@ fn add_to_index(
     let doc_ref = doc_urls.len().to_string();
     doc_urls.push(url.into());
 
-    let items = items.iter().map(|&x| mdbook::utils::collapse_whitespace(x.trim()));
+    let items = items
+        .iter()
+        .map(|&x| mdbook::utils::collapse_whitespace(x.trim()));
     index.add_doc(&doc_ref, items);
 }
 

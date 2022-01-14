@@ -202,7 +202,7 @@ impl Default for MdzkConfig {
             language: Some("en".to_string()),
             backlinks_header: None,
             generate_summary: None,
-            search: None
+            search: None,
         }
     }
 }
