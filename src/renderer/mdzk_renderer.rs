@@ -155,6 +155,14 @@ impl Renderer for HtmlMdzk {
             include_bytes!("theme/css/main.css"),
         )?;
         utils::write_file(
+            &css_path.join("chrome.css"),
+            include_bytes!("theme/css/chrome.css"),
+        )?;
+        utils::write_file(
+            &css_path.join("variables.css"),
+            include_bytes!("theme/css/variables.css"),
+        )?;
+        utils::write_file(
             &css_path.join("inter.css"),
             include_bytes!("theme/css/inter.css"),
         )?;
@@ -169,6 +177,10 @@ impl Renderer for HtmlMdzk {
         utils::write_file(
             &js_path.join("auto-render.min.js"),
             include_bytes!("theme/js/auto-render.min.js"),
+        )?;
+        utils::write_file(
+            &js_path.join("page.js"),
+            include_bytes!("theme/js/page.js"),
         )?;
         if font_path.exists() {
             mdbook::utils::fs::remove_dir_content(&font_path)

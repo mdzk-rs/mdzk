@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }} - {{ mdzk_title }}</title>
-
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
     <meta name="description" content="{{ description }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#ffffff" />
+    {{#if base_url}}
+    <base href="{{ base_url }}">
+    {{/if}}
 
+    <title>{{ title }} - {{ mdzk_title }}</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ path_to_root }}css/variables.css">
     <link rel="stylesheet" type="text/css" href="{{ path_to_root }}css/main.css">
+    <link rel="stylesheet" type="text/css" href="{{ path_to_root }}css/chrome.css">
     <link rel="stylesheet" type="text/css" href="{{ path_to_root }}css/inter.css">
 
     <!-- KaTeX -->
@@ -26,12 +31,22 @@
       var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "{{ preferred_dark_theme }}" : "{{ default_theme }}";
   </script>
 
+  <!-- Work around some values being stored in localStorage wrapped in quotes -->
+  <script type="text/javascript">
+      try {
+          var sidebar = localStorage.getItem('mdbook-sidebar');
+          if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+              localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+          }
+      } catch (e) { }
+  </script>
+
   <!-- Hide / unhide sidebar before it is displayed -->
   <script type="text/javascript">
       var html = document.querySelector('html');
       var sidebar = 'hidden';
       if (document.body.clientWidth >= 1080) {
-          try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+          try { sidebar = localStorage.getItem('mdzk-sidebar'); } catch(e) { }
           sidebar = sidebar || 'visible';
       }
       html.classList.remove('sidebar-visible');
@@ -46,6 +61,53 @@
     <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
   </nav>
 
+  <div id="page-wrapper" class="page-wrapper">
+    <div class="page">
+      <div id="menu-bar-hover-placeholder"></div>
+      <div id="menu-bar" class="menu-bar sticky bordered">
+        <div class="left-buttons">
+          <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+            ☰
+          </button>
+        </div>
+
+        <h1 class="menu-title">{{ title }}</h1>
+
+        <div class="right-buttons">
+          <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+            ⌕
+          </button>
+        </div>
+      </div>
+
+      <div id="search-wrapper" class="hidden">
+        <form id="searchbar-outer" class="searchbar-outer">
+          <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+        </form>
+        <div id="searchresults-outer" class="searchresults-outer hidden">
+          <div id="searchresults-header" class="searchresults-header"></div>
+          <ul id="searchresults">
+          </ul>
+        </div>
+      </div>
+
+      <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+      <script type="text/javascript">
+        document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+        document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+        Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+            link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+        });
+      </script>
+
+      <div id="content" class="content">
+        <main>
+            {{{ content }}}
+        </main>
+      </div>
+    </div>
+  </div>
+
   <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
   <script type="text/javascript">
       document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -55,31 +117,28 @@
       });
   </script>
 
-  <!-- Sidebar JS -->
-  <script src="{{ path_to_root }}sidebar.js" type="text/javascript" charset="utf-8"></script>
-
-  <!-- Search -->
-  <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
-    <i class="fa fa-search"></i>
-    <p>Search</p>
-  </button>
-  <div id="search-wrapper" class="hidden">
-      <form id="searchbar-outer" class="searchbar-outer">
-          <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
-      </form>
-      <div id="searchresults-outer" class="searchresults-outer hidden">
-          <div id="searchresults-header" class="searchresults-header"></div>
-          <ul id="searchresults">
-          </ul>
-      </div>
-  </div>
+  <!-- JS for page functionality -->
+  <script src="{{ path_to_root }}js/page.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Search JS -->
   <script src="{{ path_to_root }}js/elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="{{ path_to_root }}js/mark.min.js" type="text/javascript" charset="utf-8"></script>
   <script src="{{ path_to_root }}js/searcher.js" type="text/javascript" charset="utf-8"></script>
 
-
-  {{content}}
+  <!-- Livereload script (if served using the cli tool) -->
+  {{#if livereload}}
+  <script type="text/javascript">
+      var socket = new WebSocket("{{{livereload}}}");
+      socket.onmessage = function (event) {
+          if (event.data === "reload") {
+              socket.close();
+              location.reload();
+          }
+      };
+      window.onbeforeunload = function() {
+          socket.close();
+      }
+  </script>
+  {{/if}}
 </body>
 </html>

@@ -1,3 +1,8 @@
+"use strict";
+
+// Fix back button cache problem
+window.onunload = function () { };
+
 (function sidebar() {
     var html = document.querySelector("html");
     var sidebar = document.getElementById("sidebar");
@@ -14,7 +19,7 @@
         });
         sidebarToggleButton.setAttribute('aria-expanded', true);
         sidebar.setAttribute('aria-hidden', false);
-        try { localStorage.setItem('mdbook-sidebar', 'visible'); } catch (e) { }
+        try { localStorage.setItem('mdzk-sidebar', 'visible'); } catch (e) { }
     }
 
 
@@ -36,7 +41,7 @@
         });
         sidebarToggleButton.setAttribute('aria-expanded', false);
         sidebar.setAttribute('aria-hidden', true);
-        try { localStorage.setItem('mdbook-sidebar', 'hidden'); } catch (e) { }
+        try { localStorage.setItem('mdzk-sidebar', 'hidden'); } catch (e) { }
     }
 
     // Toggle sidebar
@@ -116,4 +121,70 @@
         // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
         activeSection.scrollIntoView({ block: 'center' });
     }
+})();
+
+(function scrollToTop () {
+    var menuTitle = document.querySelector('.menu-title');
+
+    menuTitle.addEventListener('click', function () {
+        document.scrollingElement.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+})();
+
+(function controllMenu() {
+    var menu = document.getElementById('menu-bar');
+
+    (function controllPosition() {
+        var scrollTop = document.scrollingElement.scrollTop;
+        var prevScrollTop = scrollTop;
+        var minMenuY = -menu.clientHeight - 50;
+        // When the script loads, the page can be at any scroll (e.g. if you reforesh it).
+        menu.style.top = scrollTop + 'px';
+        // Same as parseInt(menu.style.top.slice(0, -2), but faster
+        var topCache = menu.style.top.slice(0, -2);
+        menu.classList.remove('sticky');
+        var stickyCache = false; // Same as menu.classList.contains('sticky'), but faster
+        document.addEventListener('scroll', function () {
+            scrollTop = Math.max(document.scrollingElement.scrollTop, 0);
+            // `null` means that it doesn't need to be updated
+            var nextSticky = null;
+            var nextTop = null;
+            var scrollDown = scrollTop > prevScrollTop;
+            var menuPosAbsoluteY = topCache - scrollTop;
+            if (scrollDown) {
+                nextSticky = false;
+                if (menuPosAbsoluteY > 0) {
+                    nextTop = prevScrollTop;
+                }
+            } else {
+                if (menuPosAbsoluteY > 0) {
+                    nextSticky = true;
+                } else if (menuPosAbsoluteY < minMenuY) {
+                    nextTop = prevScrollTop + minMenuY;
+                }
+            }
+            if (nextSticky === true && stickyCache === false) {
+                menu.classList.add('sticky');
+                stickyCache = true;
+            } else if (nextSticky === false && stickyCache === true) {
+                menu.classList.remove('sticky');
+                stickyCache = false;
+            }
+            if (nextTop !== null) {
+                menu.style.top = nextTop + 'px';
+                topCache = nextTop;
+            }
+            prevScrollTop = scrollTop;
+        }, { passive: true });
+    })();
+    (function controllBorder() {
+        menu.classList.remove('bordered');
+        document.addEventListener('scroll', function () {
+            if (menu.offsetTop === 0) {
+                menu.classList.remove('bordered');
+            } else {
+                menu.classList.add('bordered');
+            }
+        }, { passive: true });
+    })();
 })();

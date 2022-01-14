@@ -1,0 +1,45 @@
+/* Globals */
+
+:root {
+    --sidebar-width: 300px;
+    --page-padding: 15px;
+    --content-max-width: 750px;
+    --menu-bar-height: 50px;
+
+    --bg: #fff;
+    --fg: #000;
+    --links: #008cff;
+
+    --sidebar-bg: #fafafa;
+    --sidebar-fg: #000;
+    --sidebar-non-existant: #aaa;
+    --sidebar-active: var(--links);
+    --sidebar-spacer: #eee;
+
+    --scrollbar: #eee;
+
+    --icons: #aaa;
+    --icons-hover: var(--links);
+
+    --inline-code-color: #301900;
+
+    --theme-popup-bg: #fff;
+    --theme-popup-border: #eee;
+    --theme-hover: #eee;
+
+    --quote-bg: #fafafa;
+    --quote-border: #eee;
+
+    --table-border-color: hsl(0, 0%, 95%);
+    --table-header-bg: hsl(0, 0%, 80%);
+    --table-alternate-bg: hsl(0, 0%, 97%);
+
+    --searchbar-border-color: blue;
+    --searchbar-bg: #eee;
+    --searchbar-fg: #000;
+    --searchbar-shadow-color: #fff;
+    --searchresults-header-fg: #000;
+    --searchresults-border-color: #eee;
+    --searchresults-li-bg: #eee;
+    --search-mark-bg: #eee;
+}
