@@ -229,7 +229,7 @@ fn render_markdown(text: &str) -> String {
 
 /// Changes links with extension `.md` to `.html` if they don't have schemes. Keep any anchors.
 fn fix_link(dest: CowStr) -> CowStr {
-    if !crate::utils::has_scheme(&dest) && !dest.starts_with('#') {
+    if !(dest.starts_with('#') || crate::utils::has_scheme(&dest)) {
         if let Some((link, anchor)) = dest.split_once(".md") {
             let mut fixed_link = String::new();
             fixed_link.push_str(link);
