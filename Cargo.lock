@@ -862,6 +862,7 @@ dependencies = [
  "handlebars",
  "ignore",
  "lazy-regex",
+ "lazy_static",
  "mdbook",
  "notify",
  "pest",
