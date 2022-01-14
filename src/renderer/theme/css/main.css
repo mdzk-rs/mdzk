@@ -2,30 +2,13 @@
 
 @import 'variables.css';
 
-@media (orientation: landscape) {
-	body {
-		margin-left: 10%;
-		margin-right: 10%;
-	}
-}
-
-html {
-    font-family: "Inter"
-}
-
-code {
-	background-color: #e8e8e8;
-	padding: 2px 4px 2px 4px;
-}
-
-/* mdBook general.css from here */
-
 :root {
     /* Browser default font-size is 16px, this way 1 rem = 10px */
     font-size: 62.5%;
 }
 
 html {
+    font-family: "Inter", sans-serif;
     color: var(--fg);
     background-color: var(--bg);
     text-size-adjust: none;
@@ -146,6 +129,9 @@ table tbody tr:nth-child(2n) {
     background: var(--table-alternate-bg);
 }
 
+hr {
+    border: .1rem solid var(--quote-border);
+}
 
 blockquote {
     margin: 20px 0;

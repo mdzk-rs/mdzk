@@ -3,8 +3,8 @@
 :root {
     --sidebar-width: 300px;
     --page-padding: 15px;
-    --content-max-width: 750px;
-    --menu-bar-height: 50px;
+    --content-max-width: 800px;
+    --menu-bar-height: 70px;
 
     --bg: #fff;
     --fg: #000;

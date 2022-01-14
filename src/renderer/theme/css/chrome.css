@@ -58,6 +58,7 @@ a > .hljs {
     line-height: var(--menu-bar-height);
     cursor: pointer;
     transition: color 0.5s;
+    font-size: 18px;
 }
 @media only screen and (max-width: 420px) {
     #menu-bar i, #menu-bar .icon-button {
@@ -91,19 +92,17 @@ a > .hljs {
 }
 
 .menu-title {
+    color: var(--fg);
     display: inline-block;
-    font-weight: 200;
+    font-weight: 700;
     font-size: 2.4rem;
-    line-height: var(--menu-bar-height);
+    line-height: 1;
     text-align: center;
     margin: 0;
     flex: 1;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
-}
-.js .menu-title {
-    cursor: pointer;
+    padding-top: calc(var(--menu-bar-height) / 3);
+    padding-bottom: calc(var(--menu-bar-height) / 3);
 }
 
 .menu-bar,
