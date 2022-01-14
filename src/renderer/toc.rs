@@ -1,4 +1,3 @@
-use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;
@@ -10,6 +9,8 @@ use pulldown_cmark::{html, Event, Parser};
 #[derive(Clone, Copy)]
 pub struct RenderToc {
     pub no_section_label: bool,
+    pub fold_enable: bool,
+    pub fold_level: u8,
 }
 
 impl HelperDef for RenderToc {
@@ -33,7 +34,7 @@ impl HelperDef for RenderToc {
             .as_json()
             .as_str()
             .ok_or_else(|| RenderError::new("Type error for `path`, string expected"))?
-            .replace('\"', "");
+            .replace("\"", "");
 
         let current_section = rc
             .evaluate(ctx, "@root/section")?
@@ -41,18 +42,6 @@ impl HelperDef for RenderToc {
             .as_str()
             .map(str::to_owned)
             .unwrap_or_default();
-
-        let fold_enable = rc
-            .evaluate(ctx, "@root/fold_enable")?
-            .as_json()
-            .as_bool()
-            .ok_or_else(|| RenderError::new("Type error for `fold_enable`, bool expected"))?;
-
-        let fold_level = rc
-            .evaluate(ctx, "@root/fold_level")?
-            .as_json()
-            .as_u64()
-            .ok_or_else(|| RenderError::new("Type error for `fold_level`, u64 expected"))?;
 
         out.write("<ol class=\"chapter\">")?;
 
@@ -72,35 +61,31 @@ impl HelperDef for RenderToc {
             };
 
             let is_expanded =
-                if !fold_enable || (!section.is_empty() && current_section.starts_with(section)) {
+                if !self.fold_enable || (!section.is_empty() && current_section.starts_with(section)) {
                     // Expand if folding is disabled, or if the section is an
                     // ancestor or the current section itself.
                     true
                 } else {
                     // Levels that are larger than this would be folded.
-                    level - 1 < fold_level as usize
+                    level - 1 < self.fold_level as usize
                 };
 
-            match level.cmp(&current_level) {
-                Ordering::Greater => {
-                    while level > current_level {
-                        out.write("<li>")?;
-                        out.write("<ol class=\"section\">")?;
-                        current_level += 1;
-                    }
-                    write_li_open_tag(out, is_expanded, false)?;
+            if level > current_level {
+                while level > current_level {
+                    out.write("<li>")?;
+                    out.write("<ol class=\"section\">")?;
+                    current_level += 1;
                 }
-                Ordering::Less => {
-                    while level < current_level {
-                        out.write("</ol>")?;
-                        out.write("</li>")?;
-                        current_level -= 1;
-                    }
-                    write_li_open_tag(out, is_expanded, false)?;
+                write_li_open_tag(out, is_expanded, false)?;
+            } else if level < current_level {
+                while level < current_level {
+                    out.write("</ol>")?;
+                    out.write("</li>")?;
+                    current_level -= 1;
                 }
-                Ordering::Equal => {
-                    write_li_open_tag(out, is_expanded, item.get("section").is_none())?
-                }
+                write_li_open_tag(out, is_expanded, false)?;
+            } else {
+                write_li_open_tag(out, is_expanded, item.get("section").is_none())?;
             }
 
             // Part title
@@ -123,10 +108,10 @@ impl HelperDef for RenderToc {
                     .to_str()
                     .unwrap()
                     // Hack for windows who tends to use `\` as separator instead of `/`
-                    .replace('\\', "/");
+                    .replace("\\", "/");
 
                 // Add link
-                out.write(&mdbook::utils::fs::path_to_root(&current_path))?;
+                out.write(&crate::utils::path_to_root(&current_path))?;
                 out.write(&tmp)?;
                 out.write("\"")?;
 
@@ -154,8 +139,9 @@ impl HelperDef for RenderToc {
                 // Render only inline code blocks
 
                 // filter all events that are not inline code blocks
-                let parser = Parser::new(name).filter(|event| {
-                    matches!(*event, Event::Code(_) | Event::Html(_) | Event::Text(_))
+                let parser = Parser::new(name).filter(|event| match *event {
+                    Event::Code(_) | Event::Html(_) | Event::Text(_) => true,
+                    _ => false,
                 });
 
                 // render markdown to html
@@ -175,7 +161,7 @@ impl HelperDef for RenderToc {
             // Render expand/collapse toggle
             if let Some(flag) = item.get("has_sub_items") {
                 let has_sub_items = flag.parse::<bool>().unwrap_or_default();
-                if fold_enable && has_sub_items {
+                if self.fold_enable && has_sub_items {
                     out.write("<a class=\"toggle\"><div>❱</div></a>")?;
                 }
             }

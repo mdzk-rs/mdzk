@@ -5,7 +5,7 @@ use handlebars::{no_escape, Handlebars};
 use lazy_regex::regex;
 use mdbook::{book::Chapter, errors::*, renderer::RenderContext, BookItem, Renderer};
 use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag};
-use serde_json::json;
+use serde_json::{json, Value};
 use std::collections::BTreeMap;
 use std::fs;
 
@@ -14,43 +14,17 @@ use std::fs;
 pub struct HtmlMdzk;
 
 impl HtmlMdzk {
-    fn render_chapter(&self, ch: &Chapter, ctx: &RenderContext, hbs: &Handlebars) -> Result<()> {
+    fn render_note(&self, ch: &Chapter, ctx: &RenderContext, data: &mut BTreeMap<&str, Value>, hbs: &Handlebars) -> Result<()> {
         let path = ch.path.as_ref().unwrap();
 
         let html = render_markdown(&ch.content);
 
         // Make map with values for all handlebars keys
-        let mut data = BTreeMap::new();
         data.insert("content", json!(html));
         data.insert("title", json!(ch.name));
-        data.insert(
-            "mdzk-title",
-            json!(ctx.config.book.title.as_ref().unwrap_or(&"".to_owned())),
-        );
-        data.insert(
-            "description",
-            json!(ctx
-                .config
-                .book
-                .description
-                .as_ref()
-                .unwrap_or(&"".to_owned())),
-        );
-        // TODO: Favicon
-        data.insert(
-            "language",
-            json!(ctx
-                .config
-                .book
-                .language
-                .as_ref()
-                .unwrap_or(&"en".to_owned())),
-        );
+        data.insert("path", json!(path));
         data.insert("path_to_root", json!(utils::path_to_root(path)));
 
-        if let Some(toml::Value::Boolean(true)) = ctx.config.get("output.html.fold.enable") {
-            data.insert("fold-enable", json!(true));
-        }
         if let Some(section_number) = &ch.number {
             data.insert("section", json!(section_number));
         }
@@ -75,6 +49,14 @@ impl Renderer for HtmlMdzk {
     fn render(&self, ctx: &RenderContext) -> Result<()> {
         let destination = &ctx.destination;
         let book = &ctx.book;
+        let html_config = match ctx.config.get_deserialized_opt("output.html") {
+            Ok(Some(html_config)) => html_config,
+            Ok(None) => mdbook::config::HtmlConfig::default(),
+            Err(e) => {
+                warn!("Failed to parse HTML config: {}", e);
+                mdbook::config::HtmlConfig::default()
+            }
+        };
 
         if destination.exists() {
             // If output directory exists already, remove all content inside
@@ -86,17 +68,73 @@ impl Renderer for HtmlMdzk {
                 .context("Unexpected error when constructing destination path")?;
         }
 
+        // Create data for all notes
+        let mut data = BTreeMap::new();
+        data.insert(
+            "language",
+            json!(ctx.config.book.language.clone().unwrap_or_default()),
+        );
+        data.insert(
+            "mdzk_title",
+            json!(ctx.config.book.title.clone().unwrap_or_default()),
+        );
+        data.insert(
+            "description",
+            json!(ctx.config.book.description.clone().unwrap_or_default()),
+        );
+        // TODO: Favicon
+        if let Some(ref livereload) = html_config.livereload_url {
+            data.insert("livereload", json!(livereload));
+        }
+        data.insert("fold_enable", json!(html_config.fold.enable));
+        data.insert("fold_level", json!(html_config.fold.level));
+
+        // Add chapter titles for use in TOC
+        let mut chapters = vec![];
+        for item in book.iter() {
+            // Create the data to inject in the template
+            let mut chapter = BTreeMap::new();
+
+            match *item {
+                BookItem::PartTitle(ref title) => {
+                    chapter.insert("part", json!(title));
+                }
+                BookItem::Chapter(ref ch) => {
+                    if let Some(ref section) = ch.number {
+                        chapter.insert("section", json!(section.to_string()));
+                    }
+
+                    chapter.insert(
+                        "has_sub_items",
+                        json!((!ch.sub_items.is_empty()).to_string()),
+                    );
+
+                    chapter.insert("name", json!(ch.name));
+                    if let Some(ref path) = ch.path {
+                        let p = path
+                            .to_str()
+                            .with_context(|| "Could not convert path to str")?;
+                        chapter.insert("path", json!(p));
+                    }
+                }
+                BookItem::Separator => {
+                    chapter.insert("spacer", json!("_spacer_"));
+                }
+            }
+
+            chapters.push(chapter);
+        }
+        data.insert("chapters", json!(chapters));
+
         let mut hbs = Handlebars::new();
         hbs.register_escape_fn(no_escape);
         hbs.register_template_string("index", include_str!("theme/index.hbs"))?;
         hbs.register_helper(
             "toc",
             Box::new(toc::RenderToc {
-                no_section_label: ctx
-                    .config
-                    .html_config()
-                    .unwrap_or_default()
-                    .no_section_label,
+                no_section_label: html_config.no_section_label,
+                fold_enable: html_config.fold.enable,
+                fold_level: html_config.fold.level,
             }),
         );
 
@@ -104,7 +142,7 @@ impl Renderer for HtmlMdzk {
         for item in book.iter() {
             if let BookItem::Chapter(ref ch) = *item {
                 if !ch.is_draft_chapter() {
-                    self.render_chapter(ch, ctx, &hbs)?;
+                    self.render_note(ch, ctx, &mut data, &hbs)?;
                 }
             }
         }
@@ -144,10 +182,9 @@ impl Renderer for HtmlMdzk {
             utils::write_file(&font_path.join(font), bytes)?;
         }
 
-        if let Some(toml::Value::Boolean(false)) = ctx.config.get("mdzk.search") {
-        } else {
-            let search = mdbook::config::Search::default();
-            super::search::create_files(&search, destination, book)?;
+        if html_config.search.unwrap_or_default().enable {
+            let search_config = mdbook::config::Search::default();
+            super::search::create_files(&search_config, destination, book)?;
         }
 
         Ok(())

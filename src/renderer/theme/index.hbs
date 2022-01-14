@@ -26,10 +26,37 @@
       var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "{{ preferred_dark_theme }}" : "{{ default_theme }}";
   </script>
 
+  <!-- Hide / unhide sidebar before it is displayed -->
+  <script type="text/javascript">
+      var html = document.querySelector('html');
+      var sidebar = 'hidden';
+      if (document.body.clientWidth >= 1080) {
+          try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+          sidebar = sidebar || 'visible';
+      }
+      html.classList.remove('sidebar-visible');
+      html.classList.add("sidebar-" + sidebar);
+  </script>
+
   <!-- Sidebar -->
   <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-      <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+    <div class="sidebar-scrollbox">
+      {{#toc}}{{/toc}}
+    </div>
+    <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
   </nav>
+
+  <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+  <script type="text/javascript">
+      document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+      document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+      Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+          link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+      });
+  </script>
+
+  <!-- Sidebar JS -->
+  <script src="{{ path_to_root }}sidebar.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Search -->
   <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
