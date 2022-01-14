@@ -2,7 +2,6 @@ use super::toc;
 use crate::utils;
 use anyhow::Context;
 use handlebars::{no_escape, Handlebars};
-use lazy_regex::regex;
 use mdbook::{book::Chapter, errors::*, renderer::RenderContext, BookItem, Renderer};
 use pulldown_cmark::{html::push_html, CowStr, Event, Options, Parser, Tag};
 use serde_json::{json, Value};
@@ -202,10 +201,10 @@ fn render_markdown(text: &str) -> String {
     let parser = Parser::new_ext(text, opts);
     let parser = parser.map(|event| match event {
         Event::Start(Tag::Link(link_type, dest, title)) => {
-            Event::Start(Tag::Link(link_type, fix(dest), title))
+            Event::Start(Tag::Link(link_type, fix_link(dest), title))
         }
         Event::Start(Tag::Image(link_type, dest, title)) => {
-            Event::Start(Tag::Image(link_type, fix(dest), title))
+            Event::Start(Tag::Image(link_type, fix_link(dest), title))
         }
         _ => event,
     });
@@ -216,29 +215,18 @@ fn render_markdown(text: &str) -> String {
     content
 }
 
-fn fix(dest: CowStr) -> CowStr {
-    // TODO: Would like to avoid the usage of regexes here.
-    let scheme_link_re = regex!(r"^[a-z][a-z0-9+.-]*:");
-    let md_link_re = regex!(r"(?P<link>.*)\.md(?P<anchor>#.*)?");
-
-    if dest.starts_with('#') {
-        return dest;
-    }
-    // Don't modify links with schemes like `https`.
-    if !scheme_link_re.is_match(&dest) {
-        // This is a relative link, adjust it as necessary.
-        let mut fixed_link = String::new();
-
-        if let Some(caps) = md_link_re.captures(&dest) {
-            fixed_link.push_str(&caps["link"]);
+/// Changes links with extension `.md` to `.html` if they don't have schemes. Keep any anchors.
+fn fix_link(dest: CowStr) -> CowStr {
+    if !crate::utils::has_scheme(&dest) && !dest.starts_with('#') {
+        if let Some((link, anchor)) = dest.split_once(".md") {
+            let mut fixed_link = String::new();
+            fixed_link.push_str(link);
             fixed_link.push_str(".html");
-            if let Some(anchor) = caps.name("anchor") {
-                fixed_link.push_str(anchor.as_str());
+            if anchor.starts_with('#') {
+                fixed_link.push_str(anchor);
             }
-        } else {
-            fixed_link.push_str(&dest);
-        };
-        return CowStr::from(fixed_link);
+            return CowStr::from(fixed_link);
+        }
     }
     dest
 }
@@ -326,3 +314,15 @@ const FONTS: [(&str, &[u8]); 21] = [
         include_bytes!("theme/css/fonts/KaTeX_Size4-Regular.woff2"),
     ),
 ];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_fix_link() {
+        assert_eq!(fix_link("folder/subfolder/file.md".into()), "folder/subfolder/file.html".into());
+        assert_eq!(fix_link("https://mdzk.md".into()), "https://mdzk.md".into());
+        assert_eq!(fix_link("file.md#anchor".into()), "file.html#anchor".into());
+    }
+}
