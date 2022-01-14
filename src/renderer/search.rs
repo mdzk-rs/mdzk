@@ -15,26 +15,27 @@ pub fn create_files(search_config: &Search, destination: &Path, book: &Book) -> 
     let mut index = Index::new(&["title", "body", "breadcrumbs"]);
     let mut doc_urls = Vec::with_capacity(book.sections.len());
 
+    debug!("Populating search index");
     for item in book.iter() {
-        flatten_markdown(&mut index, search_config, &mut doc_urls, item)?;
+        populate_index(&mut index, search_config, &mut doc_urls, item)?;
     }
 
+    debug!("Writing search index as JSON");
     let index = write_to_json(index, search_config, doc_urls)?;
-    debug!("Writing search index");
     if index.len() > 10_000_000 {
         warn!("searchindex.json is very large ({} bytes)", index.len());
     }
-
-    let js_dir = destination.join("js");
     crate::utils::write_file(&destination.join("searchindex.json"), index.as_bytes())?;
     crate::utils::write_file(
         &destination.join("searchindex.js"),
         format!("Object.assign(window.search, {});", index).as_bytes(),
     )?;
+
+    debug!("Copying search JS files");
+    let js_dir = destination.join("js");
     crate::utils::write_file(&js_dir.join("searcher.js"), include_bytes!("theme/js/searcher.js"))?;
     crate::utils::write_file(&js_dir.join("mark.min.js"), include_bytes!("theme/js/mark.min.js"))?;
     crate::utils::write_file(&js_dir.join("elasticlunr.min.js"), include_bytes!("theme/js/elasticlunr.min.js"))?;
-    debug!("Copied search JS files");
 
     Ok(())
 }
@@ -101,7 +102,7 @@ fn write_to_json(index: Index, search_config: &Search, doc_urls: Vec<String>) ->
 }
 
 /// Renders markdown into flat unformatted text and adds it to the search index.
-fn flatten_markdown(
+fn populate_index(
     index: &mut Index,
     search_config: &Search,
     doc_urls: &mut Vec<String>,
@@ -119,40 +120,53 @@ fn flatten_markdown(
     let filepath = Path::new(&chapter_path).with_extension("html");
     let filepath = filepath
         .to_str()
-        .with_context(|| "Could not convert HTML path to str")?;
+        .with_context(|| format!("Could not convert HTML path {:?} to str", filepath))?;
     let anchor_base = mdbook::utils::fs::normalize_path(filepath);
 
     let mut p = mdbook::utils::new_cmark_parser(&chapter.content, false).peekable();
+
+    let mut breadcrumbs = chapter.parent_names.clone();
+    breadcrumbs.push(chapter.name.clone());
 
     let mut in_heading = false;
     let max_section_depth = u32::from(search_config.heading_split_level);
     let mut section_id = None;
     let mut heading = String::new();
     let mut body = String::new();
-    let mut breadcrumbs = chapter.parent_names.clone();
     let mut footnote_numbers = HashMap::new();
-
-    breadcrumbs.push(chapter.name.clone());
 
     while let Some(event) = p.next() {
         match event {
             Event::Start(Tag::Heading(i, ..)) if i as u32 <= max_section_depth => {
-                if !heading.is_empty() {
-                    // Section finished, the next heading is following now
-                    // Write the data to the index, and clear it for the next section
-                    add_doc(
-                        index,
-                        doc_urls,
-                        &anchor_base,
-                        &section_id,
-                        &[&heading, &body, &breadcrumbs.join(" » ")],
-                    );
-                    section_id = None;
-                    heading.clear();
-                    body.clear();
-                    breadcrumbs.pop();
+                match (body.is_empty(), heading.is_empty()) {
+                    (false, true) => {
+                        // Content before first heading. Add it to the index under the note title.
+                        add_to_index(
+                            index,
+                            doc_urls,
+                            &anchor_base,
+                            &None,
+                            &[&chapter.name, &body, &breadcrumbs.join(" » ")],
+                        );
+                        body.clear();
+                    }
+                    (_, false) => {
+                        // Section finished, the next heading is following now
+                        // Write the data to the index, and clear it for the next section
+                        add_to_index(
+                            index,
+                            doc_urls,
+                            &anchor_base,
+                            &section_id,
+                            &[&heading, &body, &breadcrumbs.join(" » ")],
+                        );
+                        section_id = None;
+                        heading.clear();
+                        body.clear();
+                        breadcrumbs.pop();
+                    }
+                    _ => {}
                 }
-
                 in_heading = true;
             }
             Event::End(Tag::Heading(i, ..)) if i as u32 <= max_section_depth => {
@@ -176,6 +190,10 @@ fn flatten_markdown(
                 }
 
                 body.push_str(&clean_html(&html_block));
+            }
+            Event::Start(Tag::Link(_, _, title)) => {
+                // Push only link titles, not the whole markup
+                body.push_str(&title);
             }
             Event::Start(_) | Event::End(_) | Event::Rule | Event::SoftBreak | Event::HardBreak => {
                 // Insert spaces where HTML output would usually separate text
@@ -209,7 +227,7 @@ fn flatten_markdown(
             }
         }
         // Make sure the last section is added to the index
-        add_doc(
+        add_to_index(
             index,
             doc_urls,
             &anchor_base,
@@ -222,7 +240,7 @@ fn flatten_markdown(
 }
 
 /// Uses the given arguments to construct a search document, then inserts it to the given index.
-fn add_doc(
+fn add_to_index(
     index: &mut Index,
     doc_urls: &mut Vec<String>,
     anchor_base: &str,
