@@ -7,7 +7,7 @@ use toml::Value;
 pub fn insert_backlinks(
     ch: &mut Chapter,
     backlinks_map: &mut HashMap<PathBuf, Vec<(PathBuf, String)>>,
-    pre: &str,
+    header: &str,
 ) {
     if let Some(path) = &ch.path {
         if let Some(backlinks) = backlinks_map.get_mut(path) {
@@ -15,27 +15,30 @@ pub fn insert_backlinks(
                 backlinks.sort_unstable();
                 backlinks.dedup();
 
-                ch.content.push_str(pre);
+                ch.content.push_str("\n<div class=\"backlinks\">\n\n");
+                ch.content.push_str(header);
 
                 for (dest, name) in backlinks.iter() {
                     let diff_path = diff_paths(dest, path.parent().unwrap()).unwrap();
                     ch.content.push_str(&format!(
-                        "\n> - [{}](<{}>)",
+                        "\n- [{}](<{}>)",
                         name,
-                        diff_path.to_string_lossy()
+                        diff_path.to_string_lossy(),
                     ));
                 }
+
+                ch.content.push_str("\n</div>");
             };
         }
     }
 }
 
-pub fn prefix(config: &mdbook::Config) -> String {
-    let mut prefix = "\n\n---\n\n".to_string();
+pub fn backlinks_header(config: &mdbook::Config) -> String {
+    let mut header = String::new();
     if let Some(Value::String(val)) = config.get("mdzk.backlinks-header") {
-        prefix.push_str("## ");
-        prefix.push_str(val);
-        prefix.push_str("\n\n");
+        header.push_str("## ");
+        header.push_str(val);
+        header.push_str(" {.backlinks-header}");
     }
-    prefix
+    header
 }
