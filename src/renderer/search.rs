@@ -134,7 +134,10 @@ fn populate_index(
         .with_context(|| format!("Could not convert HTML path {:?} to str", filepath))?;
     let anchor_base = mdbook::utils::fs::normalize_path(filepath);
 
-    let mut p = mdbook::utils::new_cmark_parser(&chapter.content, false).peekable();
+    let mut opts = Options::empty();
+    opts.insert(Options::ENABLE_FOOTNOTES);
+    opts.insert(Options::ENABLE_HEADING_ATTRIBUTES);
+    let mut p = Parser::new_ext(&chapter.content, opts).peekable();
 
     let mut breadcrumbs = chapter.parent_names.clone();
     breadcrumbs.push(chapter.name.clone());
