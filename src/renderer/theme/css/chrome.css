@@ -256,18 +256,20 @@ mark.fade-out {
 }
 
 #searchbar {
+    outline: none;
     width: 100%;
     margin: 5px auto 0px auto;
     padding: 10px 16px;
-    transition: box-shadow 300ms ease-in-out;
-    border: 1px solid var(--searchbar-border-color);
-    border-radius: 3px;
+    transition: all 100ms ease-in-out;
+    border: none;
+    border-bottom: 1px solid var(--quote-border);
     background-color: var(--searchbar-bg);
     color: var(--searchbar-fg);
 }
 #searchbar:focus,
-#searchbar.active {
-    box-shadow: 0 0 3px var(--searchbar-shadow-color);
+#searchbar:active,
+#searchbar:focus-visible {
+    border-bottom-color: var(--searchbar-border-color);
 }
 
 .searchresults-header {
