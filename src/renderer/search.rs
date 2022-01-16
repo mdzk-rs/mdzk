@@ -136,6 +136,9 @@ fn populate_index(
 
     let mut opts = Options::empty();
     opts.insert(Options::ENABLE_FOOTNOTES);
+    opts.insert(Options::ENABLE_TASKLISTS);
+    opts.insert(Options::ENABLE_STRIKETHROUGH);
+    opts.insert(Options::ENABLE_TABLES);
     opts.insert(Options::ENABLE_HEADING_ATTRIBUTES);
     let mut p = Parser::new_ext(&chapter.content, opts).peekable();
 
