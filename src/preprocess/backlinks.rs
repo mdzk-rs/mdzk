@@ -1,4 +1,4 @@
-use crate::utils::diff_paths;
+use crate::utils::{diff_paths, escape_special_chars};
 use mdbook::book::Chapter;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -19,11 +19,11 @@ pub fn insert_backlinks(
                 ch.content.push_str(header);
 
                 for (dest, name) in backlinks.iter() {
-                    let diff_path = diff_paths(dest, path.parent().unwrap()).unwrap();
+                    let link = diff_paths(dest, path.parent().unwrap()).unwrap();
                     ch.content.push_str(&format!(
-                        "\n- [{}](<{}>)",
+                        "\n- [{}]({})",
                         name,
-                        diff_path.to_string_lossy(),
+                        escape_special_chars(&link.to_string_lossy()),
                     ));
                 }
 

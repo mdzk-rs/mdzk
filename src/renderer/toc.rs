@@ -1,9 +1,9 @@
+use crate::utils;
+use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
+use pulldown_cmark::{html, Event, Parser};
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;
-
-use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
-use pulldown_cmark::{html, Event, Parser};
 
 // Handlebars helper to construct TOC
 #[derive(Clone, Copy)]
@@ -33,7 +33,7 @@ impl HelperDef for RenderToc {
             .evaluate(ctx, "@root/path")?
             .as_json()
             .as_str()
-            .ok_or_else(|| RenderError::new("Type error for `path`, string expected"))?
+            .ok_or_else(|| RenderError::new("Type error for `path`. String expected."))?
             .replace("\"", "");
 
         let current_section = rc
@@ -103,16 +103,15 @@ impl HelperDef for RenderToc {
             {
                 out.write("<a href=\"")?;
 
-                let tmp = Path::new(item.get("path").expect("Error: path should be Some(_)"))
+                let dest = Path::new(path)
                     .with_extension("html")
                     .to_str()
                     .unwrap()
-                    // Hack for windows who tends to use `\` as separator instead of `/`
-                    .replace("\\", "/");
+                    .replace("\\", "/"); // Hack for Windows paths
 
                 // Add link
-                out.write(&crate::utils::path_to_root(&current_path))?;
-                out.write(&tmp)?;
+                out.write(&utils::path_to_root(&current_path))?;
+                out.write(&utils::escape_special_chars(&dest))?;
                 out.write("\"")?;
 
                 if path == &current_path {
