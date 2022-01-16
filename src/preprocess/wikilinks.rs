@@ -275,15 +275,15 @@ let link = "[[link_in_code]]".to_owned();
 
         let cases = vec![
             (
-                "[Some alias](<../../This%20is%20note.md>)",
+                "[Some alias](../../This%20is%20note.md)",
                 WikiLink::from_with_index("This is note|Some alias", &index).unwrap(),
             ),
             (
-                "[Tïtlæ fôr nøte](<../../T%C3%AFtl%C3%A6%20f%C3%B4r%20n%C3%B8te.md#id1234>)",
+                "[Tïtlæ fôr nøte](../../T%C3%AFtl%C3%A6%20f%C3%B4r%20n%C3%B8te.md#id1234)",
                 WikiLink::from_with_index("Tïtlæ fôr nøte#id1234", &index).unwrap(),
             ),
             (
-                "<span class=\"missing-link\" style=\"color:darkred;\">This is missing note</span>",
+                "<span class=\"missing-link\" title=\"This note does not exist.\">This is missing note</span>",
                 WikiLink::from_with_index("Missing note#header | This is missing note", &index)
                     .unwrap(),
             ),
