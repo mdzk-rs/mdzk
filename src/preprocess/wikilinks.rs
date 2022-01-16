@@ -154,10 +154,10 @@ impl WikiLink {
                 Anchor::None => {}
             }
 
-            format!("[{}](<{}>)", self.title, escape_special_chars(&href))
+            format!("[{}]({})", self.title, escape_special_chars(&href))
         } else {
             format!(
-                "<span class=\"missing-link\" style=\"color:darkred;\">{}</span>",
+                "<span class=\"missing-link\" title=\"This note does not exist.\">{}</span>",
                 self.title
             )
         }

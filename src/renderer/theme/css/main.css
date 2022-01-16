@@ -142,6 +142,13 @@ blockquote {
     border-bottom: .1em solid var(--quote-border);
 }
 
+.missing-link {
+    opacity: 0.4;
+}
+
+.missing-link:hover {
+    text-decoration: underline;
+}
 
 :not(.footnote-definition) + .footnote-definition,
 .footnote-definition + :not(.footnote-definition) {
