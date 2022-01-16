@@ -60,15 +60,16 @@ impl HelperDef for RenderToc {
                 ("", 1)
             };
 
-            let is_expanded =
-                if !self.fold_enable || (!section.is_empty() && current_section.starts_with(section)) {
-                    // Expand if folding is disabled, or if the section is an
-                    // ancestor or the current section itself.
-                    true
-                } else {
-                    // Levels that are larger than this would be folded.
-                    level - 1 < self.fold_level as usize
-                };
+            let is_expanded = if !self.fold_enable
+                || (!section.is_empty() && current_section.starts_with(section))
+            {
+                // Expand if folding is disabled, or if the section is an
+                // ancestor or the current section itself.
+                true
+            } else {
+                // Levels that are larger than this would be folded.
+                level - 1 < self.fold_level as usize
+            };
 
             if level > current_level {
                 while level > current_level {

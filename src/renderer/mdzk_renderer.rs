@@ -13,7 +13,13 @@ use std::fs;
 pub struct HtmlMdzk;
 
 impl HtmlMdzk {
-    fn render_note(&self, ch: &Chapter, ctx: &RenderContext, data: &mut BTreeMap<&str, Value>, hbs: &Handlebars) -> Result<()> {
+    fn render_note(
+        &self,
+        ch: &Chapter,
+        ctx: &RenderContext,
+        data: &mut BTreeMap<&str, Value>,
+        hbs: &Handlebars,
+    ) -> Result<()> {
         let path = ch.path.as_ref().unwrap();
 
         let html = render_markdown(&ch.content);
@@ -178,10 +184,7 @@ impl Renderer for HtmlMdzk {
             &js_path.join("auto-render.min.js"),
             include_bytes!("theme/js/auto-render.min.js"),
         )?;
-        utils::write_file(
-            &js_path.join("page.js"),
-            include_bytes!("theme/js/page.js"),
-        )?;
+        utils::write_file(&js_path.join("page.js"), include_bytes!("theme/js/page.js"))?;
         if font_path.exists() {
             mdbook::utils::fs::remove_dir_content(&font_path)
                 .context("Unable to remove old fonts")?;
@@ -333,7 +336,10 @@ mod tests {
 
     #[test]
     fn test_fix_link() {
-        assert_eq!(fix_link("folder/subfolder/file.md".into()), "folder/subfolder/file.html".into());
+        assert_eq!(
+            fix_link("folder/subfolder/file.md".into()),
+            "folder/subfolder/file.html".into()
+        );
         assert_eq!(fix_link("https://mdzk.md".into()), "https://mdzk.md".into());
         assert_eq!(fix_link("file.md#anchor".into()), "file.html#anchor".into());
     }

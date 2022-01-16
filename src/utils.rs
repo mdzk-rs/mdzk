@@ -228,7 +228,7 @@ pub fn has_scheme(url: &str) -> bool {
     if let Some((potential_scheme, _)) = url.split_once("://") {
         let mut chars = potential_scheme.chars();
         chars.next().unwrap_or('�').is_ascii_alphabetic()
-        && chars.all(|c| c.is_alphanumeric() || c == '+' || c == '.' || c == '-')
+            && chars.all(|c| c.is_alphanumeric() || c == '+' || c == '.' || c == '-')
     } else {
         false
     }
