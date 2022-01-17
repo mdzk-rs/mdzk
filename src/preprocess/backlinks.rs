@@ -36,7 +36,7 @@ pub fn insert_backlinks(
 pub fn backlinks_header(config: &mdbook::Config) -> String {
     let mut header = String::new();
     if let Some(Value::String(val)) = config.get("mdzk.backlinks-header") {
-        header.push_str("## ");
+        header.push_str("### ");
         header.push_str(val);
         header.push_str(" {.backlinks-header}");
     }

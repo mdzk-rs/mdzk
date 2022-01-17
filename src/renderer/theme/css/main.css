@@ -220,3 +220,18 @@ blockquote {
 .result-no-output {
     font-style: italic;
 }
+
+#watermark {
+    text-align: center;
+    margin: 30px 0;
+    font-size: 90%;
+    border-bottom: 1px solid var(--quote-border);
+}
+#watermark a {
+    text-decoration: none;
+    color: var(--icons);
+    transition: color 150ms;
+}
+#watermark a:hover {
+    color: var(--links);
+}
