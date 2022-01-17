@@ -103,6 +103,36 @@ h6:target::before {
     text-decoration: none;
 }
 
+.backlinks-header {
+    text-align: center;
+    border-bottom: 1px solid var(--quote-border);
+}
+
+.backlinks p {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    list-style-type: none;
+    padding: 0;
+}
+
+.backlinks p a {
+    padding: 10px;
+    background-color: var(--quote-bg);
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--quote-border);
+    transition: background-color 100ms;
+}
+
+.backlinks p a:hover {
+    background-color: var(--quote-border);
+    text-decoration: none;
+}
+
 table {
     margin: 0 auto;
     border-collapse: collapse;
