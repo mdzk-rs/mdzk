@@ -396,6 +396,7 @@ ul#searchresults span.teaser em {
     padding: 0;
     text-decoration: none;
     color: var(--sidebar-fg);
+    transition: color 100ms;
 }
 
 .chapter li a:hover {
