@@ -827,11 +827,9 @@ version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "241f10687eb3b4e0634b3b4e423f97c5f1efbd69dc9522e24a8b94583eeec3c6"
 dependencies = [
- "ammonia",
  "anyhow",
  "chrono",
  "clap",
- "elasticlunr-rs",
  "env_logger",
  "handlebars",
  "lazy_static",
