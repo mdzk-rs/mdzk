@@ -166,7 +166,7 @@ impl HelperDef for RenderToc {
             if let Some(flag) = item.get("has_sub_items") {
                 let has_sub_items = flag.parse::<bool>().unwrap_or_default();
                 if self.fold_enable && has_sub_items {
-                    out.write("<a class=\"toggle\"><div>❱</div></a>")?;
+                    out.write("<a class=\"toggle\"><div>→</div></a>")?;
                 }
             }
             out.write("</li>")?;
