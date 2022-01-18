@@ -181,8 +181,8 @@ impl Renderer for HtmlMdzk {
             include_bytes!("theme/js/katex.min.js"),
         )?;
         utils::write_file(
-            &js_path.join("auto-render.min.js"),
-            include_bytes!("theme/js/auto-render.min.js"),
+            &js_path.join("highlight.min.js"),
+            include_bytes!("theme/js/highlight.min.js"),
         )?;
         utils::write_file(&js_path.join("page.js"), include_bytes!("theme/js/page.js"))?;
         if font_path.exists() {
