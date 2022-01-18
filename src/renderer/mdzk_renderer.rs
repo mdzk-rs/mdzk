@@ -173,8 +173,8 @@ impl Renderer for HtmlMdzk {
             include_bytes!("theme/css/atom-one-light.css"),
         )?;
         utils::write_file(
-            &css_path.join("inter.css"),
-            include_bytes!("theme/css/inter.css"),
+            &css_path.join("fonts.css"),
+            include_bytes!("theme/css/fonts.css"),
         )?;
         utils::write_file(
             &css_path.join("katex.min.css"),
@@ -250,8 +250,12 @@ fn fix_link(dest: CowStr) -> CowStr {
     dest
 }
 
-const FONTS: [(&str, &[u8]); 21] = [
+const FONTS: [(&str, &[u8]); 22] = [
     ("Inter.ttf", include_bytes!("theme/css/fonts/Inter.ttf")),
+    (
+        "Source_Code_Pro_v11_All_Charsets_500.woff2",
+        include_bytes!("theme/css/fonts/Source_Code_Pro_v11_All_Charsets_500.woff2")
+    ),
     (
         "KaTeX_Main-Regular.woff2",
         include_bytes!("theme/css/fonts/KaTeX_Main-Regular.woff2"),
