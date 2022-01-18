@@ -1,6 +1,7 @@
 use crate::utils;
 use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
 use pulldown_cmark::{html, Event, Parser};
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;
@@ -34,7 +35,7 @@ impl HelperDef for RenderToc {
             .as_json()
             .as_str()
             .ok_or_else(|| RenderError::new("Type error for `path`. String expected."))?
-            .replace("\"", "");
+            .replace('"', "");
 
         let current_section = rc
             .evaluate(ctx, "@root/section")?
@@ -71,22 +72,26 @@ impl HelperDef for RenderToc {
                 level - 1 < self.fold_level as usize
             };
 
-            if level > current_level {
-                while level > current_level {
-                    out.write("<li>")?;
-                    out.write("<ol class=\"section\">")?;
-                    current_level += 1;
+            match level.cmp(&current_level) {
+                Ordering::Greater => {
+                    while level > current_level {
+                        out.write("<li>")?;
+                        out.write("<ol class=\"section\">")?;
+                        current_level += 1;
+                    }
+                    write_li_open_tag(out, is_expanded, false)?;
                 }
-                write_li_open_tag(out, is_expanded, false)?;
-            } else if level < current_level {
-                while level < current_level {
-                    out.write("</ol>")?;
-                    out.write("</li>")?;
-                    current_level -= 1;
+                Ordering::Less => {
+                    while level < current_level {
+                        out.write("</ol>")?;
+                        out.write("</li>")?;
+                        current_level -= 1;
+                    }
+                    write_li_open_tag(out, is_expanded, false)?;
                 }
-                write_li_open_tag(out, is_expanded, false)?;
-            } else {
-                write_li_open_tag(out, is_expanded, item.get("section").is_none())?;
+                Ordering::Equal => {
+                    write_li_open_tag(out, is_expanded, item.get("section").is_none())?;
+                }
             }
 
             // Part title
@@ -108,7 +113,7 @@ impl HelperDef for RenderToc {
                     .with_extension("html")
                     .to_str()
                     .unwrap()
-                    .replace("\\", "/"); // Hack for Windows paths
+                    .replace('\\', "/"); // Hack for Windows paths
 
                 // Add link
                 out.write(&utils::path_to_root(&current_path))?;
@@ -139,9 +144,8 @@ impl HelperDef for RenderToc {
                 // Render only inline code blocks
 
                 // filter all events that are not inline code blocks
-                let parser = Parser::new(name).filter(|event| match *event {
-                    Event::Code(_) | Event::Html(_) | Event::Text(_) => true,
-                    _ => false,
+                let parser = Parser::new(name).filter(|event| {
+                    matches!(*event, Event::Code(_) | Event::Html(_) | Event::Text(_))
                 });
 
                 // render markdown to html

@@ -145,7 +145,7 @@ pub fn escape_special_chars(text: &str) -> String {
     escape_href(&mut buf, text).ok();
     // Apparently, pulldown-cmark does not escape `?` into `%3F`, which means we
     // have to do it manually.
-    buf.replace("?", "%3F")
+    buf.replace('?', "%3F")
 }
 
 /// Ease-of-use function for creating a file and writing bytes to it
