@@ -188,3 +188,21 @@ window.onunload = function () { };
         }, { passive: true });
     })();
 })();
+
+(function highlight() {
+    // Syntax highlighting Configuration
+    hljs.configure({
+        tabReplace: '    ', // 4 spaces
+        languages: [],      // Languages used for auto-detection
+    });
+    let code_nodes = Array
+        .from(document.querySelectorAll('code'))
+        // Don't highlight `inline code` blocks in headers.
+        .filter(function (node) {return !node.parentElement.classList.contains("header"); });
+
+    code_nodes.forEach(function (block) { hljs.highlightElement(block); });
+
+    // Adding the hljs class gives code blocks the color css
+    // even if highlighting doesn't apply
+    code_nodes.forEach(function (block) { block.classList.add('hljs'); });
+})();

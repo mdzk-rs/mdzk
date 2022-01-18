@@ -25,6 +25,16 @@ code {
     font-family: "Source Code Pro", Consolas, "Ubuntu Mono", Menlo, "DejaVu Sans Mono", monospace, monospace !important;
     font-size: 0.875em; /* please adjust the ace font size accordingly in editor.js */
 }
+pre code {
+    border-radius: 5px;
+    border: 1px solid var(--code-border);
+    display: block;
+    padding: 1rem 1.5rem;
+    white-space: pre;
+}
+.hljs {
+    background: var(--code-bg);
+}
 
 /* Don't change font size in headers. */
 h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {

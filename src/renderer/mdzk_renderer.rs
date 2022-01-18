@@ -169,6 +169,10 @@ impl Renderer for HtmlMdzk {
             include_bytes!("theme/css/variables.css"),
         )?;
         utils::write_file(
+            &css_path.join("atom-one-light.css"),
+            include_bytes!("theme/css/atom-one-light.css"),
+        )?;
+        utils::write_file(
             &css_path.join("inter.css"),
             include_bytes!("theme/css/inter.css"),
         )?;

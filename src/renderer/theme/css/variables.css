@@ -23,12 +23,11 @@
 
     --inline-code-color: #301900;
 
-    --theme-popup-bg: #fff;
-    --theme-popup-border: #eee;
-    --theme-hover: #eee;
+    --quote-bg: var(--sidebar-bg);
+    --quote-border: var(--sidebar-spacer);
 
-    --quote-bg: #fafafa;
-    --quote-border: #eee;
+    --code-bg: var(--quote-bg);
+    --code-border: var(--quote-border);
 
     --table-border-color: hsl(0, 0%, 95%);
     --table-header-bg: hsl(0, 0%, 80%);
