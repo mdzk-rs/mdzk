@@ -119,23 +119,19 @@ h6:target::before {
 }
 
 .backlinks p {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    list-style-type: none;
-    padding: 0;
+    gap: calc(100%/30/2);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .backlinks p a {
     padding: 10px;
     background-color: var(--quote-bg);
     border-radius: 5px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     border: 1px solid var(--quote-border);
     transition: background-color 100ms;
+    margin-bottom: calc(100%/30/2);
 }
 
 .backlinks p a:hover {
