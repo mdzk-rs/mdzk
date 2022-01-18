@@ -33,12 +33,11 @@
     --table-header-bg: hsl(0, 0%, 80%);
     --table-alternate-bg: hsl(0, 0%, 97%);
 
-    --searchbar-border-color: var(--links);
+    --searchbar-border: var(--sidebar-spacer);
+    --searchbar-active: var(--links);
     --searchbar-bg: var(--bg);
-    --searchbar-fg: #000;
-    --searchbar-shadow-color: #fff;
+    --searchbar-fg: var(--fg);
     --searchresults-header-fg: #000;
     --searchresults-border-color: #eee;
     --searchresults-li-bg: #eee;
-    --search-mark-bg: #eee;
 }

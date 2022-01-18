@@ -206,14 +206,18 @@ mark.fade-out {
     padding: 10px 16px;
     transition: all 100ms ease-in-out;
     border: none;
-    border-bottom: 1px solid var(--quote-border);
+    border-bottom: 1px solid var(--searchbar-border);
     background-color: var(--searchbar-bg);
     color: var(--searchbar-fg);
+}
+#searchbar::placeholder {
+    color: var(--searchbar-fg);
+    opacity: 0.3;
 }
 #searchbar:focus,
 #searchbar:active,
 #searchbar:focus-visible {
-    border-bottom-color: var(--searchbar-border-color);
+    border-bottom-color: var(--searchbar-active);
 }
 
 .searchresults-header {
