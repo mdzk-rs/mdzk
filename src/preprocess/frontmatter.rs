@@ -53,11 +53,9 @@ pub fn run(ch: &mut Chapter) {
                 "Unknown date format".to_string()
             };
 
-            ch.content = format!(
-                "{}\n\n<div class=\"datetime\" style=\"text-align: center; color: gray; font-style: italic; font-size: 90%;\">{}</div>\n\n",
-                ch.content,
-                &formatted_date,
-            );
+            ch.content.push_str("\n\n<div class=\"datetime\">");
+            ch.content.push_str(&formatted_date);
+            ch.content.push_str("</div>\n");
         }
     };
 

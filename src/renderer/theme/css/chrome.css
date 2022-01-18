@@ -57,7 +57,7 @@ a > .hljs {
     z-index: 10;
     line-height: var(--menu-bar-height);
     cursor: pointer;
-    transition: color 0.5s;
+    transition: color 150ms;
     font-size: 18px;
 }
 @media only screen and (max-width: 420px) {

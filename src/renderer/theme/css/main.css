@@ -175,7 +175,6 @@ blockquote {
 .missing-link {
     opacity: 0.4;
 }
-
 .missing-link:hover {
     text-decoration: underline;
 }
@@ -185,11 +184,24 @@ blockquote {
     margin-top: 2em;
 }
 .footnote-definition {
-    font-size: 0.9em;
+    font-size: 0.8em;
     margin: 0.5em 0;
+    opacity: 0.7;
+    transition: opacity 150ms;
+}
+.footnote-definition:hover,
+.footnote-definition:target {
+    opacity: 1;
 }
 .footnote-definition p {
     display: inline;
+    margin: 6px;
+    opacity: 0.8;
+}
+.footnote-definition-label {
+    background-color: var(--quote-border);
+    border-radius: 10px;
+    padding: 1px 6px;
 }
 
 .tooltiptext {
@@ -234,4 +246,12 @@ blockquote {
 }
 #watermark a:hover {
     color: var(--links);
+}
+
+.datetime {
+    text-align: center;
+    font-style: italic;
+    font-size: 90%;
+    font-weight: 300;
+    opacity: 0.3;
 }
