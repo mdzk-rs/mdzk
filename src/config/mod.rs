@@ -1,12 +1,17 @@
-use crate::{BUILD_DIR, SRC_DIR};
+mod build;
+pub use build::BuildConfig;
+mod mdzk;
+pub use mdzk::MdzkConfig;
+mod style;
+pub use style::StyleConfig;
 
 use anyhow::Context;
-use mdbook::config::{BookConfig, RustConfig};
+use mdbook::config::RustConfig;
 use mdbook::errors::{Error, Result};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::Path; 
 use std::str::FromStr;
 use toml::{self, value::Table, Value};
 
@@ -16,6 +21,8 @@ pub struct Config {
     pub mdzk: MdzkConfig,
     /// Configuration for the build process.
     pub build: BuildConfig,
+    /// Styling configuration.
+    pub style: StyleConfig,
     /// Configuration for the Rust language support.
     pub rust: RustConfig,
     rest: Value,
@@ -58,6 +65,7 @@ impl Default for Config {
         Self {
             mdzk: MdzkConfig::default(),
             build: BuildConfig::default(),
+            style: StyleConfig::default(),
             rust: RustConfig::default(),
             rest: Value::Table(Table::default()),
         }
@@ -87,6 +95,7 @@ impl From<Config> for mdbook::Config {
         config.set("mdzk.math", conf.build.math).ok();
         config.set("mdzk.readme", conf.build.readme).ok();
         config.set("mdzk.wikilinks", conf.build.wikilinks).ok();
+        config.set("style", conf.style).ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
@@ -116,13 +125,19 @@ impl<'de> Deserialize<'de> for Config {
 
         let mdzk: MdzkConfig = table
             .remove("mdzk")
-            .map(|book| book.try_into().map_err(D::Error::custom))
+            .map(|mdzk| mdzk.try_into().map_err(D::Error::custom))
             .transpose()?
             .unwrap_or_default();
 
         let build: BuildConfig = table
             .remove("build")
             .map(|build| build.try_into().map_err(D::Error::custom))
+            .transpose()?
+            .unwrap_or_default();
+
+        let style: StyleConfig = table
+            .remove("style")
+            .map(|style| style.try_into().map_err(D::Error::custom))
             .transpose()?
             .unwrap_or_default();
 
@@ -135,6 +150,7 @@ impl<'de> Deserialize<'de> for Config {
         Ok(Config {
             mdzk,
             build,
+            style,
             rust,
             rest: Value::Table(table),
         })
@@ -159,101 +175,6 @@ impl Serialize for Config {
         }
 
         table.serialize(s)
-    }
-}
-
-/// This struct holds the configuration for the metadata of the mdzk, as well as what it should
-/// include.
-#[derive(Deserialize, Serialize)]
-#[serde(default, rename_all = "kebab-case")]
-pub struct MdzkConfig {
-    /// The title of the vault.
-    pub title: Option<String>,
-    /// The author(s) of the vault.
-    pub authors: Vec<String>,
-    /// A description of the vault (optional).
-    pub description: Option<String>,
-    /// The source directory of the vault, relative to the location of the config file.
-    pub src: PathBuf,
-    /// A list of patterns to ignore notes. Based on gitignore syntax.
-    pub ignore: Option<Vec<String>>,
-    /// Whether the vault is multilingual or not.
-    pub multilingual: bool,
-    /// The language of the vault.
-    pub language: Option<String>,
-    /// The header before the backlinks list
-    pub backlinks_header: Option<String>,
-    /// Whether the summary will be auto-generated or not.
-    pub generate_summary: Option<bool>,
-}
-
-impl Default for MdzkConfig {
-    fn default() -> Self {
-        MdzkConfig {
-            title: None,
-            authors: Vec::new(),
-            description: None,
-            src: PathBuf::from(SRC_DIR),
-            ignore: None,
-            multilingual: false,
-            language: Some("en".to_string()),
-            backlinks_header: None,
-            generate_summary: None,
-        }
-    }
-}
-
-impl From<MdzkConfig> for BookConfig {
-    fn from(conf: MdzkConfig) -> Self {
-        Self {
-            title: conf.title,
-            authors: conf.authors,
-            description: conf.description,
-            src: conf.src,
-            multilingual: conf.multilingual,
-            language: conf.language,
-        }
-    }
-}
-
-/// Configuration describing the build process.
-#[derive(Deserialize, Serialize, PartialEq)]
-#[serde(default, rename_all = "kebab-case")]
-pub struct BuildConfig {
-    pub build_dir: PathBuf,
-    pub create_missing: bool,
-    pub disable_default_preprocessors: bool,
-    pub front_matter: bool,
-    pub math: bool,
-    pub readme: bool,
-    pub wikilinks: bool,
-    pub preprocessors: Vec<String>,
-}
-
-impl Default for BuildConfig {
-    fn default() -> BuildConfig {
-        BuildConfig {
-            build_dir: PathBuf::from(BUILD_DIR),
-            create_missing: true,
-            disable_default_preprocessors: false,
-            front_matter: true,
-            math: true,
-            readme: true,
-            wikilinks: true,
-            preprocessors: vec![],
-        }
-    }
-}
-
-impl From<BuildConfig> for mdbook::config::BuildConfig {
-    fn from(conf: BuildConfig) -> Self {
-        Self {
-            build_dir: conf.build_dir,
-            create_missing: conf.create_missing,
-            // Override use_default_preprocessors config option. We are using our own versions of
-            // the defaults, controlled with `disable_default_preprocessors`.
-            use_default_preprocessors: false,
-        }
     }
 }
 

@@ -62,6 +62,14 @@ impl Renderer for HtmlMdzk {
                 mdbook::config::HtmlConfig::default()
             }
         };
+        let style_config = match ctx.config.get_deserialized_opt("style") {
+            Ok(Some(style_config)) => style_config,
+            Ok(None) => crate::config::StyleConfig::default(),
+            Err(e) => {
+                warn!("Failed to parse HTML config: {}", e);
+                crate::config::StyleConfig::default()
+            }
+        };
 
         if destination.exists() {
             // If output directory exists already, remove all content inside
