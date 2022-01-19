@@ -1,7 +1,7 @@
 mod build;
 pub use build::BuildConfig;
 mod mdzk;
-pub use mdzk::MdzkConfig;
+pub use self::mdzk::MdzkConfig;
 mod style;
 pub use style::StyleConfig;
 
