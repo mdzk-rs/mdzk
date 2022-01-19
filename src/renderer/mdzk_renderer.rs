@@ -1,5 +1,5 @@
 use super::toc;
-use crate::utils;
+use crate::{config::StyleConfig, utils};
 use anyhow::Context;
 use handlebars::{no_escape, Handlebars};
 use mdbook::{book::Chapter, errors::*, renderer::RenderContext, BookItem, Renderer};
@@ -54,20 +54,13 @@ impl Renderer for HtmlMdzk {
     fn render(&self, ctx: &RenderContext) -> Result<()> {
         let destination = &ctx.destination;
         let book = &ctx.book;
+        let style_config: StyleConfig = ctx.config.clone().into();
         let html_config = match ctx.config.get_deserialized_opt("output.html") {
             Ok(Some(html_config)) => html_config,
             Ok(None) => mdbook::config::HtmlConfig::default(),
             Err(e) => {
                 warn!("Failed to parse HTML config: {}", e);
                 mdbook::config::HtmlConfig::default()
-            }
-        };
-        let style_config = match ctx.config.get_deserialized_opt("style") {
-            Ok(Some(style_config)) => style_config,
-            Ok(None) => crate::config::StyleConfig::default(),
-            Err(e) => {
-                warn!("Failed to parse HTML config: {}", e);
-                crate::config::StyleConfig::default()
             }
         };
 
@@ -164,6 +157,10 @@ impl Renderer for HtmlMdzk {
         let css_path = destination.join("css");
         let js_path = destination.join("js");
         let font_path = css_path.join("fonts");
+        utils::write_file(
+            &css_path.join("user.css"),
+            &style_config.css_bytes(),
+        )?;
         utils::write_file(
             &css_path.join("main.css"),
             include_bytes!("theme/css/main.css"),

@@ -11,12 +11,12 @@
     --menu-bar-height: 70px;
 
     --sidebar-bg: #fafafa;
-    --sidebar-fg: #000;
+    --sidebar-fg: var(--fg);
     --sidebar-non-existant: #aaa;
     --sidebar-active: var(--links);
     --sidebar-spacer: #eee;
 
-    --scrollbar: #eee;
+    --scrollbar: var(--sidebar-spacer);
 
     --icons: #aaa;
     --icons-hover: var(--links);
@@ -26,8 +26,8 @@
     --quote-bg: var(--sidebar-bg);
     --quote-border: var(--sidebar-spacer);
 
-    --code-bg: var(--quote-bg);
-    --code-border: var(--quote-border);
+    --code-bg: var(--sidebar-bg);
+    --code-border: var(--sidebar-spacer);
 
     --table-border-color: hsl(0, 0%, 95%);
     --table-header-bg: hsl(0, 0%, 80%);
@@ -37,7 +37,7 @@
     --searchbar-active: var(--links);
     --searchbar-bg: var(--bg);
     --searchbar-fg: var(--fg);
-    --searchresults-header-fg: #000;
-    --searchresults-border-color: #eee;
-    --searchresults-li-bg: #eee;
+    --searchresults-header-fg: var(--fg);
+    --searchresults-border-color: var(--sidebar-spacer);
+    --searchresults-li-bg: var(--sidebar-spacer);
 }

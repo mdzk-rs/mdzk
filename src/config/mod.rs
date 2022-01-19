@@ -21,8 +21,6 @@ pub struct Config {
     pub mdzk: MdzkConfig,
     /// Configuration for the build process.
     pub build: BuildConfig,
-    /// Styling configuration.
-    pub style: StyleConfig,
     /// Configuration for the Rust language support.
     pub rust: RustConfig,
     rest: Value,
@@ -65,7 +63,6 @@ impl Default for Config {
         Self {
             mdzk: MdzkConfig::default(),
             build: BuildConfig::default(),
-            style: StyleConfig::default(),
             rust: RustConfig::default(),
             rest: Value::Table(Table::default()),
         }
@@ -95,7 +92,6 @@ impl From<Config> for mdbook::Config {
         config.set("mdzk.math", conf.build.math).ok();
         config.set("mdzk.readme", conf.build.readme).ok();
         config.set("mdzk.wikilinks", conf.build.wikilinks).ok();
-        config.set("style", conf.style).ok();
 
         config.book = conf.mdzk.into();
         config.build = conf.build.into();
@@ -135,12 +131,6 @@ impl<'de> Deserialize<'de> for Config {
             .transpose()?
             .unwrap_or_default();
 
-        let style: StyleConfig = table
-            .remove("style")
-            .map(|style| style.try_into().map_err(D::Error::custom))
-            .transpose()?
-            .unwrap_or_default();
-
         let rust: RustConfig = table
             .remove("rust")
             .map(|rust| rust.try_into().map_err(D::Error::custom))
@@ -150,7 +140,6 @@ impl<'de> Deserialize<'de> for Config {
         Ok(Config {
             mdzk,
             build,
-            style,
             rust,
             rest: Value::Table(table),
         })
@@ -161,8 +150,8 @@ impl Serialize for Config {
     fn serialize<S: Serializer>(&self, s: S) -> std::result::Result<S::Ok, S::Error> {
         let mut table = self.rest.clone();
 
-        let book_config = Value::try_from(&self.mdzk).expect("should always be serializable");
-        table.insert("mdzk", book_config);
+        let mdzk_config = Value::try_from(&self.mdzk).expect("should always be serializable");
+        table.insert("mdzk", mdzk_config);
 
         if self.build != BuildConfig::default() {
             let build_config = Value::try_from(&self.build).expect("should always be serializable");

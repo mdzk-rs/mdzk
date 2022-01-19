@@ -1,7 +1,5 @@
 /* CSS for UI elements (a.k.a. chrome) */
 
-@import 'variables.css';
-
 ::-webkit-scrollbar {
     background: var(--bg);
 }
