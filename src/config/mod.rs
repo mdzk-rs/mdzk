@@ -11,7 +11,7 @@ use mdbook::errors::{Error, Result};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fs::File;
 use std::io::Read;
-use std::path::Path; 
+use std::path::Path;
 use std::str::FromStr;
 use toml::{self, value::Table, Value};
 

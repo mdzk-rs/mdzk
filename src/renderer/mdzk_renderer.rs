@@ -157,10 +157,7 @@ impl Renderer for HtmlMdzk {
         let css_path = destination.join("css");
         let js_path = destination.join("js");
         let font_path = css_path.join("fonts");
-        utils::write_file(
-            &css_path.join("user.css"),
-            &style_config.css_bytes(),
-        )?;
+        utils::write_file(&css_path.join("user.css"), &style_config.css_bytes())?;
         utils::write_file(
             &css_path.join("main.css"),
             include_bytes!("theme/css/main.css"),
@@ -259,7 +256,7 @@ const FONTS: [(&str, &[u8]); 22] = [
     ("Inter.ttf", include_bytes!("theme/css/fonts/Inter.ttf")),
     (
         "Source_Code_Pro_v11_All_Charsets_500.woff2",
-        include_bytes!("theme/css/fonts/Source_Code_Pro_v11_All_Charsets_500.woff2")
+        include_bytes!("theme/css/fonts/Source_Code_Pro_v11_All_Charsets_500.woff2"),
     ),
     (
         "KaTeX_Main-Regular.woff2",
