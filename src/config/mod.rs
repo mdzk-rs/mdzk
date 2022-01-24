@@ -1,3 +1,16 @@
+//! mdzk's config module is messy - very messy... The reason for this is that we have to work
+//! around mdBook's configuration, which is structured very different.
+//!
+//! The way this module works is that we first parse mdzk.toml into a [`Config`] struct.
+//! The relevant options are then first used by mdzk, then we convert [`Config`] into
+//! [`mdbook::config::Config`] which is used by the renderer. Options needed by mdzk which are not
+//! specified in mdBook's config are passed through as entries in the `rest` table. This allows us
+//! to work around the need for a `[book]` table.
+//!
+//! In contrast to the above, the [`StyleConfig`] struct is extracted from
+//! [`mdbook::config::Config`] during the rendering process, and is thus not defined inside
+//! [`Config`]. This is a messy solution, but probably the best we have until we decide to move
+//! away from mdBook as our backend and write our own.
 mod build;
 pub use build::BuildConfig;
 mod mdzk;
