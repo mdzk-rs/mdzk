@@ -143,8 +143,10 @@ a:hover > .hljs {
     text-decoration: underline;
 }
 
+/* Code blocks */
 pre {
     position: relative;
+    overflow: auto;
 }
 pre > .buttons {
     position: absolute;
@@ -169,6 +171,10 @@ pre > .buttons button {
 }
 pre > .result {
     margin-top: 10px;
+}
+/* Wrap Markdown code-blocks */
+pre > code.language-markdown {
+    white-space: pre-wrap;
 }
 
 /* Search */
