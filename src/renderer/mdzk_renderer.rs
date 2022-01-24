@@ -69,7 +69,7 @@ impl Renderer for HtmlMdzk {
             mdbook::utils::fs::remove_dir_content(destination)
                 .context("Unable to remove old output")?;
         } else {
-            // If output direcory doesn't exist, create it
+            // If output directory doesn't exist, create it
             fs::create_dir_all(destination)
                 .context("Unexpected error when constructing destination path")?;
         }
@@ -157,7 +157,9 @@ impl Renderer for HtmlMdzk {
         let css_path = destination.join("css");
         let js_path = destination.join("js");
         let font_path = css_path.join("fonts");
-        utils::write_file(&css_path.join("user.css"), &style_config.css_bytes())?;
+        if let Some(user_css) = style_config.css_bytes() {
+            utils::write_file(&css_path.join("user.css"), &user_css)?;
+        }
         utils::write_file(
             &css_path.join("main.css"),
             include_bytes!("theme/css/main.css"),

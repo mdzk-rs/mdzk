@@ -8,9 +8,9 @@ pub struct StyleConfig {
 }
 
 impl StyleConfig {
-    pub fn css_bytes(&self) -> Vec<u8> {
-        let mut css = String::new();
+    pub fn css_bytes(&self) -> Option<Vec<u8>> {
         if let Some(ref variables) = self.variables {
+            let mut css = String::new();
             css.push_str(":root {\n");
             for (key, value) in variables.iter() {
                 if let Some(value) = value.as_str() {
@@ -18,8 +18,10 @@ impl StyleConfig {
                 }
             }
             css.push('}');
+            Some(css.into_bytes())
+        } else {
+            None
         }
-        css.into_bytes()
     }
 }
 
