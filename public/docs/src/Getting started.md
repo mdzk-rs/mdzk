@@ -2,7 +2,9 @@
 title: Getting started
 ---
 
-An *mdzk* is simply a directory with a `mdzk.toml`-file in it. This directory will contain both the source of your notes as well as the output. This getting started guide will go over initially setting up your mdzk if you are starting from scratch or if you already have a vault of notes you want to use.
+In mdzk, a Zettelkasten is simply a directory containing two things: Some Markdown-files and a TOML configuration file. To simplify things, we'll make a new noun and refer to this directory (and it's output) as "your *mdzk*".
+
+This getting started guide will go over setting up your own mdzk, adding notes to it and generating a static webpage from them.
 
 ### Initializing your mdzk
 
@@ -10,19 +12,21 @@ First, navigate to the directory you want to use as your mdzk and run
 
     $ mdzk init
 
-Optionally, you can have mdzk create a new directory for you, by running `mdzk init <path>`. You will notice that the following has been generated for you:
+Optionally, you can have mdzk create a new directory for you, by running `mdzk init <path>`. You will notice that the following has been generated:
 
-- A configuration file at the root of your mdzk, called `mdzk.toml`.
+- A TOML configuration file at the root of your mdzk, called `mdzk.toml`.
 
     > 📖 *This file is used to specify metadata about your mdzk, build instructions and much more. You can read more about configuring [[Configuration|here]].*
 
 - A directory called `notes`.
 
-    > 📖 *This is where you put all your notes (duh). If you want, you can change the source directory name from `notes` to something else by changing the `src` value in `mdzk.toml`.*
+    > 📖 *This is where you put all your notes (duh). If you want, you can change which path (relative to the root) holds your source notes by changing the `src` value in `mdzk.toml`.*
 
 - A `.gitignore` file.
 
-There are no notes in your mdzk yet, so nothing exciting will happen. This is your time to shine - time to write some content!
+There are no notes in your mdzk yet, so nothing exciting will happen. This is your time to shine - let's write some content!
+
+<!-- TODO: Adding existing notes -->
 
 ### Writing notes
 
@@ -30,13 +34,13 @@ Now is the time to open the `notes` folder in your favorite text editor. Start b
 
 All notes follow an extended variant of the [CommonMark](https://commonmark.org/) specification. An excellent overview of all it's features is available [here](https://commonmark.org/help/). If you are unfamiliar with Markdown, we recommend you follow [this quick interactive tutorial](https://commonmark.org/help/tutorial/) to get comfortable with the markup language.
 
-Among the main extensions mdzk provides to CommonMark are internal links. Internal links are made using the *wikilink* syntax: `[[Name of destination note]]`. Say you have a note called `White bellbird's mating call.md`. If you want to make a link to this note from another one, you can write
+Among the main extensions mdzk provides to CommonMark are internal links. Internal links are made using the *wikilink* syntax, e.g.: `[[Name of destination note]]`. Say you have a note called `White bellbird's mating call.md`. If you want to make a link to this note from another, you can write
 
 ```markdown
 I'm trying to pay attention and write notes from this lecture, but I'm too bored. I'd rather listen to a [[White bellbird's mating call]] than suffer another second.
 ```
 
-This will create a link in the text and insert a backlink at the end of `White bellbird's mating call.md`. Note that the `.md` extension is excluded. More about mdzk's markup can be read [[Markup|here]].
+This will create a link in the text and insert a backlink at the end of `White bellbird's mating call.md`. Note that the `.md` extension is excluded in internal links. More about mdzk's markup can be read [[Markup|here]].
 
 > 📖 *For a fully specialized experience, our text editor recommendation goes to [Obsidian](https://obsidian.md). mdzk is targeted specifically at it's syntax and is inspired by many of it's conventions. However, any text editor will suffice. I personally love writing my notes in [Neovim](https://neovim.io/), and there are many extensions that add wikilink support to e.g. [Visual Studio Code](https://code.visualstudio.com/). Use whatever suits you best.*
 

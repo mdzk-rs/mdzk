@@ -1,9 +1,10 @@
 [mdzk]
+title = "mdzk documentation"
 authors = ["mdzk-rs"]
 language = "en"
 multilingual = false
 src = "src"
-title = "mdzk documentation"
+backlinks-header = "Backlinks"
 generate-summary = false
 ignore = [
     ".obsidian/"
