@@ -66,7 +66,7 @@ where
 
     let _ = watcher.watch(book.theme_dir(), Recursive);
 
-    // Add the book.toml file to the watcher if it exists
+    // Add the mdzk.toml file to the watcher
     let _ = watcher.watch(book.root.join(CONFIG_FILE), NonRecursive);
 
     info!("Listening for changes...");
@@ -80,7 +80,7 @@ where
 
         let paths = all_events
             .filter_map(|event| {
-                debug!("Received filesystem event: {:?}", event);
+                debug!("Received filesystem event: {:#?}", event);
 
                 match event {
                     Create(path) | Write(path) | Remove(path) | Rename(_, path) => Some(path),
