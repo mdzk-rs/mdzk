@@ -93,7 +93,6 @@ impl Renderer for HtmlMdzk {
             "description",
             json!(ctx.config.book.description.clone().unwrap_or_default()),
         );
-        // TODO: Favicon
         if let Some(ref livereload) = html_config.livereload_url {
             data.insert("livereload", json!(livereload));
         }
@@ -185,6 +184,14 @@ impl Renderer for HtmlMdzk {
         for (font, bytes) in FONTS {
             utils::write_file(&font_path.join(font), bytes)?;
         }
+        utils::write_file(
+            &destination.join("favicon.png"),
+            include_bytes!("theme/favicon.png"),
+        )?;
+        utils::write_file(
+            &destination.join("favicon.svg"),
+            include_bytes!("theme/favicon.svg"),
+        )?;
 
         if html_config.search.unwrap_or_default().enable {
             let search_config = mdbook::config::Search::default();
