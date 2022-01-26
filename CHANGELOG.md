@@ -2,9 +2,49 @@
 
 ## 0.5.1 (Unreleased)
 
+### Added
+
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): All CSS variables can now be changed directly in the configuration file. For example, say you want to set the variable `--sidebar-bg` to `red`. To do this, you can simply add
+    
+    ```toml
+    [style]
+    sidebar-bg = "red"
+    ```
+    
+    This should work for all CSS variables.
+
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): Add any custom CSS through the configuration file. You can either write CSS as a string directly in `mdzk.toml`, like this:
+
+    ```toml
+    [style]
+    css = """
+    <CSS here>
+    """
+    ```
+    
+    or you can load a separate CSS file, like this:
+    
+    ```toml
+    [style]
+    css = "path/to/file.css"
+    ```
+    
+    Paths are relative to the `mdzk.toml` file.
+
+### Changed
+
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): mdzk now has a custom renderer and a new look. Everything should look more clean and polished, and you can expect some performance improvements as well.
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): KaTeX is no longer loaded through a CDN, but written to the generated site. This means your mdzk will work offline as well.
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): The default renderer is no longer `mdbook`, but `mdzk`. You can change back to rendering with mdBook by adding `--renderer mdbook` after the build command.
+
 ### Fixed
 
 - [#67](https://github.com/mdzk-rs/mdzk/issues/67): You could previously not use `?` characters in a title, because they were not escaped properly in URLs. This is now fixed with the introduction of our custom renderer.
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): Note titles are now added to the search index as well.
+
+### Removed
+
+- [#66](https://github.com/mdzk-rs/mdzk/pull/66): You can no longer theme mdzk like in mdBook (by adding a directory called `theme`). See above for how you can customize your mdzk.
 
 ## 0.5.0 (2022-01-03)
 
