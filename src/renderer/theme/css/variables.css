@@ -1,0 +1,44 @@
+/* Globals */
+
+:root {
+    --bg: #fff;
+    --fg: #000;
+    --links: #008cff;
+
+    --sidebar-width: 300px;
+    --page-padding: 15px;
+    --content-max-width: 800px;
+    --menu-bar-height: 70px;
+
+    --sidebar-bg: #fafafa;
+    --sidebar-fg: var(--fg);
+    --sidebar-non-existant: #aaa;
+    --sidebar-active: var(--links);
+    --sidebar-spacer: #eee;
+
+    --scrollbar: var(--sidebar-spacer);
+
+    --icons: #aaa;
+    --icons-hover: var(--links);
+
+    --inline-code-color: #301900;
+
+    --quote-bg: var(--sidebar-bg);
+    --quote-border: var(--sidebar-spacer);
+
+    --code-bg: var(--sidebar-bg);
+    --code-border: var(--sidebar-spacer);
+
+    --table-border-color: var(--sidebar-spacer);
+    --table-header-bg: var(--sidebar-spacer);
+    --table-alternate-bg: var(--sidebar-bg);
+    --table-focused-bg: #edf6fc;
+
+    --searchbar-border: var(--sidebar-spacer);
+    --searchbar-active: var(--links);
+    --searchbar-bg: var(--bg);
+    --searchbar-fg: var(--fg);
+    --searchresults-header-fg: var(--fg);
+    --searchresults-border-color: var(--sidebar-spacer);
+    --searchresults-li-bg: var(--sidebar-spacer);
+}

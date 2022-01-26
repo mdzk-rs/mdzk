@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 (Unreleased)
+
+### Fixed
+
+- [#67](https://github.com/mdzk-rs/mdzk/issues/67): You could previously not use `?` characters in a title, because they were not escaped properly in URLs. This is now fixed with the introduction of our custom renderer.
+
 ## 0.5.0 (2022-01-03)
 
 ### New features

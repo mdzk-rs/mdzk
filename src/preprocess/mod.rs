@@ -123,12 +123,12 @@ If links do not properly specify paths, they might lead to the wrong note..."#,
         });
 
         if backlinks {
-            let prefix = backlinks::prefix(&ctx.config);
+            let header = backlinks::backlinks_header(&ctx.config);
 
             // Third iteration
             book.for_each_mut(|item| {
                 if let BookItem::Chapter(ch) = item {
-                    backlinks::insert_backlinks(ch, &mut backlinks_map, &prefix);
+                    backlinks::insert_backlinks(ch, &mut backlinks_map, &header);
                 }
             });
         }

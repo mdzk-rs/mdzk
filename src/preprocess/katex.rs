@@ -1,8 +1,6 @@
 use mdbook::book::Chapter;
 use pulldown_cmark::{Event, Parser, Tag};
 
-const KATEX_CSS: &str = r#"<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">"#;
-const KATEX_JS: &str = r#"<script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.20/dist/katex.min.js" integrity="sha384-ov99pRO2tAc0JuxTVzf63RHHeQTJ0CIawbDZFiFTzB07aqFZwEu2pz4uzqL+5OPG" crossorigin="anonymous"></script>"#;
 const RENDER_SCRIPT: &str = r#"<script>
 document.addEventListener('DOMContentLoaded', function() {
     var math = document.querySelectorAll("[class^=katex]");
@@ -56,8 +54,6 @@ pub fn run(ch: &mut Chapter) {
         }
     }
 
-    ch.content.push_str(&format!("\n\n{}", KATEX_CSS));
-    ch.content.push_str(&format!("\n\n{}", KATEX_JS));
     ch.content.push_str(&format!("\n\n{}", RENDER_SCRIPT));
 }
 

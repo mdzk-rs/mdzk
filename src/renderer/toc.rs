@@ -1,15 +1,17 @@
+use crate::utils;
+use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
+use pulldown_cmark::{html, Event, Parser};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;
 
-use handlebars::{Context, Handlebars, Helper, HelperDef, Output, RenderContext, RenderError};
-use pulldown_cmark::{html, Event, Parser};
-
 // Handlebars helper to construct TOC
 #[derive(Clone, Copy)]
 pub struct RenderToc {
     pub no_section_label: bool,
+    pub fold_enable: bool,
+    pub fold_level: u8,
 }
 
 impl HelperDef for RenderToc {
@@ -32,8 +34,8 @@ impl HelperDef for RenderToc {
             .evaluate(ctx, "@root/path")?
             .as_json()
             .as_str()
-            .ok_or_else(|| RenderError::new("Type error for `path`, string expected"))?
-            .replace('\"', "");
+            .ok_or_else(|| RenderError::new("Type error for `path`. String expected."))?
+            .replace('"', "");
 
         let current_section = rc
             .evaluate(ctx, "@root/section")?
@@ -41,18 +43,6 @@ impl HelperDef for RenderToc {
             .as_str()
             .map(str::to_owned)
             .unwrap_or_default();
-
-        let fold_enable = rc
-            .evaluate(ctx, "@root/fold_enable")?
-            .as_json()
-            .as_bool()
-            .ok_or_else(|| RenderError::new("Type error for `fold_enable`, bool expected"))?;
-
-        let fold_level = rc
-            .evaluate(ctx, "@root/fold_level")?
-            .as_json()
-            .as_u64()
-            .ok_or_else(|| RenderError::new("Type error for `fold_level`, u64 expected"))?;
 
         out.write("<ol class=\"chapter\">")?;
 
@@ -71,15 +61,16 @@ impl HelperDef for RenderToc {
                 ("", 1)
             };
 
-            let is_expanded =
-                if !fold_enable || (!section.is_empty() && current_section.starts_with(section)) {
-                    // Expand if folding is disabled, or if the section is an
-                    // ancestor or the current section itself.
-                    true
-                } else {
-                    // Levels that are larger than this would be folded.
-                    level - 1 < fold_level as usize
-                };
+            let is_expanded = if !self.fold_enable
+                || (!section.is_empty() && current_section.starts_with(section))
+            {
+                // Expand if folding is disabled, or if the section is an
+                // ancestor or the current section itself.
+                true
+            } else {
+                // Levels that are larger than this would be folded.
+                level - 1 < self.fold_level as usize
+            };
 
             match level.cmp(&current_level) {
                 Ordering::Greater => {
@@ -99,7 +90,7 @@ impl HelperDef for RenderToc {
                     write_li_open_tag(out, is_expanded, false)?;
                 }
                 Ordering::Equal => {
-                    write_li_open_tag(out, is_expanded, item.get("section").is_none())?
+                    write_li_open_tag(out, is_expanded, item.get("section").is_none())?;
                 }
             }
 
@@ -118,16 +109,15 @@ impl HelperDef for RenderToc {
             {
                 out.write("<a href=\"")?;
 
-                let tmp = Path::new(item.get("path").expect("Error: path should be Some(_)"))
+                let dest = Path::new(path)
                     .with_extension("html")
                     .to_str()
                     .unwrap()
-                    // Hack for windows who tends to use `\` as separator instead of `/`
-                    .replace('\\', "/");
+                    .replace('\\', "/"); // Hack for Windows paths
 
                 // Add link
-                out.write(&mdbook::utils::fs::path_to_root(&current_path))?;
-                out.write(&tmp)?;
+                out.write(&utils::path_to_root(&current_path))?;
+                out.write(&utils::escape_special_chars(&dest))?;
                 out.write("\"")?;
 
                 if path == &current_path {
@@ -175,8 +165,8 @@ impl HelperDef for RenderToc {
             // Render expand/collapse toggle
             if let Some(flag) = item.get("has_sub_items") {
                 let has_sub_items = flag.parse::<bool>().unwrap_or_default();
-                if fold_enable && has_sub_items {
-                    out.write("<a class=\"toggle\"><div>❱</div></a>")?;
+                if self.fold_enable && has_sub_items {
+                    out.write("<a class=\"toggle\"><div>→</div></a>")?;
                 }
             }
             out.write("</li>")?;

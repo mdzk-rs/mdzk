@@ -25,9 +25,8 @@ fn blockref_id(paragraph: &str) -> Option<String> {
     let len = paragraph.len();
     if len > 8 {
         let mut iter = paragraph.chars().skip(len - 8);
-        if iter.next() == Some(' ')
-        && iter.next() == Some('^')
-        && iter.clone().all(is_id_friendly) {
+        if iter.next() == Some(' ') && iter.next() == Some('^') && iter.clone().all(is_id_friendly)
+        {
             return Some(iter.collect());
         }
     }

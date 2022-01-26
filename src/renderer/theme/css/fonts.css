@@ -1,0 +1,11 @@
+@font-face {
+    font-family: Inter;
+    src: url("fonts/Inter.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 500;
+  src: url('fonts/Source_Code_Pro_v11_All_Charsets_500.woff2') format('woff2');
+}

@@ -143,7 +143,9 @@ pub fn update_summary(config: &Config, root: &Path) -> Result<(), Error> {
 pub fn escape_special_chars(text: &str) -> String {
     let mut buf = String::new();
     escape_href(&mut buf, text).ok();
-    buf
+    // Apparently, pulldown-cmark does not escape `?` into `%3F`, which means we
+    // have to do it manually.
+    buf.replace('?', "%3F")
 }
 
 /// Ease-of-use function for creating a file and writing bytes to it
@@ -221,9 +223,27 @@ where
     }
 }
 
+/// Checks if the URL starts with a scheme (like `https:`).
+pub fn has_scheme(url: &str) -> bool {
+    if let Some((potential_scheme, _)) = url.split_once("://") {
+        let mut chars = potential_scheme.chars();
+        chars.next().unwrap_or('�').is_ascii_alphabetic()
+            && chars.all(|c| c.is_alphanumeric() || c == '+' || c == '.' || c == '-')
+    } else {
+        false
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_has_scheme() {
+        assert!(has_scheme("https://mdzk.app"));
+        assert!(has_scheme("file:///home/user/mdzk/file.md"));
+        assert!(!has_scheme("folder/subfolder/file.md"));
+    }
 
     #[test]
     fn test_escape_special_chars() {
