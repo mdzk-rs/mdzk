@@ -29,8 +29,8 @@ pub fn serve(dir: Option<PathBuf>, port: i32, bind: String, renderer: String) ->
 
     match renderer.as_str() {
         "markdown" => zk.execute_build_process(&MarkdownRenderer)?,
-        "mdzk" => zk.execute_build_process(&HtmlMdzk)?,
-        _ => zk.execute_build_process(&HtmlHandlebars)?,
+        "mdbook" => zk.execute_build_process(&HtmlHandlebars)?,
+        _ => zk.execute_build_process(&HtmlMdzk)?,
     }
 
     let sockaddr: SocketAddr = address

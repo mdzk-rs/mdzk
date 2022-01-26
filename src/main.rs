@@ -43,7 +43,7 @@ enum Command {
         #[structopt(long = "bind", short = "b", default_value = "localhost")]
         bind: String,
 
-        #[structopt(long = "renderer", short = "r", default_value = "mdbook")]
+        #[structopt(long = "renderer", short = "r", default_value = "mdzk")]
         renderer: String,
     },
 }
