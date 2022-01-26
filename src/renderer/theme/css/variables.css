@@ -29,9 +29,10 @@
     --code-bg: var(--sidebar-bg);
     --code-border: var(--sidebar-spacer);
 
-    --table-border-color: hsl(0, 0%, 95%);
-    --table-header-bg: hsl(0, 0%, 80%);
-    --table-alternate-bg: hsl(0, 0%, 97%);
+    --table-border-color: var(--sidebar-spacer);
+    --table-header-bg: var(--sidebar-spacer);
+    --table-alternate-bg: var(--sidebar-bg);
+    --table-focused-bg: #edf6fc;
 
     --searchbar-border: var(--sidebar-spacer);
     --searchbar-active: var(--links);

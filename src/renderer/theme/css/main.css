@@ -158,6 +158,8 @@ table thead th {
 table thead tr {
     border: 1px var(--table-header-bg) solid;
 }
+table tbody tr { transition: background 100ms; }
+table tbody tr:hover { background: var(--table-focused-bg) !important; }
 /* Alternate background colors for rows */
 table tbody tr:nth-child(2n) {
     background: var(--table-alternate-bg);
