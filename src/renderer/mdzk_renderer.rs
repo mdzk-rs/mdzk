@@ -53,6 +53,10 @@ impl Renderer for HtmlMdzk {
 
     fn render(&self, ctx: &RenderContext) -> Result<()> {
         let destination = &ctx.destination;
+        let css_path = destination.join("css");
+        let js_path = destination.join("js");
+        let font_path = css_path.join("fonts");
+
         let book = &ctx.book;
         let style_config: StyleConfig = ctx.config.clone().into();
         let html_config = match ctx.config.get_deserialized_opt("output.html") {
@@ -73,6 +77,7 @@ impl Renderer for HtmlMdzk {
             fs::create_dir_all(destination)
                 .context("Unexpected error when constructing destination path")?;
         }
+
 
         // Create data for all notes
         let mut data = BTreeMap::new();
@@ -132,33 +137,10 @@ impl Renderer for HtmlMdzk {
         }
         data.insert("chapters", json!(chapters));
 
-        let mut hbs = Handlebars::new();
-        hbs.register_escape_fn(no_escape);
-        hbs.register_template_string("index", include_str!("theme/index.hbs"))?;
-        hbs.register_helper(
-            "toc",
-            Box::new(toc::RenderToc {
-                no_section_label: html_config.no_section_label,
-                fold_enable: html_config.fold.enable,
-                fold_level: html_config.fold.level,
-            }),
-        );
-
-        // Render out each note
-        for item in book.iter() {
-            if let BookItem::Chapter(ref ch) = *item {
-                if !ch.is_draft_chapter() {
-                    self.render_note(ch, ctx, &mut data, &hbs)?;
-                }
-            }
-        }
-
         // Write static files
-        let css_path = destination.join("css");
-        let js_path = destination.join("js");
-        let font_path = css_path.join("fonts");
         if let Some(user_css) = style_config.css_bytes() {
             utils::write_file(&css_path.join("user.css"), &user_css)?;
+            data.insert("has_user_css", json!(true));
         }
         utils::write_file(
             &css_path.join("main.css"),
@@ -208,6 +190,29 @@ impl Renderer for HtmlMdzk {
             let search_config = mdbook::config::Search::default();
             super::search::create_files(&search_config, destination, book)?;
         }
+
+        // Make Handlebars template
+        let mut hbs = Handlebars::new();
+        hbs.register_escape_fn(no_escape);
+        hbs.register_template_string("index", include_str!("theme/index.hbs"))?;
+        hbs.register_helper(
+            "toc",
+            Box::new(toc::RenderToc {
+                no_section_label: html_config.no_section_label,
+                fold_enable: html_config.fold.enable,
+                fold_level: html_config.fold.level,
+            }),
+        );
+
+        // Render out each note
+        for item in book.iter() {
+            if let BookItem::Chapter(ref ch) = *item {
+                if !ch.is_draft_chapter() {
+                    self.render_note(ch, ctx, &mut data, &hbs)?;
+                }
+            }
+        }
+
 
         Ok(())
     }
