@@ -25,7 +25,7 @@ enum Command {
         #[structopt(parse(from_os_str))]
         dir: Option<PathBuf>,
 
-        #[structopt(long = "renderer", short = "r", default_value = "mdbook")]
+        #[structopt(long = "renderer", short = "r", default_value = "mdzk")]
         renderer: String,
     },
 
