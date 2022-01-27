@@ -1,4 +1,4 @@
-use crate::BUILD_DIR;
+use crate::DEFAULT_BUILD_DIR;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -14,12 +14,14 @@ pub struct BuildConfig {
     pub readme: bool,
     pub wikilinks: bool,
     pub preprocessors: Vec<String>,
+    /// A list of patterns to ignore notes. Based on gitignore syntax.
+    pub ignore: Option<Vec<String>>,
 }
 
 impl Default for BuildConfig {
     fn default() -> BuildConfig {
         BuildConfig {
-            build_dir: PathBuf::from(BUILD_DIR),
+            build_dir: PathBuf::from(DEFAULT_BUILD_DIR),
             create_missing: true,
             disable_default_preprocessors: false,
             front_matter: true,
@@ -27,18 +29,7 @@ impl Default for BuildConfig {
             readme: true,
             wikilinks: true,
             preprocessors: vec![],
-        }
-    }
-}
-
-impl From<BuildConfig> for mdbook::config::BuildConfig {
-    fn from(conf: BuildConfig) -> Self {
-        Self {
-            build_dir: conf.build_dir,
-            create_missing: conf.create_missing,
-            // Override use_default_preprocessors config option. We are using our own versions of
-            // the defaults, controlled with `disable_default_preprocessors`.
-            use_default_preprocessors: false,
+            ignore: None,
         }
     }
 }

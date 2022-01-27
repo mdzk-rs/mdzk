@@ -1,10 +1,12 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::path::Path;
 use toml::value::{Map, Value};
 
-#[derive(Deserialize, Serialize, PartialEq, Default)]
+#[derive(Serialize, PartialEq, Default)]
 #[serde(default, rename_all = "kebab-case")]
 pub struct StyleConfig {
+    /// The header before the backlinks list
+    pub backlinks_header: Option<String>,
     additional_css: Option<String>,
     variables: Option<Map<String, Value>>,
 }
@@ -45,25 +47,33 @@ impl StyleConfig {
     }
 }
 
-impl From<mdbook::Config> for StyleConfig {
-    fn from(conf: mdbook::Config) -> Self {
-        if let Some(mut style) = conf
-            .get("style")
-            .and_then(Value::as_table)
-            .map(|t| t.to_owned())
-        {
-            let additional_css = if let Some(additional) = style.remove("additional-css") {
-                Value::as_str(&additional).map(String::from)
-            } else {
-                None
-            };
+impl<'de> Deserialize<'de> for StyleConfig {
+    fn deserialize<D: Deserializer<'de>>(de: D) -> std::result::Result<Self, D::Error> {
+        let raw = Value::deserialize(de)?;
 
-            Self {
-                additional_css,
-                variables: Some(style),
+        use serde::de::Error;
+        let mut table = match raw {
+            Value::Table(t) => t,
+            _ => {
+                return Err(D::Error::custom(
+                    "A style config file should always be a TOML table",
+                ));
             }
-        } else {
-            Self { additional_css: None, variables: None }
-        }
+        };
+
+        let backlinks_header = table
+            .remove("backlinks-header")
+            .map(|v| v.to_string());
+
+        let additional_css = table
+            .remove("additional-css")
+            .map(|v| v.to_string());
+
+
+        Ok(Self {
+            backlinks_header,
+            additional_css,
+            variables: Some(table),
+        })
     }
 }
