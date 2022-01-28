@@ -1,10 +1,6 @@
+use crate::{link::Edge, Config, Note, NoteId, DEFAULT_CONFIG_FILE};
 use anyhow::{bail, Result};
-use crate::{Config, DEFAULT_CONFIG_FILE, Note, NoteId, link::Edge};
-use ignore::{
-    WalkBuilder,
-    overrides::OverrideBuilder,
-    types::TypesBuilder,
-};
+use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
     cmp::Ordering,
     collections::HashMap,
@@ -63,16 +59,19 @@ impl Vault {
 
         let notes_map: HashMap<NoteId, Note> = ids
             .clone()
-            .zip(paths.iter()
-                .map(|path| Note {
+            .zip(paths.iter().map(|path| {
+                Note {
                     title: path.file_stem().unwrap().to_string_lossy().to_string(),
                     path: Some(path.to_owned()),
                     tags: vec![],
                     date: None,
                     content: "".to_owned(),
-                    adjacencies: ids.to_owned().zip(std::iter::repeat(Edge::NotConnected)).collect(),
-                })
-            )
+                    adjacencies: ids
+                        .to_owned()
+                        .zip(std::iter::repeat(Edge::NotConnected))
+                        .collect(),
+                }
+            }))
             .collect();
 
         Ok(Self::default())

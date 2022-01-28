@@ -61,14 +61,9 @@ impl<'de> Deserialize<'de> for StyleConfig {
             }
         };
 
-        let backlinks_header = table
-            .remove("backlinks-header")
-            .map(|v| v.to_string());
+        let backlinks_header = table.remove("backlinks-header").map(|v| v.to_string());
 
-        let additional_css = table
-            .remove("additional-css")
-            .map(|v| v.to_string());
-
+        let additional_css = table.remove("additional-css").map(|v| v.to_string());
 
         Ok(Self {
             backlinks_header,

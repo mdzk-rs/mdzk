@@ -3,8 +3,8 @@ pub use build::BuildConfig;
 mod style;
 pub use style::StyleConfig;
 
-use anyhow::{Context, Error, Result};
 use crate::DEFAULT_SRC_DIR;
+use anyhow::{Context, Error, Result};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
