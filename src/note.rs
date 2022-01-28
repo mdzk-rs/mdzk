@@ -8,10 +8,10 @@ use std::{
 pub type NoteId = u16;
 
 pub struct Note {
-    title: String,
-    path: Option<PathBuf>,
-    tags: Vec<String>,
-    date: Option<chrono::NaiveDateTime>,
-    content: String,
-    adjacencies: HashMap<NoteId, Edge>,
+    pub title: String,
+    pub path: Option<PathBuf>,
+    pub tags: Vec<String>,
+    pub date: Option<chrono::NaiveDateTime>,
+    pub content: String,
+    pub adjacencies: HashMap<NoteId, Edge>,
 }
