@@ -1,32 +1,52 @@
-use crate::{Config, Note, NoteId, DEFAULT_CONFIG_FILE};
+use crate::{Note, NoteId};
 use anyhow::Result;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
-use std::{cmp::Ordering, collections::HashMap, path::Path};
+use std::{
+    cmp::Ordering,
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
-#[derive(Default)]
-pub struct Vault {
-    pub config: Config,
-    pub notes: HashMap<NoteId, Note>,
+/// Builder struct for making a Vault instance.
+pub struct VaultBuilder {
+    source: PathBuf,
+    ignores: Vec<String>,
 }
 
-impl Vault {
-    pub fn load(root: impl AsRef<Path>) -> Result<Self> {
-        let root = root.as_ref();
-        let config = Config::from_disk(root.join(DEFAULT_CONFIG_FILE))?;
-        let book_source = root.join(&config.src);
+impl VaultBuilder {
+    /// Set the source for the directory walker.
+    ///
+    /// The source has to be a directory, but this
+    /// function does not check that. Rather, the [`VaultBuilder::build`] function will do the
+    /// check and errors if the check fails.
+    #[must_use]
+    pub fn source(self, source: impl AsRef<Path>) -> Self {
+        Self {
+            source: source.as_ref().to_owned(),
+            ..self
+        }
+    }
 
-        let mut overrides = OverrideBuilder::new(&book_source);
-        if let Some(ref ignores) = config.build.ignore {
-            for ignore in ignores.iter() {
-                if let Some(s) = ignore.strip_prefix('!') {
-                    overrides.add(s)?;
-                } else {
-                    overrides.add(&format!("!{}", ignore))?;
-                }
+    /// Set the ignore patterns for the directory walker.
+    ///
+    /// The patterns follows the [gitignore format](https://git-scm.com/docs/gitignore).
+    #[must_use]
+    pub fn ignores(self, ignores: Vec<String>) -> Self {
+        Self { ignores, ..self }
+    }
+
+    /// Build a [`Vault`] from the options supplied to the builder.
+    pub fn build(&self) -> Result<Vault> {
+        let mut overrides = OverrideBuilder::new(&self.source);
+        for ignore in self.ignores.iter() {
+            if let Some(s) = ignore.strip_prefix('!') {
+                overrides.add(s)?;
+            } else {
+                overrides.add(&format!("!{}", ignore))?;
             }
         }
 
-        let walker = WalkBuilder::new(&book_source)
+        let walker = WalkBuilder::new(&self.source)
             .hidden(true)
             .overrides(overrides.build()?)
             .types(
@@ -61,6 +81,11 @@ impl Vault {
             })
             .collect();
 
-        Ok(Self { notes, config })
+        Ok(Vault { notes })
     }
+}
+
+#[derive(Default)]
+pub struct Vault {
+    pub notes: HashMap<NoteId, Note>,
 }
