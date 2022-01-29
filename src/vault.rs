@@ -1,4 +1,4 @@
-use crate::{Note, NoteId};
+use crate::{Note, NoteId, error::Error, link::Edge};
 use anyhow::Result;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
@@ -8,6 +8,7 @@ use std::{
 };
 
 /// Builder struct for making a Vault instance.
+#[derive(Default)]
 pub struct VaultBuilder {
     source: PathBuf,
     ignores: Vec<String>,
@@ -16,9 +17,8 @@ pub struct VaultBuilder {
 impl VaultBuilder {
     /// Set the source for the directory walker.
     ///
-    /// The source has to be a directory, but this
-    /// function does not check that. Rather, the [`VaultBuilder::build`] function will do the
-    /// check and errors if the check fails.
+    /// The source has to be a directory, but this function does not check that. Rather, the
+    /// [`build`](VaultBuilder::build) function will do a check and errors if it fails.
     #[must_use]
     pub fn source(self, source: impl AsRef<Path>) -> Self {
         Self {
@@ -37,6 +37,10 @@ impl VaultBuilder {
 
     /// Build a [`Vault`] from the options supplied to the builder.
     pub fn build(&self) -> Result<Vault> {
+        if !self.source.is_dir() {
+            return Err(Error::VaultSourceNotDir.into())
+        }
+
         let mut overrides = OverrideBuilder::new(&self.source);
         for ignore in self.ignores.iter() {
             if let Some(s) = ignore.strip_prefix('!') {
@@ -63,8 +67,9 @@ impl VaultBuilder {
             })
             .build();
 
-        let notes: HashMap<NoteId, Note> = walker
+        let mut notes: HashMap<NoteId, Note> = walker
             .filter_map(|e| e.ok())
+            .filter(|e| !e.path().is_dir())
             .map(|e| e.into_path())
             .map(|path| {
                 (
@@ -80,6 +85,19 @@ impl VaultBuilder {
                 )
             })
             .collect();
+
+        let adjacencies: HashMap<NoteId, Edge> = notes
+            .keys()
+            .clone()
+            .cloned()
+            .map(|id| (id, Edge::NotConnected))
+            .collect();
+
+        notes.iter_mut()
+            .for_each(|(_, note)| {
+                note.adjacencies = adjacencies.clone();
+                note.content = crate::utils::read_file(note.path.as_ref().unwrap()).unwrap(); // TODO: Handle error
+            });
 
         Ok(Vault { notes })
     }

@@ -5,7 +5,7 @@ use std::{
     path::PathBuf,
 };
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Eq, Hash, Debug, PartialEq)]
 pub struct NoteId(u64);
 
 impl NoteId {
