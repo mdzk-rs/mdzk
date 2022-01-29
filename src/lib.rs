@@ -1,6 +1,3 @@
-#[macro_use]
-pub mod log;
-
 mod link;
 mod note;
 mod vault;
