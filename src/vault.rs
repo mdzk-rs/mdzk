@@ -1,5 +1,5 @@
-use crate::{Note, NoteId, error::Error, link::Edge, utils};
-use anyhow::Result;
+use crate::{Note, NoteId, error::{Error, Result}, link::Edge, utils};
+use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
     cmp::Ordering,
@@ -38,26 +38,28 @@ impl VaultBuilder {
     /// Build a [`Vault`] from the options supplied to the builder.
     pub fn build(&self) -> Result<Vault> {
         if !self.source.is_dir() {
-            return Err(Error::VaultSourceNotDir.into())
+            return Err(Error::VaultSourceNotDir)
         }
 
         let mut overrides = OverrideBuilder::new(&self.source);
         for ignore in self.ignores.iter() {
             if let Some(s) = ignore.strip_prefix('!') {
-                overrides.add(s)?;
+                overrides.add(s)
+                    .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
             } else {
-                overrides.add(&format!("!{}", ignore))?;
+                overrides.add(&format!("!{}", ignore))
+                    .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
             }
         }
 
         let walker = WalkBuilder::new(&self.source)
             .hidden(true)
-            .overrides(overrides.build()?)
+            .overrides(overrides.build().context("Building walker overrides failed.")?)
             .types(
                 TypesBuilder::new()
                     .add_defaults()
                     .select("markdown")
-                    .build()?,
+                    .build().expect("Building default types should never fail."),
             )
             .sort_by_file_path(|path1, path2| match (path1.is_dir(), path2.is_dir()) {
                 // Sort alphabetically, directories first
