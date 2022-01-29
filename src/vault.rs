@@ -74,8 +74,9 @@ impl VaultBuilder {
             .filter(|e| !e.path().is_dir())
             .map(|e| e.into_path())
             .map(|path| {
+                let path_from_root = utils::fs::diff_paths(&self.source, &path).unwrap();
                 (
-                    NoteId::from(path.to_string_lossy()),
+                    NoteId::from(path_from_root.to_string_lossy()),
                     Note {
                         title: path.file_stem().unwrap().to_string_lossy().to_string(),
                         path: Some(path.to_owned()),
@@ -96,10 +97,12 @@ impl VaultBuilder {
             .collect();
 
         notes.iter_mut()
-            .for_each(|(_, note)| {
+            .map(|(_, note)| {
                 note.adjacencies = adjacencies.clone();
-                note.content = utils::fs::read_file(note.path.as_ref().unwrap()).unwrap(); // TODO: Handle error
-            });
+                note.process_content(&utils::fs::read_file(note.path.as_ref().unwrap())?)?;
+                Ok(())
+            })
+            .collect::<Result<()>>()?;
 
         Ok(Vault { notes })
     }
