@@ -1,3 +1,1 @@
-mod fs;
-
-pub use fs::*;
+pub mod fs;

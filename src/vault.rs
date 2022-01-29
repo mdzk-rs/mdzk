@@ -1,4 +1,4 @@
-use crate::{Note, NoteId, error::Error, link::Edge};
+use crate::{Note, NoteId, error::Error, link::Edge, utils};
 use anyhow::Result;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
@@ -96,7 +96,7 @@ impl VaultBuilder {
         notes.iter_mut()
             .for_each(|(_, note)| {
                 note.adjacencies = adjacencies.clone();
-                note.content = crate::utils::read_file(note.path.as_ref().unwrap()).unwrap(); // TODO: Handle error
+                note.content = utils::fs::read_file(note.path.as_ref().unwrap()).unwrap(); // TODO: Handle error
             });
 
         Ok(Vault { notes })
