@@ -1,20 +1,17 @@
-use crate::{link::Edge, Config, Note, NoteId, DEFAULT_CONFIG_FILE};
-use anyhow::{bail, Result};
+use crate::{Config, Note, NoteId, DEFAULT_CONFIG_FILE};
+use anyhow::Result;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
-use std::{
-    cmp::Ordering,
-    collections::HashMap,
-    path::{Path, PathBuf},
-};
+use std::{cmp::Ordering, collections::HashMap, path::Path};
 
 #[derive(Default)]
-struct Vault {
-    config: Config,
-    notes: HashMap<NoteId, Note>,
+pub struct Vault {
+    pub config: Config,
+    pub notes: HashMap<NoteId, Note>,
 }
 
 impl Vault {
-    fn load(root: &Path) -> Result<Self> {
+    pub fn load(root: impl AsRef<Path>) -> Result<Self> {
+        let root = root.as_ref();
         let config = Config::from_disk(root.join(DEFAULT_CONFIG_FILE))?;
         let book_source = root.join(&config.src);
 
@@ -46,34 +43,24 @@ impl Vault {
             })
             .build();
 
-        let paths: Vec<PathBuf> = walker
+        let notes: HashMap<NoteId, Note> = walker
             .filter_map(|e| e.ok())
             .map(|e| e.into_path())
+            .map(|path| {
+                (
+                    NoteId::from(path.to_string_lossy()),
+                    Note {
+                        title: path.file_stem().unwrap().to_string_lossy().to_string(),
+                        path: Some(path.to_owned()),
+                        tags: vec![],
+                        date: None,
+                        content: "".to_owned(),
+                        adjacencies: HashMap::new(),
+                    },
+                )
+            })
             .collect();
 
-        let ids = if paths.len() > NoteId::MAX.into() {
-            0..paths.len() as u16
-        } else {
-            bail!("Too many notes!");
-        };
-
-        let notes_map: HashMap<NoteId, Note> = ids
-            .clone()
-            .zip(paths.iter().map(|path| {
-                Note {
-                    title: path.file_stem().unwrap().to_string_lossy().to_string(),
-                    path: Some(path.to_owned()),
-                    tags: vec![],
-                    date: None,
-                    content: "".to_owned(),
-                    adjacencies: ids
-                        .to_owned()
-                        .zip(std::iter::repeat(Edge::NotConnected))
-                        .collect(),
-                }
-            }))
-            .collect();
-
-        Ok(Self::default())
+        Ok(Self { notes, config })
     }
 }
