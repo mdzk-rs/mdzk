@@ -1,4 +1,4 @@
-use crate::{error::Result, link::Edge};
+use crate::{error::Result, Edge};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{Matter, Pod, engine::YAML};
 use serde::Deserialize;
@@ -12,6 +12,10 @@ use std::{
 pub struct NoteId(u64);
 
 impl NoteId {
+    pub(crate) fn new(id: u64) -> Self {
+        Self(id)
+    }
+
     pub fn from(s: impl Hash) -> Self {
         let mut hasher = DefaultHasher::new();
         s.hash(&mut hasher);

@@ -1,8 +1,8 @@
-use crate::utils::{fs::diff_paths, string::{kebab, escape_href}};
-use anyhow::Result;
+use crate::{NoteId, utils::{fs::diff_paths, string::{kebab, escape_href}}, error::{Error, Result}};
+use anyhow::Context;
 use pest::Parser;
-use pulldown_cmark::{CowStr, Event};
-use std::path::{Path, PathBuf};
+use pulldown_cmark::{CowStr, Event, Tag};
+use std::{path::{Path, PathBuf}, collections::HashMap};
 
 #[derive(Clone, Debug)]
 pub enum Edge {
@@ -26,11 +26,12 @@ pub fn for_each_internal_link(content: &str, mut handle_link: impl FnMut(&str) -
     let mut current = Currently::OutsideLink;
     for event in parser {
         match event {
-            // Ignore KaTeX spans
-            Event::Html(CowStr::Borrowed("<span class=\"katex-inline\">")) => {
-                current = Currently::Ignore
-            }
-            Event::Html(CowStr::Borrowed("</span>")) => current = Currently::OutsideLink,
+            Event::Start(Tag::CodeBlock(_))
+            | Event::Start(Tag::Link(_, _, _))
+            | Event::Start(Tag::Image(_, _, _)) => current = Currently::Ignore,
+            Event::End(Tag::CodeBlock(_))
+            | Event::End(Tag::Link(_, _, _))
+            | Event::End(Tag::Image(_, _, _)) => current = Currently::OutsideLink,
 
             Event::Text(CowStr::Borrowed("[")) => match current {
                 Currently::OutsideLink => current = Currently::MaybeOpen,
@@ -74,7 +75,7 @@ pub fn for_each_internal_link(content: &str, mut handle_link: impl FnMut(&str) -
 }
 
 #[derive(Parser)]
-#[grammar = "./wikilink.pest"]
+#[grammar = "vault/wikilink.pest"]
 pub struct InternalLinkParser;
 
 #[derive(Debug, PartialEq)]
@@ -88,21 +89,46 @@ pub enum Anchor {
 pub struct InternalLink {
     pub dest_title: String,
     pub dest_path: Option<PathBuf>,
+    pub dest_id: NoteId,
     pub link_text: String,
     pub anchor: Anchor,
 }
 
 impl InternalLink {
-    pub fn from(internals: &str) -> Result<Self> {
-        let mut link = InternalLinkParser::parse(Rule::link, internals)?
-            .next()
-            .unwrap()
-            .into_inner();
+    pub fn cmark<P>(&self, cur_dir: P) -> String
+    where
+        P: AsRef<Path>,
+    {
+        let mut href = if let Some(dest_path) = &self.dest_path {
+            diff_paths(dest_path, cur_dir.as_ref())
+                .unwrap()
+                .to_string_lossy()
+                .to_string() // Gotta love Rust <3
+        } else { self.dest_title.to_owned() };
 
-        // Handle destination
-        let mut dest = link.next().unwrap().into_inner();
-        let dest_title = dest.next().unwrap().as_str();
+        // Handle anchor
+        // TODO: Blockrefs are currently not handled here
+        match &self.anchor {
+            Anchor::Header(id) | Anchor::Blockref(id) => href.push_str(&format!("#{}", id)),
+            Anchor::None => {}
+        }
 
+        format!("[{}]({})", self.link_text, escape_href(&href))
+    }
+}
+
+pub(crate) fn create_link(link_string: &str, path_lookup: &HashMap<NoteId, PathBuf>, id_lookup: &HashMap<String, NoteId>) -> Result<InternalLink> {
+    let mut link = InternalLinkParser::parse(Rule::link, link_string)
+        .with_context(|| format!("Failed parsing internal link from {}", link_string))?
+        .next()
+        .unwrap()
+        .into_inner();
+
+    // Handle destination
+    let mut dest = link.next().unwrap().into_inner();
+    let dest_title = dest.next().unwrap().as_str();
+
+    if let Some(&dest_id) = id_lookup.get(dest_title) {
         // Handle alias
         let link_text = if let Some(alias) = link.next() {
             alias.as_str()
@@ -124,33 +150,15 @@ impl InternalLink {
             None => Anchor::None,
         };
 
-        Ok(Self {
+        Ok(InternalLink {
             dest_title: dest_title.to_owned(),
-            dest_path: None, // TODO: Find destination path
+            dest_path: path_lookup.get(&dest_id).cloned(),
+            dest_id,
             link_text: link_text.to_owned(),
             anchor,
         })
-    }
-
-    pub fn cmark<P>(&self, cur_dir: P) -> String
-    where
-        P: AsRef<Path>,
-    {
-        let mut href = if let Some(dest_path) = &self.dest_path {
-            diff_paths(dest_path, cur_dir.as_ref())
-                .unwrap()
-                .to_string_lossy()
-                .to_string() // Gotta love Rust <3
-        } else { self.dest_title.to_owned() };
-
-        // Handle anchor
-        // TODO: Blockrefs are currently not handled here
-        match &self.anchor {
-            Anchor::Header(id) | Anchor::Blockref(id) => href.push_str(&format!("#{}", id)),
-            Anchor::None => {}
-        }
-
-        format!("[{}]({})", self.link_text, escape_href(&href))
+    } else {
+        Err(Error::InvalidInternalLinkDestination(link_string.to_owned()))
     }
 }
 
@@ -194,10 +202,8 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
         let content = r#"Here are some non-correct links:
 First a link [[with
 newline]]
-Then a link `inside [[inline code]]`, or inside <span class="katex-inline">inline [[math]]</span>. What about \[\[escaped brackets\]\]?
-<div class="katex-display">
-    f(x) = \text{[[display link]]}
-</div>
+Then a link `inside [[inline code]]`, or inside. What about \[\[escaped brackets\]\]?
+
 ```rust
 let link = "[[link_in_code]]".to_owned();
 ```
@@ -220,7 +226,8 @@ let link = "[[link_in_code]]".to_owned();
             (
                 InternalLink {
                     dest_title: "This is note".to_owned(),
-                    dest_path: None,
+                    dest_path: Some(PathBuf::from("This is note")),
+                    dest_id: NoteId::new(1),
                     link_text: "Some alias".to_owned(),
                     anchor: Anchor::None,
                 },
@@ -229,7 +236,8 @@ let link = "[[link_in_code]]".to_owned();
             (
                 InternalLink {
                     dest_title: "Tïtlæ fôr nøte".to_owned(),
-                    dest_path: None,
+                    dest_path: Some(PathBuf::from("Tïtlæ fôr nøte")),
+                    dest_id: NoteId::new(2),
                     link_text: "Tïtlæ fôr nøte".to_owned(),
                     anchor: Anchor::Blockref("id1234".to_owned()),
                 },
@@ -238,35 +246,26 @@ let link = "[[link_in_code]]".to_owned();
             (
                 InternalLink {
                     dest_title: "🔈 Music".to_owned(),
-                    dest_path: None,
+                    dest_path: Some(PathBuf::from("🔈 Music")),
+                    dest_id: NoteId::new(3),
                     link_text: "🔈 Music".to_owned(),
                     anchor: Anchor::Header("header-with-spaces".to_owned()),
                 },
                 "🔈 Music#Header with spaces",
             ),
         ];
+        let id_lookup = HashMap::from([
+            ("This is note".to_owned(), NoteId::new(1)),
+            ("Tïtlæ fôr nøte".to_owned(), NoteId::new(2)),
+            ("🔈 Music".to_owned(), NoteId::new(3)),
+        ]);
+        let path_lookup = HashMap::from([
+            (NoteId::new(1), PathBuf::from("This is note")),
+            (NoteId::new(2), PathBuf::from("Tïtlæ fôr nøte")),
+            (NoteId::new(3), PathBuf::from("🔈 Music")),
+        ]);
         for (want, from) in cases {
-            assert_eq!(want, InternalLink::from(from).unwrap());
-        }
-    }
-
-    #[test]
-    fn test_cmark_link() {
-        let cases = vec![
-            (
-                "[Some alias](../../This%20is%20note.md)",
-                InternalLink::from("This is note|Some alias").unwrap(),
-            ),
-            (
-                "[Tïtlæ fôr nøte](../../T%C3%AFtl%C3%A6%20f%C3%B4r%20n%C3%B8te.md#id1234)",
-                InternalLink::from("Tïtlæ fôr nøte#id1234").unwrap(),
-            ),
-        ];
-
-        for (want, mut from) in cases {
-            // FIXME: This is temporary while we work out the proper path derivation
-            from.dest_path = Some(PathBuf::from(&format!("{}.md", from.dest_title)));
-            assert_eq!(want, from.cmark(Path::new("sub/subsub")))
+            assert_eq!(want, create_link(from, &path_lookup, &id_lookup).unwrap());
         }
     }
 }

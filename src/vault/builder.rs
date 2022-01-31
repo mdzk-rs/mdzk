@@ -1,4 +1,6 @@
-use crate::{Note, NoteId, error::{Error, Result}, link::{Edge, for_each_internal_link, InternalLink}, utils};
+use crate::{Note, NoteId, error::{Error, Result}, Edge, utils, Vault,
+    vault::link::{create_link, for_each_internal_link},
+};
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
@@ -40,27 +42,29 @@ impl VaultBuilder {
             return Err(Error::VaultSourceNotDir)
         }
 
-        let mut overrides = OverrideBuilder::new(&self.source);
-        for ignore in self.ignores.iter() {
-            if let Some(s) = ignore.strip_prefix('!') {
-                overrides.add(s)
-                    .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
-            } else {
-                overrides.add(&format!("!{}", ignore))
-                    .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
+        let walker = {
+            let mut overrides = OverrideBuilder::new(&self.source);
+            for ignore in self.ignores.iter() {
+                if let Some(s) = ignore.strip_prefix('!') {
+                    overrides.add(s)
+                        .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
+                } else {
+                    overrides.add(&format!("!{}", ignore))
+                        .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
+                }
             }
-        }
 
-        let walker = WalkBuilder::new(&self.source)
-            .hidden(true)
-            .overrides(overrides.build().context("Building walker overrides failed.")?)
-            .types(
-                TypesBuilder::new()
-                    .add_defaults()
-                    .select("markdown")
-                    .build().expect("Building default types should never fail."),
-            )
-            .build();
+            WalkBuilder::new(&self.source)
+                .hidden(true)
+                .overrides(overrides.build().context("Building walker overrides failed.")?)
+                .types(
+                    TypesBuilder::new()
+                        .add_defaults()
+                        .select("markdown")
+                        .build().expect("Building default types should never fail."),
+                )
+                .build()
+        };
 
         let mut notes = walker
             .filter_map(|e| e.ok())
@@ -88,14 +92,21 @@ impl VaultBuilder {
         let adjacencies: HashMap<NoteId, Edge> = notes
             .keys()
             .clone()
-            .cloned()
-            .map(|id| (id, Edge::NotConnected))
+            .map(|id| (*id, Edge::NotConnected))
             .collect();
 
         let id_lookup: HashMap<String, NoteId> = notes
             .clone()
             .into_iter()
-            .map(|(id, note)| (note.title, id))
+            .map(|(id, note)| {
+                let mut lookup_entries = vec![(note.title, id)];
+                if let Some(path) = note.path {
+                    // This allows linking by filename
+                    lookup_entries.push((path.to_string_lossy().to_string(), id));
+                }
+                lookup_entries
+            })
+            .flatten()
             .collect();
 
         let path_lookup: HashMap<NoteId, PathBuf> = notes
@@ -108,25 +119,19 @@ impl VaultBuilder {
             .try_for_each(|(_, note)| {
                 note.adjacencies = adjacencies.clone();
                 for_each_internal_link(&note.content.clone(), |link_string| {
-                    let mut link = InternalLink::from(link_string)?;
-                    if let Some(&dest_id) = id_lookup.get(&link.dest_title) {
-                        note.adjacencies.entry(dest_id).and_modify(|adj| *adj = Edge::Connected);
-                        link.dest_path = Some(path_lookup[&dest_id].to_owned());
-                        note.content = note.content.replacen(
-                            &format!("[[{}]]", link_string),
-                            &link.cmark(note.path.as_ref().unwrap().parent().unwrap()),
-                            1,
-                        );
-                    };
+                    let link = create_link(link_string, &path_lookup, &id_lookup)?;
+
+                    note.adjacencies.entry(link.dest_id).and_modify(|adj| *adj = Edge::Connected);
+                    note.content = note.content.replacen(
+                        &format!("[[{}]]", link_string),
+                        &link.cmark(note.path.as_ref().unwrap().parent().unwrap()),
+                        1,
+                    );
+
                     Ok(())
                 })
             })?;
 
         Ok(Vault { notes })
     }
-}
-
-#[derive(Default)]
-pub struct Vault {
-    pub notes: HashMap<NoteId, Note>,
 }
