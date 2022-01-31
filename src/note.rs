@@ -1,6 +1,6 @@
 use crate::{error::Result, link::Edge};
 use chrono::{DateTime, NaiveDate};
-use gray_matter::{Matter, engine::YAML};
+use gray_matter::{Matter, Pod, engine::YAML};
 use serde::Deserialize;
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
 };
 
-#[derive(Clone, Eq, Hash, Debug, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, Debug, PartialEq)]
 pub struct NoteId(u64);
 
 impl NoteId {
@@ -25,7 +25,7 @@ impl std::fmt::Display for NoteId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Note {
     pub title: String,
     pub path: Option<PathBuf>,
@@ -36,7 +36,7 @@ pub struct Note {
 }
 
 impl Note {
-    pub fn process_content(&mut self, content: &str) -> Result<()> {
+    pub fn process_front_matter(&mut self) -> Result<()> {
         #[derive(Deserialize)]
         struct FrontMatter {
             title: Option<String>,
@@ -44,9 +44,7 @@ impl Note {
             date: Option<String>,
         }
 
-        let gray_matter = Matter::<YAML>::new().parse(content);
-
-        if let Some(data) = gray_matter.data {
+        let mut handle_front_matter = |data: Pod| {
             if let Ok(front_matter) = data.deserialize::<FrontMatter>() {
                 if let Some(title) = front_matter.title {
                     self.title = title;
@@ -62,6 +60,11 @@ impl Note {
                         .ok();
                 }
             }
+        };
+
+        let gray_matter = Matter::<YAML>::new().parse(&self.content);
+        if let Some(data) = gray_matter.data {
+            handle_front_matter(data);
         }
 
         self.content = gray_matter.content;

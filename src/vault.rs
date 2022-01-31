@@ -1,8 +1,7 @@
-use crate::{Note, NoteId, error::{Error, Result}, link::Edge, utils};
+use crate::{Note, NoteId, error::{Error, Result}, link::{Edge, for_each_internal_link, InternalLink}, utils};
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
-    cmp::Ordering,
     collections::HashMap,
     path::{Path, PathBuf},
 };
@@ -61,33 +60,30 @@ impl VaultBuilder {
                     .select("markdown")
                     .build().expect("Building default types should never fail."),
             )
-            .sort_by_file_path(|path1, path2| match (path1.is_dir(), path2.is_dir()) {
-                // Sort alphabetically, directories first
-                (true, false) => Ordering::Less,
-                (false, true) => Ordering::Greater,
-                _ => path1.cmp(path2),
-            })
             .build();
 
-        let mut notes: HashMap<NoteId, Note> = walker
+        let mut notes = walker
             .filter_map(|e| e.ok())
             .filter(|e| !e.path().is_dir())
             .map(|e| e.into_path())
             .map(|path| {
-                let path_from_root = utils::fs::diff_paths(&self.source, &path).unwrap();
-                (
-                    NoteId::from(path_from_root.to_string_lossy()),
-                    Note {
-                        title: path.file_stem().unwrap().to_string_lossy().to_string(),
-                        path: Some(path.to_owned()),
-                        tags: vec![],
-                        date: None,
-                        content: "".to_owned(),
-                        adjacencies: HashMap::new(),
-                    },
-                )
+                let path_from_root = utils::fs::diff_paths(&path, &self.source).unwrap();
+                let id = NoteId::from(path_from_root.to_string_lossy());
+
+                let mut note = Note {
+                    title: path.file_stem().unwrap().to_string_lossy().to_string(),
+                    path: Some(path_from_root.to_owned()),
+                    tags: vec![],
+                    date: None,
+                    content: utils::fs::read_file(path)?,
+                    adjacencies: HashMap::new(),
+                };
+
+                note.process_front_matter()?;
+
+                Ok((id, note))
             })
-            .collect();
+            .collect::<Result<HashMap<NoteId, Note>>>()?;
 
         let adjacencies: HashMap<NoteId, Edge> = notes
             .keys()
@@ -96,13 +92,35 @@ impl VaultBuilder {
             .map(|id| (id, Edge::NotConnected))
             .collect();
 
+        let id_lookup: HashMap<String, NoteId> = notes
+            .clone()
+            .into_iter()
+            .map(|(id, note)| (note.title, id))
+            .collect();
+
+        let path_lookup: HashMap<NoteId, PathBuf> = notes
+            .clone()
+            .into_iter()
+            .map(|(id, note)| (id, note.path.unwrap()))
+            .collect();
+
         notes.iter_mut()
-            .map(|(_, note)| {
+            .try_for_each(|(_, note)| {
                 note.adjacencies = adjacencies.clone();
-                note.process_content(&utils::fs::read_file(note.path.as_ref().unwrap())?)?;
-                Ok(())
-            })
-            .collect::<Result<()>>()?;
+                for_each_internal_link(&note.content.clone(), |link_string| {
+                    let mut link = InternalLink::from(link_string)?;
+                    if let Some(&dest_id) = id_lookup.get(&link.dest_title) {
+                        note.adjacencies.entry(dest_id).and_modify(|adj| *adj = Edge::Connected);
+                        link.dest_path = Some(path_lookup[&dest_id].to_owned());
+                        note.content = note.content.replacen(
+                            &format!("[[{}]]", link_string),
+                            &link.cmark(note.path.as_ref().unwrap().parent().unwrap()),
+                            1,
+                        );
+                    };
+                    Ok(())
+                })
+            })?;
 
         Ok(Vault { notes })
     }
