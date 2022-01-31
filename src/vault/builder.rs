@@ -146,6 +146,6 @@ impl VaultBuilder {
             })
         })?;
 
-        Ok(Vault { notes })
+        Ok(Vault { notes, id_lookup })
     }
 }

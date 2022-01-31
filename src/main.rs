@@ -7,7 +7,9 @@ fn main() -> Result<()> {
 
     let vault = mdzk::VaultBuilder::default().source(source).build()?;
 
-    println!("{:#?}", vault.notes);
+    for backlink in vault.backlinks(vault.id_of("Bias").unwrap()) {
+        println!("{}", backlink);
+    }
 
     Ok(())
 }
