@@ -12,9 +12,9 @@ use std::{
 pub struct NoteId(u64);
 
 impl NoteId {
-    pub fn from(s: impl Into<String>) -> Self {
+    pub fn from(s: impl Hash) -> Self {
         let mut hasher = DefaultHasher::new();
-        s.into().hash(&mut hasher);
+        s.hash(&mut hasher);
         Self(hasher.finish())
     }
 }
