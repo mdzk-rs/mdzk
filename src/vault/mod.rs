@@ -4,7 +4,7 @@ mod note;
 
 pub use builder::VaultBuilder;
 pub use link::{Edge, InternalLink};
-pub use note::{NoteId, Note};
+pub use note::{Note, NoteId};
 
 use std::collections::HashMap;
 

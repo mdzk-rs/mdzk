@@ -6,4 +6,4 @@ mod error;
 mod utils;
 mod vault;
 
-pub use vault::{InternalLink, Edge, Note, NoteId, Vault, VaultBuilder};
+pub use vault::{Edge, InternalLink, Note, NoteId, Vault, VaultBuilder};

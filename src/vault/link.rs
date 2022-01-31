@@ -1,8 +1,18 @@
-use crate::{NoteId, utils::{fs::diff_paths, string::{kebab, escape_href}}, error::{Error, Result}};
+use crate::{
+    error::{Error, Result},
+    utils::{
+        fs::diff_paths,
+        string::{escape_href, kebab},
+    },
+    NoteId,
+};
 use anyhow::Context;
 use pest::Parser;
 use pulldown_cmark::{CowStr, Event, Tag};
-use std::{path::{Path, PathBuf}, collections::HashMap};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 #[derive(Clone, Debug)]
 pub enum Edge {
@@ -11,7 +21,10 @@ pub enum Edge {
 }
 
 /// Finds all wikilinks in `content` and applies the closure `handle_link` to them.
-pub fn for_each_internal_link(content: &str, mut handle_link: impl FnMut(&str) -> Result<()>) -> Result<()> {
+pub fn for_each_internal_link(
+    content: &str,
+    mut handle_link: impl FnMut(&str) -> Result<()>,
+) -> Result<()> {
     enum Currently {
         OutsideLink,
         MaybeOpen,
@@ -104,10 +117,11 @@ impl InternalLink {
                 .unwrap()
                 .to_string_lossy()
                 .to_string() // Gotta love Rust <3
-        } else { self.dest_title.to_owned() };
+        } else {
+            self.dest_title.to_owned()
+        };
 
         // Handle anchor
-        // TODO: Blockrefs are currently not handled here
         match &self.anchor {
             Anchor::Header(id) | Anchor::Blockref(id) => href.push_str(&format!("#{}", id)),
             Anchor::None => {}
@@ -117,7 +131,11 @@ impl InternalLink {
     }
 }
 
-pub(crate) fn create_link(link_string: &str, path_lookup: &HashMap<NoteId, PathBuf>, id_lookup: &HashMap<String, NoteId>) -> Result<InternalLink> {
+pub(crate) fn create_link(
+    link_string: &str,
+    path_lookup: &HashMap<NoteId, PathBuf>,
+    id_lookup: &HashMap<String, NoteId>,
+) -> Result<InternalLink> {
     let mut link = InternalLinkParser::parse(Rule::link, link_string)
         .with_context(|| format!("Failed parsing internal link from {}", link_string))?
         .next()
@@ -139,12 +157,8 @@ pub(crate) fn create_link(link_string: &str, path_lookup: &HashMap<NoteId, PathB
         // Handle header and blockref
         let anchor = match dest.next() {
             Some(anchor) => match anchor.into_inner().next() {
-                Some(x) if x.as_rule() == Rule::header => {
-                    Anchor::Header(kebab(x.as_str()))
-                }
-                Some(x) if x.as_rule() == Rule::blockref => {
-                    Anchor::Blockref(kebab(x.as_str()))
-                }
+                Some(x) if x.as_rule() == Rule::header => Anchor::Header(kebab(x.as_str())),
+                Some(x) if x.as_rule() == Rule::blockref => Anchor::Blockref(kebab(x.as_str())),
                 _ => panic!("This should not happen..."),
             },
             None => Anchor::None,
@@ -158,7 +172,9 @@ pub(crate) fn create_link(link_string: &str, path_lookup: &HashMap<NoteId, PathB
             anchor,
         })
     } else {
-        Err(Error::InvalidInternalLinkDestination(link_string.to_owned()))
+        Err(Error::InvalidInternalLinkDestination(
+            link_string.to_owned(),
+        ))
     }
 }
 
@@ -181,7 +197,8 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
         for_each_internal_link(content, |link_text| {
             links.push(link_text.to_owned());
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 
         assert_eq!(
             links,
@@ -215,7 +232,8 @@ let link = "[[link_in_code]]".to_owned();
         for_each_internal_link(content, |link_text| {
             links.push(link_text.to_owned());
             Ok(())
-        }).unwrap();
+        })
+        .unwrap();
 
         assert!(links.is_empty(), "Got links: {:?}", links);
     }

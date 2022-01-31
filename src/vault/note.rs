@@ -1,6 +1,6 @@
 use crate::{error::Result, Edge};
 use chrono::{DateTime, NaiveDate};
-use gray_matter::{Matter, Pod, engine::YAML};
+use gray_matter::{engine::YAML, Matter, Pod};
 use serde::Deserialize;
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
@@ -58,9 +58,14 @@ impl Note {
                 }
                 if let Some(datestring) = front_matter.date {
                     self.date = DateTime::parse_from_rfc3339(&datestring)
-                        .or_else(|_| DateTime::parse_from_rfc3339(format!("{}Z", datestring).as_ref()))
+                        .or_else(|_| {
+                            DateTime::parse_from_rfc3339(format!("{}Z", datestring).as_ref())
+                        })
                         .map(|s| s.naive_local())
-                        .or_else(|_| NaiveDate::parse_from_str(&datestring, "%Y-%m-%d").map(|s| s.and_hms(0, 0, 0)))
+                        .or_else(|_| {
+                            NaiveDate::parse_from_str(&datestring, "%Y-%m-%d")
+                                .map(|s| s.and_hms(0, 0, 0))
+                        })
                         .ok();
                 }
             }
