@@ -17,7 +17,7 @@ impl StyleConfig {
             css.push_str(":root {\n");
             for (key, value) in variables.iter() {
                 if let Some(value) = value.as_str() {
-                    css.push_str(&format!("--{key}: {value};\n"));
+                    css.push_str(&format!("--{}: {};\n", key, value));
                 }
             }
             css.push('}');
