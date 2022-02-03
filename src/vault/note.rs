@@ -8,9 +8,10 @@ use std::{
     path::PathBuf,
 };
 
+/// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
 
-pub trait FromHash {
+pub(crate) trait FromHash {
     fn from_hash(s: impl Hash) -> Self; 
 }
 
@@ -22,14 +23,47 @@ impl FromHash for NoteId {
     }
 }
 
+/// A node in [`Vault`](crate::Vault). Represents a note in a Zettelkasten.
+///
+/// This struct is not supposed to be constructed in isolation, but rather interacted with as part
+/// of a [`Vault`](crate::Vault) (by e.g. iterating over the [`Vault`](crate::Vault) or using the
+/// [`get`](crate::Vault::get) method).
+///
+/// # Example
+///
+/// Since the content follows CommonMark, you can easily convert it into HTML by using a Markdown 
+/// parser like e.g. [pulldown-cmark](https://github.com/raphlinus/pulldown-cmark).
+///
+/// ```
+/// # use mdzk::Vault;
+/// use pulldown_cmark::{Parser, html};
+/// 
+/// # let vault = Vault::default();
+/// for (_, note) in vault {
+///     let parser = Parser::new(&note.content);
+///     let mut html_output = String::new();
+///     html::push_html(&mut html_output, parser);
+///
+///     assert!(!html_output.is_empty())
+/// }
+/// ```
 #[derive(Clone, Debug)]
 pub struct Note {
+    /// The title of a note.
     pub title: String,
+    /// The path to the note, if it exists.
+    ///
+    /// **Note**: This path is relative to the root of the directory the vault is loaded from.
     pub path: Option<PathBuf>,
+    /// The tags assigned to the note.
     pub tags: Vec<String>,
+    /// The date assigned to the note.
     pub date: Option<chrono::NaiveDateTime>,
+    /// The full content of the note, in [CommonMark](https://commonmark.org/)[^1].
+    ///
+    /// [^1]: With some extensions. <!-- TODO: Describe which -->
     pub content: String,
-    pub adjacencies: HashMap<NoteId, Edge>,
+    pub(crate) adjacencies: HashMap<NoteId, Edge>,
 }
 
 impl Note {
@@ -77,6 +111,6 @@ impl Note {
 
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.title)
+        write!(f, "{}", self.content)
     }
 }
