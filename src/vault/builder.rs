@@ -3,6 +3,7 @@ use crate::{
     utils,
     vault::link::{create_link, for_each_internal_link},
     Edge, Note, NoteId, Vault,
+    vault::note::FromHash,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
@@ -82,7 +83,7 @@ impl VaultBuilder {
             .map(|e| e.into_path())
             .map(|path| {
                 let path_from_root = utils::fs::diff_paths(&path, &self.source).unwrap();
-                let id = NoteId::from(&path_from_root);
+                let id = NoteId::from_hash(&path_from_root);
 
                 let mut note = Note {
                     title: path.file_stem().unwrap().to_string_lossy().to_string(),

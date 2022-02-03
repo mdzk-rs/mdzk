@@ -8,24 +8,17 @@ use std::{
     path::PathBuf,
 };
 
-#[derive(Clone, Copy, Eq, Hash, Debug, PartialEq)]
-pub struct NoteId(u64);
+pub type NoteId = u64;
 
-impl NoteId {
-    pub(crate) fn new(id: u64) -> Self {
-        Self(id)
-    }
-
-    pub fn from(s: impl Hash) -> Self {
-        let mut hasher = DefaultHasher::new();
-        s.hash(&mut hasher);
-        Self(hasher.finish())
-    }
+pub trait FromHash {
+    fn from_hash(s: impl Hash) -> Self; 
 }
 
-impl std::fmt::Display for NoteId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:x}", self.0)
+impl FromHash for NoteId {
+    fn from_hash(s: impl Hash) -> Self {
+        let mut hasher = DefaultHasher::new();
+        s.hash(&mut hasher);
+        hasher.finish()
     }
 }
 
@@ -40,7 +33,7 @@ pub struct Note {
 }
 
 impl Note {
-    pub fn process_front_matter(&mut self) -> Result<()> {
+    pub(crate) fn process_front_matter(&mut self) -> Result<()> {
         #[derive(Deserialize)]
         struct FrontMatter {
             title: Option<String>,

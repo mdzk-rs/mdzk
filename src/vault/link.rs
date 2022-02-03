@@ -245,7 +245,7 @@ let link = "[[link_in_code]]".to_owned();
                 InternalLink {
                     dest_title: "This is note".to_owned(),
                     dest_path: Some(PathBuf::from("This is note")),
-                    dest_id: NoteId::new(1),
+                    dest_id: 1,
                     link_text: "Some alias".to_owned(),
                     anchor: Anchor::None,
                 },
@@ -255,7 +255,7 @@ let link = "[[link_in_code]]".to_owned();
                 InternalLink {
                     dest_title: "Tïtlæ fôr nøte".to_owned(),
                     dest_path: Some(PathBuf::from("Tïtlæ fôr nøte")),
-                    dest_id: NoteId::new(2),
+                    dest_id: 2,
                     link_text: "Tïtlæ fôr nøte".to_owned(),
                     anchor: Anchor::Blockref("id1234".to_owned()),
                 },
@@ -265,7 +265,7 @@ let link = "[[link_in_code]]".to_owned();
                 InternalLink {
                     dest_title: "🔈 Music".to_owned(),
                     dest_path: Some(PathBuf::from("🔈 Music")),
-                    dest_id: NoteId::new(3),
+                    dest_id: 3,
                     link_text: "🔈 Music".to_owned(),
                     anchor: Anchor::Header("header-with-spaces".to_owned()),
                 },
@@ -273,14 +273,14 @@ let link = "[[link_in_code]]".to_owned();
             ),
         ];
         let id_lookup = HashMap::from([
-            ("This is note".to_owned(), NoteId::new(1)),
-            ("Tïtlæ fôr nøte".to_owned(), NoteId::new(2)),
-            ("🔈 Music".to_owned(), NoteId::new(3)),
+            ("This is note".to_owned(), 1),
+            ("Tïtlæ fôr nøte".to_owned(), 2),
+            ("🔈 Music".to_owned(), 3),
         ]);
         let path_lookup = HashMap::from([
-            (NoteId::new(1), PathBuf::from("This is note")),
-            (NoteId::new(2), PathBuf::from("Tïtlæ fôr nøte")),
-            (NoteId::new(3), PathBuf::from("🔈 Music")),
+            (1, PathBuf::from("This is note")),
+            (2, PathBuf::from("Tïtlæ fôr nøte")),
+            (3, PathBuf::from("🔈 Music")),
         ]);
         for (want, from) in cases {
             assert_eq!(want, create_link(from, &path_lookup, &id_lookup).unwrap());
