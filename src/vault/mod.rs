@@ -23,6 +23,18 @@ impl Vault {
         self.notes.iter_mut()
     }
 
+    pub fn get(&self, id: &NoteId) -> Option<&Note> {
+        self.notes.get(id)
+    }
+
+    pub fn get_mut(&mut self, id: &NoteId) -> Option<&mut Note> {
+        self.notes.get_mut(id)
+    }
+
+    pub fn len(&self) -> usize {
+        self.notes.len()
+    }
+
     pub fn id_of(&self, title_or_path: impl AsRef<str>) -> Option<&NoteId> {
         self.id_lookup.get(title_or_path.as_ref())
     }
