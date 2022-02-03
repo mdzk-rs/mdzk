@@ -8,6 +8,12 @@ pub use note::{Note, NoteId};
 
 use std::collections::HashMap;
 
+/// A directed graph, where the nodes are [`Notes`](Note).
+///
+/// The graph is represented by an adjacency matrix; a
+/// [HashMap]<[NoteId], [Note]> that indexes all notes, which in turn contain a 
+/// [HashMap]<[NoteId], [Edge]> showing all potential adjacencies to other notes. These hashmaps
+/// are not directly accessible, but can be interfaced with via the methods provided by [`Vault`].
 #[derive(Default)]
 pub struct Vault {
     notes: HashMap<NoteId, Note>,
@@ -15,40 +21,74 @@ pub struct Vault {
 }
 
 impl Vault {
+    /// An iterator visiting all pairs of IDs and corresponding notes in an arbitrary order.
     pub fn iter(&self) -> impl Iterator<Item = (&NoteId, &Note)> + '_ {
         self.notes.iter()
     }
 
+    /// An iterator visiting all pairs of IDs and corresponding notes in an arbitrary order, with
+    /// mutable references to the notes.
     pub fn iter_mut(&mut self) -> impl Iterator<Item = (&NoteId, &mut Note)> + '_ {
         self.notes.iter_mut()
     }
 
+    /// Gets a reference to a [`Note`] by it's [`NoteId`].
+    ///
+    /// Returns the reference as `Some(note_ref)`. If the given [`NoteId`] does not correspond to 
+    /// any [`Notes`](Note), this function will return `None`.
     pub fn get(&self, id: &NoteId) -> Option<&Note> {
         self.notes.get(id)
     }
 
+    /// Gets a mutable reference to a [`Note`] by it's [`NoteId`].
+    ///
+    /// Returns the reference as `Some`. If the given [`NoteId`] does not correspond to any
+    /// [`Note`]s, this function will return `None`.
     pub fn get_mut(&mut self, id: &NoteId) -> Option<&mut Note> {
         self.notes.get_mut(id)
     }
 
+    /// Returns the amount of [`Note`]s in the vault.
     pub fn len(&self) -> usize {
         self.notes.len()
     }
 
+    /// Returns the [`NoteId`] to a note that has the supplied title or path.
+    ///
+    /// **Note**: If two notes share the same title, the [`NoteId`] returned is determined by which
+    /// note is read last when generating the vault. This can make looking up IDs by title
+    /// non-consistent. Paths are unique to each [`Note`] and should therefore be consistent.
     pub fn id_of(&self, title_or_path: impl AsRef<str>) -> Option<&NoteId> {
         self.id_lookup.get(title_or_path.as_ref())
     }
 
-    pub fn backlinks(&self, id: &NoteId) -> Vec<NoteId> {
+    /// Returns an iterator of backlink [`NoteId`]s.
+    ///
+    /// The IDs point to notes that link to the note identified by the paramater ID (`id`).
+    /// Essentially, this gives you an iterator of
+    /// [backlinks](https://en.wikipedia.org/wiki/Backlink).
+    ///
+    /// # Example
+    ///
+    /// This example prints all note titles and their backlinks.
+    ///
+    /// ```
+    /// # use std::collections::HashMap;
+    /// # use mdzk::Vault;
+    /// # let vault = Vault::default();
+    /// for (id, note) in vault.iter() {
+    ///     println!("Backlinks of {}:", note.title);
+    ///     for backlink_id in vault.backlinks(*id) {
+    ///         println!(" - {}", vault.get(backlink_id).unwrap().title);
+    ///     }
+    /// }
+    /// ```
+    pub fn backlinks(&self, id: NoteId) -> impl Iterator<Item = &NoteId> + '_ {
         self.iter()
-            .filter_map(|(backlink_id, note)| {
-                if matches!(note.adjacencies.get(&id), Some(Edge::Connected)) {
-                    Some(backlink_id.to_owned())
-                } else {
-                    None
-                }
+            .filter_map(move |(backlink_id, note)| match note.adjacencies.get(&id) {
+                Some(Edge::Connected) => Some(backlink_id),
+                _ => None,
             })
-            .collect()
     }
 }
 
