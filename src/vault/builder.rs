@@ -13,6 +13,19 @@ use std::{
 };
 
 /// Builder struct for making a Vault instance.
+///
+/// # Example
+///
+/// ```ignore
+/// # use mdzk::VaultBuilder;
+/// let vault = VaultBuilder::default()
+///     .source("some/dir")
+///     .ignores(vec!["some/dir/ignore-this".to_owned()])
+///     .build()
+///     .unwrap();
+/// ```
+///
+/// **Note**: This example is not tested, since it is dependent on the file system.
 #[derive(Default)]
 pub struct VaultBuilder {
     source: PathBuf,

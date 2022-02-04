@@ -20,7 +20,7 @@ pub(crate) fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
 // Slightly modified version of pathdiff::diff_paths:
 // https://github.com/Manishearth/pathdiff/blob/08fabb3b2864a19d1b870d0d1fe887abad351930/src/lib.rs#L34-L77
 /// Returns a relative path from `from` to `to`.
-pub fn diff_paths<T, F>(to: T, from: F) -> Option<PathBuf>
+pub(crate) fn diff_paths<T, F>(to: T, from: F) -> Option<PathBuf>
 where
     T: AsRef<Path>,
     F: AsRef<Path>,
