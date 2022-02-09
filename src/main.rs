@@ -7,8 +7,11 @@ fn main() -> Result<()> {
 
     let vault = mdzk::VaultBuilder::default().source(source).build()?;
 
-    for backlink in vault.backlinks(vault.id_of("Bias").unwrap()) {
-        println!("{}", backlink);
+    for (id, note) in vault.iter() {
+        println!("Backlinks of {}:", note.title);
+        for backlink_id in vault.backlinks(*id) {
+            println!(" - {}", vault.get(backlink_id).unwrap().title);
+        }
     }
 
     Ok(())
