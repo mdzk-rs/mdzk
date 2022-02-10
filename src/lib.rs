@@ -1,4 +1,5 @@
-#![feature(test)]
+// Add nightly test crate if compiling tests
+#![cfg_attr(test, feature(test))]
 
 extern crate pest;
 #[macro_use]
