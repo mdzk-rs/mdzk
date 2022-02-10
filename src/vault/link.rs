@@ -65,8 +65,7 @@ pub fn for_each_internal_link(
                     buffer.clear();
                     current = Currently::OutsideLink;
                 }
-                Currently::OutsideLink => {}
-                Currently::Ignore => {}
+                Currently::OutsideLink | Currently::Ignore => {}
             },
 
             Event::Text(ref text) => {

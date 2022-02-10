@@ -10,6 +10,7 @@ use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
+    sync::{Arc, Mutex},
 };
 
 /// Builder struct for making a Vault instance.
@@ -60,79 +61,76 @@ impl VaultBuilder {
         }
 
         let walker = {
-            let mut overrides = OverrideBuilder::new(&self.source);
+            let mut builder = OverrideBuilder::new(&self.source);
             for ignore in self.ignores.iter() {
-                if let Some(s) = ignore.strip_prefix('!') {
-                    overrides
-                        .add(s)
-                        .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
-                } else {
-                    overrides
-                        .add(&format!("!{}", ignore))
-                        .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
-                }
+                builder
+                    .add(ignore)
+                    .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
             }
+            let overrides = builder
+                .build()
+                .context("Building walker overrides failed.")?;
+
+            let types = TypesBuilder::new()
+                .add_defaults()
+                .select("markdown")
+                .build()
+                .expect("Building default types should never fail.");
 
             WalkBuilder::new(&self.source)
                 .hidden(true)
-                .overrides(
-                    overrides
-                        .build()
-                        .context("Building walker overrides failed.")?,
-                )
-                .types(
-                    TypesBuilder::new()
-                        .add_defaults()
-                        .select("markdown")
-                        .build()
-                        .expect("Building default types should never fail."),
-                )
-                .build()
+                .overrides(overrides)
+                .types(types)
+                .build_parallel()
         };
 
-        let mut notes = walker
-            .filter_map(|e| e.ok())
-            .filter(|e| !e.path().is_dir())
-            .map(|e| e.into_path())
-            .map(|path| {
-                let path_from_root = utils::fs::diff_paths(&path, &self.source).unwrap();
-                let id = NoteId::from_hash(&path_from_root);
+        let notes = Arc::new(Mutex::new(HashMap::<NoteId, Note>::new()));
+        let adjacencies = Arc::new(Mutex::new(HashMap::<NoteId, Edge>::new()));
+        let id_lookup = Arc::new(Mutex::new(HashMap::<String, NoteId>::new()));
 
-                let mut note = Note {
-                    title: path.file_stem().unwrap().to_string_lossy().to_string(),
-                    path: Some(path_from_root),
-                    tags: vec![],
-                    date: None,
-                    content: utils::fs::read_file(path)?,
-                    adjacencies: HashMap::new(),
-                };
+        walker.run(|| {
+            let notes = notes.clone();
+            let adjacencies = adjacencies.clone();
+            let id_lookup = id_lookup.clone();
+            Box::new(move |e| {
+                if let Ok(e) = e {
+                    let path = e.path();
+                    if !path.is_dir() {
+                        let path_from_root = utils::fs::diff_paths(&path, &self.source).unwrap();
+                        let id = NoteId::from_hash(&path_from_root);
 
-                note.process_front_matter()?;
+                        let mut note = Note {
+                            title: path.file_stem().unwrap().to_string_lossy().to_string(),
+                            path: Some(path_from_root),
+                            tags: vec![],
+                            date: None,
+                            content: utils::fs::read_file(path).unwrap(),
+                            adjacencies: HashMap::new(),
+                        };
 
-                Ok((id, note))
-            })
-            .collect::<Result<HashMap<NoteId, Note>>>()?;
+                        note.process_front_matter().unwrap();
 
-        let adjacencies: HashMap<NoteId, Edge> = notes
-            .keys()
-            .clone()
-            .map(|id| (*id, Edge::NotConnected))
-            .collect();
-
-        let id_lookup: HashMap<String, NoteId> = notes
-            .clone()
-            .into_iter()
-            .flat_map(|(id, note)| {
-                let mut lookup_entries = vec![(note.title, id)];
-                if let Some(path) = note.path {
-                    // This allows linking by filename
-                    lookup_entries.push((path.to_string_lossy().to_string(), id));
+                        id_lookup.lock().unwrap().insert(note.title.clone(), id);
+                        if let Some(ref path) = note.path {
+                            // This allows linking by filename
+                            id_lookup
+                                .lock()
+                                .unwrap()
+                                .insert(path.to_string_lossy().to_string(), id);
+                        }
+                        adjacencies.lock().unwrap().insert(id, Edge::NotConnected);
+                        notes.lock().unwrap().insert(id, note);
+                    }
                 }
-                lookup_entries
+                ignore::WalkState::Continue
             })
-            .collect();
+        });
 
-        let path_lookup: HashMap<NoteId, PathBuf> = notes
+        let id_lookup = id_lookup.lock().unwrap().to_owned();
+        let adjacencies = adjacencies.lock().unwrap().to_owned();
+        let mut notes = notes.lock().unwrap().to_owned();
+
+        let path_lookup = notes
             .clone()
             .into_iter()
             .map(|(id, note)| (id, note.path.unwrap()))
