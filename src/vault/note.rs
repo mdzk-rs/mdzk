@@ -12,7 +12,7 @@ use std::{
 pub type NoteId = u64;
 
 pub(crate) trait FromHash {
-    fn from_hash(s: impl Hash) -> Self; 
+    fn from_hash(s: impl Hash) -> Self;
 }
 
 impl FromHash for NoteId {
@@ -31,13 +31,13 @@ impl FromHash for NoteId {
 ///
 /// # Example
 ///
-/// Since the content follows CommonMark, you can easily convert it into HTML by using a Markdown 
+/// Since the content follows CommonMark, you can easily convert it into HTML by using a Markdown
 /// parser like e.g. [pulldown-cmark](https://github.com/raphlinus/pulldown-cmark).
 ///
 /// ```
 /// # use mdzk::Vault;
 /// use pulldown_cmark::{Parser, html};
-/// 
+///
 /// # let vault = Vault::default();
 /// for (_, note) in vault {
 ///     let parser = Parser::new(&note.content);
@@ -47,7 +47,7 @@ impl FromHash for NoteId {
 ///     assert!(!html_output.is_empty())
 /// }
 /// ```
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Note {
     /// The title of a note.
     pub title: String,

@@ -2,8 +2,8 @@ use crate::{
     error::{Error, Result},
     utils,
     vault::link::{create_link, for_each_internal_link},
-    Edge, Note, NoteId, Vault,
     vault::note::FromHash,
+    Edge, Note, NoteId, Vault,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};

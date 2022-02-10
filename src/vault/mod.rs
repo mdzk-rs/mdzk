@@ -11,10 +11,10 @@ use std::collections::HashMap;
 /// A directed graph, where the nodes are [`Notes`](Note).
 ///
 /// The graph is represented by an adjacency matrix; a
-/// [HashMap]<[NoteId], [Note]> that indexes all notes, which in turn contain a 
+/// [HashMap]<[NoteId], [Note]> that indexes all notes, which in turn contain a
 /// [HashMap]<[NoteId], [Edge]> showing all potential adjacencies to other notes. These hashmaps
 /// are not directly accessible, but can be interfaced with via the methods provided by [`Vault`].
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Vault {
     notes: HashMap<NoteId, Note>,
     id_lookup: HashMap<String, NoteId>,
@@ -34,7 +34,7 @@ impl Vault {
 
     /// Gets a reference to a [`Note`] by it's [`NoteId`].
     ///
-    /// Returns the reference as `Some(note_ref)`. If the given [`NoteId`] does not correspond to 
+    /// Returns the reference as `Some(note_ref)`. If the given [`NoteId`] does not correspond to
     /// any [`Notes`](Note), this function will return `None`.
     pub fn get(&self, id: &NoteId) -> Option<&Note> {
         self.notes.get(id)
@@ -51,6 +51,11 @@ impl Vault {
     /// Returns the amount of [`Note`]s in the vault.
     pub fn len(&self) -> usize {
         self.notes.len()
+    }
+
+    /// Returns `true` if the vault does not contain any notes.
+    pub fn is_empty(&self) -> bool {
+        self.notes.is_empty()
     }
 
     /// Returns the [`NoteId`] to a note that has the supplied title or path.
@@ -100,3 +105,16 @@ impl IntoIterator for Vault {
         self.notes.into_iter()
     }
 }
+
+impl PartialEq for Vault {
+    fn eq(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+
+        self.iter()
+            .all(|(id, note)| other.get(id).map_or(false, |n| *note == *n))
+    }
+}
+
+impl Eq for Vault {}
