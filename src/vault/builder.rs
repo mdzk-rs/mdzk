@@ -152,6 +152,9 @@ impl VaultBuilder {
                             1,
                         );
                     }
+                    // NOTE: This error is currently ignored, but could be useful as a toggleable
+                    // error, since that would allow users of mdzk to ensure all links have a valid
+                    // destination on vault creation.
                     Err(Error::InvalidInternalLinkDestination(_)) => {}
                     Err(e) => return Err(e),
                 }
@@ -161,5 +164,26 @@ impl VaultBuilder {
         })?;
 
         Ok(Vault { notes, id_lookup })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate test;
+    use std::path::PathBuf;
+    use test::Bencher;
+
+    #[bench]
+    fn bench_builder(b: &mut Bencher) {
+        b.iter(|| {
+            let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("benchsuite")
+                .join("lyt_kit");
+
+            crate::VaultBuilder::default()
+                .source(source)
+                .build()
+                .unwrap()
+        });
     }
 }
