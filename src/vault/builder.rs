@@ -10,7 +10,7 @@ use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::mpsc,
 };
 
 /// Builder struct for making a Vault instance.
@@ -84,14 +84,10 @@ impl VaultBuilder {
                 .build_parallel()
         };
 
-        let notes = Arc::new(Mutex::new(HashMap::<NoteId, Note>::new()));
-        let adjacencies = Arc::new(Mutex::new(HashMap::<NoteId, Edge>::new()));
-        let id_lookup = Arc::new(Mutex::new(HashMap::<String, NoteId>::new()));
+        let (sender, reciever) = mpsc::channel();
 
         walker.run(|| {
-            let notes = notes.clone();
-            let adjacencies = adjacencies.clone();
-            let id_lookup = id_lookup.clone();
+            let sender = sender.clone();
             Box::new(move |e| {
                 if let Ok(e) = e {
                     let path = e.path();
@@ -110,31 +106,30 @@ impl VaultBuilder {
 
                         note.process_front_matter().unwrap();
 
-                        id_lookup.lock().unwrap().insert(note.title.clone(), id);
-                        if let Some(ref path) = note.path {
-                            // This allows linking by filename
-                            id_lookup
-                                .lock()
-                                .unwrap()
-                                .insert(path.to_string_lossy().to_string(), id);
-                        }
-                        adjacencies.lock().unwrap().insert(id, Edge::NotConnected);
-                        notes.lock().unwrap().insert(id, note);
+                        sender.send((id, note)).unwrap();
                     }
                 }
                 ignore::WalkState::Continue
             })
         });
 
-        let id_lookup = id_lookup.lock().unwrap().to_owned();
-        let adjacencies = adjacencies.lock().unwrap().to_owned();
-        let mut notes = notes.lock().unwrap().to_owned();
+        drop(sender);
 
-        let path_lookup = notes
-            .clone()
-            .into_iter()
-            .map(|(id, note)| (id, note.path.unwrap()))
-            .collect();
+        let mut id_lookup = HashMap::<String, NoteId>::new();
+        let mut adjacencies = HashMap::<NoteId, Edge>::new();
+        let mut path_lookup = HashMap::<NoteId, PathBuf>::new();
+        let mut notes = HashMap::<NoteId, Note>::new();
+
+        for (id, note) in reciever {
+            id_lookup.insert(note.title.clone(), id);
+            if let Some(ref path) = note.path {
+                // This allows linking by filename
+                id_lookup.insert(path.to_string_lossy().to_string(), id);
+            }
+            adjacencies.insert(id, Edge::NotConnected);
+            path_lookup.insert(id, note.path.clone().unwrap());
+            notes.insert(id, note);
+        }
 
         notes.iter_mut().try_for_each(|(_, note)| {
             note.adjacencies = adjacencies.clone();
