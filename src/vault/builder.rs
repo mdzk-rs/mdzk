@@ -163,18 +163,18 @@ impl VaultBuilder {
 #[cfg(test)]
 mod tests {
     extern crate test;
-    use std::path::PathBuf;
+    use std::path::Path;
     use test::Bencher;
 
     #[bench]
     fn bench_builder(b: &mut Bencher) {
-        b.iter(|| {
-            let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join("benchsuite")
-                .join("lyt_kit");
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("benchsuite")
+            .join("lyt_kit");
 
+        b.iter(|| {
             crate::VaultBuilder::default()
-                .source(source)
+                .source(source.to_owned())
                 .build()
                 .unwrap()
         });
