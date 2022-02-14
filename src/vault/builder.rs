@@ -13,7 +13,7 @@ use std::{
     sync::mpsc,
 };
 
-/// Builder struct for making a Vault instance.
+/// Builder struct for making a Vault instance from a directory.
 ///
 /// # Example
 ///
@@ -27,10 +27,9 @@ use std::{
 /// ```
 ///
 /// **Note**: This example is not tested, since it is dependent on the file system.
-#[derive(Default)]
 pub struct VaultBuilder {
     source: PathBuf,
-    ignores: Vec<String>,
+    override_builder: OverrideBuilder,
 }
 
 impl VaultBuilder {
@@ -46,12 +45,45 @@ impl VaultBuilder {
         }
     }
 
-    /// Set the ignore patterns for the directory walker.
+    /// Adds multiple ignore patterns for the directory walker.
     ///
-    /// The patterns follows the [gitignore format](https://git-scm.com/docs/gitignore).
+    /// The patterns follow the [gitignore format](https://git-scm.com/docs/gitignore).
+    ///
+    /// ## Panics
+    ///
+    /// This function will panic on any invalid ignores. For a safer way of adding ignores, see the
+    /// [`add_ignore`] function.
     #[must_use]
-    pub fn ignores(self, ignores: Vec<String>) -> Self {
-        Self { ignores, ..self }
+    pub fn ignores(mut self, ignores: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
+        for ignore in ignores {
+            let ignore = ignore.as_ref();
+            let s = match ignore.strip_prefix('!') {
+                Some(s) => s.to_owned(),
+                None => format!("!{}", ignore),
+            };
+
+            self.override_builder
+                .add(&s)
+                .unwrap_or_else(|_| panic!("Invalid ignore pattern: {}", ignore));
+        }
+        self
+    }
+
+    /// Adds an ignore pattern for the directory walker.
+    ///
+    /// The patterns follow the [gitignore format](https://git-scm.com/docs/gitignore). Any invalid
+    /// pattern will return an error.
+    pub fn add_ignore(&mut self, ignore: impl AsRef<str>) -> Result<()> {
+        let ignore = ignore.as_ref();
+        let s = match ignore.strip_prefix('!') {
+            Some(s) => s.to_owned(),
+            None => format!("!{}", ignore),
+        };
+        self.override_builder
+            .add(&s)
+            .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
+
+        Ok(())
     }
 
     /// Build a [`Vault`] from the options supplied to the builder.
@@ -61,13 +93,7 @@ impl VaultBuilder {
         }
 
         let walker = {
-            let mut builder = OverrideBuilder::new(&self.source);
-            for ignore in self.ignores.iter() {
-                builder
-                    .add(ignore)
-                    .with_context(|| format!("Invalid ignore pattern: {}", ignore))?;
-            }
-            let overrides = builder
+            let overrides = self.override_builder
                 .build()
                 .context("Building walker overrides failed.")?;
 
@@ -92,21 +118,31 @@ impl VaultBuilder {
                 if let Ok(e) = e {
                     let path = e.path();
                     if !path.is_dir() {
-                        let path_from_root = utils::fs::diff_paths(&path, &self.source).unwrap();
+                        let path_from_root = utils::fs::diff_paths(path, &self.source).unwrap();
                         let id = NoteId::from_hash(&path_from_root);
+                        let content = match utils::fs::read_file(path) {
+                            Ok(content) => content,
+                            Err(e) => {
+                                sender.send(Err(e)).unwrap();
+                                return ignore::WalkState::Quit;
+                            }
+                        };
 
                         let mut note = Note {
                             title: path.file_stem().unwrap().to_string_lossy().to_string(),
                             path: Some(path_from_root),
                             tags: vec![],
                             date: None,
-                            content: utils::fs::read_file(path).unwrap(),
+                            content,
                             adjacencies: HashMap::new(),
                         };
 
-                        note.process_front_matter().unwrap();
+                        if let Err(e) = note.process_front_matter() {
+                            sender.send(Err(e.into())).unwrap();
+                            return ignore::WalkState::Quit;
+                        };
 
-                        sender.send((id, note)).unwrap();
+                        sender.send(Ok((id, note))).unwrap();
                     }
                 }
                 ignore::WalkState::Continue
@@ -120,15 +156,20 @@ impl VaultBuilder {
         let mut path_lookup = HashMap::<NoteId, PathBuf>::new();
         let mut notes = HashMap::<NoteId, Note>::new();
 
-        for (id, note) in reciever {
-            id_lookup.insert(note.title.clone(), id);
-            if let Some(ref path) = note.path {
-                // This allows linking by filename
-                id_lookup.insert(path.to_string_lossy().to_string(), id);
+        for res in reciever {
+            match res {
+                Ok((id, note)) => {
+                    id_lookup.insert(note.title.clone(), id);
+                    if let Some(ref path) = note.path {
+                        // This allows linking by filename
+                        id_lookup.insert(path.to_string_lossy().to_string(), id);
+                    }
+                    adjacencies.insert(id, Edge::NotConnected);
+                    path_lookup.insert(id, note.path.clone().unwrap());
+                    notes.insert(id, note);
+                }
+                Err(e) => return Err(e.into()),
             }
-            adjacencies.insert(id, Edge::NotConnected);
-            path_lookup.insert(id, note.path.clone().unwrap());
-            notes.insert(id, note);
         }
 
         notes.iter_mut().try_for_each(|(_, note)| {
@@ -160,6 +201,16 @@ impl VaultBuilder {
     }
 }
 
+impl Default for VaultBuilder {
+    fn default() -> Self {
+        let source = PathBuf::default();
+        Self {
+            override_builder: OverrideBuilder::new(&source),
+            source,
+        } 
+    }
+}
+
 #[cfg(test)]
 mod tests {
     extern crate test;
@@ -178,5 +229,17 @@ mod tests {
                 .build()
                 .unwrap()
         });
+    }
+
+    #[test]
+    fn test_ignores() {
+        let ignores = vec![
+            "ignore-this-dir",
+            "also-ignore-this",
+            "!dont-ignore-this-dir",
+        ];
+
+        let _ = crate::VaultBuilder::default()
+            .ignores(ignores);
     }
 }
