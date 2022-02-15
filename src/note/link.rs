@@ -88,7 +88,7 @@ pub fn for_each_internal_link(
 }
 
 #[derive(Parser)]
-#[grammar = "vault/wikilink.pest"]
+#[grammar = "note/wikilink.pest"]
 pub struct InternalLinkParser;
 
 #[derive(Debug, PartialEq)]

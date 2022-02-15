@@ -1,10 +1,10 @@
 mod builder;
-pub(crate) mod link;
-mod note;
 
 pub use builder::VaultBuilder;
-pub use link::Edge;
-pub use note::{Note, NoteId};
+pub use crate::note::{
+    link::Edge,
+    Note, NoteId,
+};
 
 use std::collections::HashMap;
 

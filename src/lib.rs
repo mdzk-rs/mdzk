@@ -5,7 +5,9 @@ extern crate pest;
 extern crate pest_derive;
 
 pub mod error;
+pub mod note;
 mod utils;
 mod vault;
 
-pub use vault::{Edge, Note, NoteId, Vault, VaultBuilder, Notes, NotesMut};
+pub use vault::{Vault, VaultBuilder};
+pub use note::{Note, NoteId};

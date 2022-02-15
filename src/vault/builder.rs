@@ -1,8 +1,8 @@
 use crate::{
     error::{Error, Result},
     utils,
-    vault::link::{create_link, for_each_internal_link, Edge},
-    vault::note::FromHash,
+    note::link::{create_link, for_each_internal_link, Edge},
+    note::FromHash,
     Note, NoteId, Vault,
 };
 use anyhow::Context;

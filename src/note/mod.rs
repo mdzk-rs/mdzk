@@ -1,4 +1,6 @@
-use crate::{error::Result, vault::link::Edge};
+pub(crate) mod link;
+
+use crate::{error::Result, note::link::Edge};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use serde::Deserialize;
