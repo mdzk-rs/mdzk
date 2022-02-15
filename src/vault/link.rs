@@ -39,6 +39,7 @@ pub fn for_each_internal_link(
     let mut current = Currently::OutsideLink;
     for event in parser {
         match event {
+            // Don't parse links in codeblocks, links and images
             Event::Start(Tag::CodeBlock(_))
             | Event::Start(Tag::Link(_, _, _))
             | Event::Start(Tag::Image(_, _, _)) => current = Currently::Ignore,
@@ -91,19 +92,19 @@ pub fn for_each_internal_link(
 pub struct InternalLinkParser;
 
 #[derive(Debug, PartialEq)]
-pub enum Anchor {
+enum Anchor {
     Header(String),
     Blockref(String),
     None,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct InternalLink {
-    pub dest_title: String,
-    pub dest_path: Option<PathBuf>,
-    pub dest_id: NoteId,
-    pub link_text: String,
-    pub anchor: Anchor,
+pub(crate) struct InternalLink {
+    dest_title: String,
+    dest_path: Option<PathBuf>,
+    pub(crate) dest_id: NoteId,
+    link_text: String,
+    anchor: Anchor,
 }
 
 impl InternalLink {

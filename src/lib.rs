@@ -8,4 +8,4 @@ pub mod error;
 mod utils;
 mod vault;
 
-pub use vault::{Edge, InternalLink, Note, NoteId, Vault, VaultBuilder};
+pub use vault::{Edge, Note, NoteId, Vault, VaultBuilder, Notes, NotesMut};

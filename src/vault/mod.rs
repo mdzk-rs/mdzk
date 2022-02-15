@@ -3,12 +3,12 @@ pub(crate) mod link;
 mod note;
 
 pub use builder::VaultBuilder;
-pub use link::{Edge, InternalLink};
+pub use link::Edge;
 pub use note::{Note, NoteId};
 
 use std::collections::HashMap;
 
-/// A directed graph, where the nodes are [`Notes`](Note).
+/// A directed graph, where the nodes are [`Note`]s.
 ///
 /// The graph is represented by an adjacency matrix; a
 /// [HashMap]<[NoteId], [Note]> that indexes all notes, which in turn contain a
@@ -22,14 +22,14 @@ pub struct Vault {
 
 impl Vault {
     /// An iterator visiting all pairs of IDs and corresponding notes in an arbitrary order.
-    pub fn iter(&self) -> impl Iterator<Item = (&NoteId, &Note)> + '_ {
-        self.notes.iter()
+    pub fn iter(&self) -> Notes {
+        Notes { base: self.notes.iter() }
     }
 
     /// An iterator visiting all pairs of IDs and corresponding notes in an arbitrary order, with
     /// mutable references to the notes.
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = (&NoteId, &mut Note)> + '_ {
-        self.notes.iter_mut()
+    pub fn iter_mut(&mut self) -> NotesMut {
+        NotesMut { base: self.notes.iter_mut() }
     }
 
     /// Gets a reference to a [`Note`] by it's [`NoteId`].
@@ -118,3 +118,36 @@ impl PartialEq for Vault {
 }
 
 impl Eq for Vault {}
+
+/// An iterator returning references to all notes in a vault in an arbitrary order.
+///
+/// The notes are indexed by a reference to their [`NoteId`].
+pub struct Notes<'a> {
+    base: std::collections::hash_map::Iter<'a, NoteId, Note>,
+}
+
+impl<'a> Iterator for Notes<'a> {
+    type Item = (&'a NoteId, &'a Note);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.base.next()
+    }
+}
+
+
+pub struct NotesMut<'a> {
+    base: std::collections::hash_map::IterMut<'a, NoteId, Note>,
+}
+
+/// An iterator returning mutable references to all notes in a vault in an arbitrary order.
+///
+/// The notes are indexed by a reference to their [`NoteId`].
+impl<'a> Iterator for NotesMut<'a> {
+    type Item = (&'a NoteId, &'a mut Note);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.base.next()
+    }
+}

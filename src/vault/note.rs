@@ -1,4 +1,4 @@
-use crate::{error::Result, Edge};
+use crate::{error::Result, vault::link::Edge};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use serde::Deserialize;
@@ -31,12 +31,14 @@ impl FromHash for NoteId {
 ///
 /// # Example
 ///
-/// Since the content follows CommonMark, you can easily convert it into HTML by using a Markdown
-/// parser like e.g. [pulldown-cmark](https://github.com/raphlinus/pulldown-cmark).
+/// Since the content adheres to CommonMark, you can easily convert it into HTML by using a 
+/// Markdown parser like e.g. [pulldown-cmark](https://github.com/raphlinus/pulldown-cmark).
 ///
 /// ```
 /// # use mdzk::Vault;
 /// use pulldown_cmark::{Parser, html};
+///
+/// // Load a vault...
 ///
 /// # let vault = Vault::default();
 /// for (_, note) in vault {

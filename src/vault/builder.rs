@@ -1,9 +1,9 @@
 use crate::{
     error::{Error, Result},
     utils,
-    vault::link::{create_link, for_each_internal_link},
+    vault::link::{create_link, for_each_internal_link, Edge},
     vault::note::FromHash,
-    Edge, Note, NoteId, Vault,
+    Note, NoteId, Vault,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
@@ -52,7 +52,7 @@ impl VaultBuilder {
     /// ## Panics
     ///
     /// This function will panic on any invalid ignores. For a safer way of adding ignores, see the
-    /// [`add_ignore`] function.
+    /// [`add_ignore`](VaultBuilder::add_ignore) function.
     #[must_use]
     pub fn ignores(mut self, ignores: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         for ignore in ignores {
@@ -90,6 +90,10 @@ impl VaultBuilder {
     pub fn build(&self) -> Result<Vault> {
         if !self.source.is_dir() {
             return Err(Error::VaultSourceNotDir);
+        }
+
+        if !self.source.exists() {
+            return Err(Error::PathNotFound(self.source.clone()))
         }
 
         let walker = {
