@@ -1,0 +1,1 @@
+**Fluid Thinking** is the ability to skillfully adjust your perspective— zooming in and out of the levels of emergence. This allows you to approach a problem from the inside and the outside…tacking back and forth with ease to generate new value and find novel solutions.

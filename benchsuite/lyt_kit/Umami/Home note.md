@@ -1,0 +1,1 @@
+Your Home note is your north star, navigating you to your MOCs. It keeps the entire system organized.
