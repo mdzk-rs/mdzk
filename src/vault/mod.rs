@@ -10,10 +10,8 @@ use std::collections::HashMap;
 
 /// A directed graph, where the nodes are [`Note`]s.
 ///
-/// The graph is represented by an adjacency matrix; a
-/// [HashMap]<[NoteId], [Note]> that indexes all notes, which in turn contain a
-/// [HashMap]<[NoteId], [Edge]> showing all potential adjacencies to other notes. These hashmaps
-/// are not directly accessible, but can be interfaced with via the methods provided by [`Vault`].
+/// The graph is represented as an adjacency matrix. This gives fast lookup times and allows the
+/// discovery of backlinks to be very quick.
 #[derive(Default, Debug)]
 pub struct Vault {
     notes: HashMap<NoteId, Note>,
