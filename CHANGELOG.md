@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.1 (Unreleased)
+## 0.5.1 (2022-02-21)
 
 ### Added
 
