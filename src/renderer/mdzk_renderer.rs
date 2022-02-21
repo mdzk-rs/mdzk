@@ -267,7 +267,7 @@ fn fix_link(dest: CowStr) -> CowStr {
 }
 
 const FONTS: [(&str, &[u8]); 62] = [
-    ("Inter.ttf", include_bytes!("theme/css/fonts/Inter.ttf")),
+    ("Inter.var.woff2", include_bytes!("theme/css/fonts/Inter.var.woff2")),
     (
         "Source_Code_Pro_v11_All_Charsets_500.woff2",
         include_bytes!("theme/css/fonts/Source_Code_Pro_v11_All_Charsets_500.woff2"),

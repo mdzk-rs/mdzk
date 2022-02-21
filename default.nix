@@ -10,5 +10,5 @@ pkgs.rustPlatform.buildRustPackage {
   ]; 
   nativeBuildInputs = [ rust-toolchain ];
 
-  cargoSha256 = "sha256-uJ00tGiKtcYghFUh0fcYg4nZc/o8yhvlVs+6/aRNY5s=";
+  cargoSha256 = "sha256-r4HXd1lSk6Tb3Aw8TL9/jqgVvm8w71ScgTLqQc14F9U=";
 }
