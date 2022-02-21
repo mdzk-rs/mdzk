@@ -63,7 +63,10 @@ impl From<mdbook::Config> for StyleConfig {
                 variables: Some(style),
             }
         } else {
-            Self { additional_css: None, variables: None }
+            Self {
+                additional_css: None,
+                variables: None,
+            }
         }
     }
 }

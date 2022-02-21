@@ -78,7 +78,6 @@ impl Renderer for HtmlMdzk {
                 .context("Unexpected error when constructing destination path")?;
         }
 
-
         // Create data for all notes
         let mut data = BTreeMap::new();
         data.insert(
@@ -220,7 +219,6 @@ impl Renderer for HtmlMdzk {
             }
         }
 
-
         Ok(())
     }
 }
@@ -267,7 +265,10 @@ fn fix_link(dest: CowStr) -> CowStr {
 }
 
 const FONTS: [(&str, &[u8]); 62] = [
-    ("Inter.var.woff2", include_bytes!("theme/css/fonts/Inter.var.woff2")),
+    (
+        "Inter.var.woff2",
+        include_bytes!("theme/css/fonts/Inter.var.woff2"),
+    ),
     (
         "Source_Code_Pro_v11_All_Charsets_500.woff2",
         include_bytes!("theme/css/fonts/Source_Code_Pro_v11_All_Charsets_500.woff2"),
