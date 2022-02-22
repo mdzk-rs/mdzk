@@ -1,6 +1,9 @@
 name: Test
 
-on: [push]
+on:
+  push:
+    paths:
+      - src/**
 
 jobs:
   build:
@@ -21,9 +24,10 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
-      - uses: actions-rs/toolchain@v1
+      - name: Install nightly (needed for benchmarking)
+        uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: check

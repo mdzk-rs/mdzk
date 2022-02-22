@@ -1,0 +1,1 @@
+Any helpful framework, or structure, that helps but doesn't hinder note retrieval and/or idea management. They are adaptable, fitting your evolving needs.

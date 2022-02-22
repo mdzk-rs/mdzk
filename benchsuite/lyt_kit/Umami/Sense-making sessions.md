@@ -1,0 +1,1 @@
+**Sense-making sessions** are immersive hands-on live events where people work their note-making muscles together.

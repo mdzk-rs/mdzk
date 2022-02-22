@@ -1,22 +1,13 @@
+#![cfg_attr(feature = "test", feature(test))]
+
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-#[macro_use]
-pub mod log;
+pub mod error;
+pub mod note;
+mod utils;
+mod vault;
 
-pub mod cmd;
-pub mod config;
-pub mod preprocess;
-pub mod renderer;
-pub mod utils;
-pub mod zk;
-
-#[doc(inline)]
-pub use crate::{cmd::build, cmd::init, cmd::serve, config::Config, zk::load_zk};
-
-pub const SRC_DIR: &str = "notes";
-pub const BUILD_DIR: &str = "html";
-pub const CONFIG_FILE: &str = "mdzk.toml";
-pub const SUMMARY_FILE: &str = ".mdzk_summary.md";
-pub const DEFAULT_ZK_TITLE: &str = "My mdzk";
+pub use vault::{Vault, VaultBuilder};
+pub use note::{Note, NoteId};
