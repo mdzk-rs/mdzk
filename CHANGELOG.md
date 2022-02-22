@@ -17,7 +17,7 @@
 
     ```toml
     [style]
-    css = """
+    additional-css = """
     <CSS here>
     """
     ```
@@ -26,7 +26,7 @@
     
     ```toml
     [style]
-    css = "path/to/file.css"
+    additional-css = "path/to/file.css"
     ```
     
     Paths are relative to the `mdzk.toml` file.
