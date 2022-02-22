@@ -19,7 +19,7 @@
           overlays = [ (import rust) ];
         };
 
-        rust-toolchain = pkgs.rust-bin.stable.latest.default.override {
+        rust-toolchain = pkgs.rust-bin.nightly.latest.default.override {
           extensions = [ "rust-std" "rust-src" ];
         };
 
