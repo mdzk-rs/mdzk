@@ -1,6 +1,6 @@
 [package]
 name = "mdzk"
-version = "0.5.1"
+version = "0.5.2"
 authors = [
     "Knut Magnus Aasrud <km@aasrud.com>",
     "Victor Freire <victor@freire.dev.br>",
@@ -30,7 +30,7 @@ include = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.54"
+anyhow = "1.0.55"
 chrono = "0.4.19"
 futures-util = "0.3.21"
 gray_matter = "0.2.1"
