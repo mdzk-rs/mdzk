@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2 (2022-02-22)
+
+### Fixes
+
+- [#70](https://github.com/mdzk-rs/mdzk/issues/70): Fixed issue where parentheses were not allowed in internal links.
+
+    577e84c: allow non-square brackets in internal links 
+
 ## 0.5.1 (2022-02-21)
 
 ### Added
