@@ -185,33 +185,42 @@ mod tests {
     #[test]
     fn detect_these() {
         let content = r#"This is a note with four links:
+
 This one [[link]], this one [[ link#header ]], this one [[   link | a bit more complex]], and this one [[     link#header | more 😭 complex]].
+
 > This is a [[link in a blockquote]]
+
 - List item
 - Second list item with [[list link]]
+
 | Header 1 | Header 2 |
 | -------- | -------- |
-| Tables can also have [[table links]] | more stuff |"#;
+| Tables can also have [[table links]] | more stuff |
 
-        let mut links = vec![];
+Check if [[link with (parentheses) work as well]]. What [[about {curly braces}?]]"#;
+
+        let mut gots = vec![];
         for_each_internal_link(content, |link_text| {
-            links.push(link_text.to_owned());
+            gots.push(link_text.to_owned());
             Ok(())
         })
         .unwrap();
 
-        assert_eq!(
-            links,
-            vec![
-                "link",
-                "link#header",
-                "link | a bit more complex",
-                "link#header | more 😭 complex",
-                "link in a blockquote",
-                "list link",
-                "table links"
-            ]
-        );
+        let wants = vec![
+            "link",
+            "link#header",
+            "link | a bit more complex",
+            "link#header | more 😭 complex",
+            "link in a blockquote",
+            "list link",
+            "table links",
+            "link with (parentheses) work as well",
+            "about {curly braces}?",
+        ];
+
+        for (got, want) in gots.iter().zip(wants.iter()) {
+            assert_eq!(got, want);
+        }
     }
 
     #[test]
