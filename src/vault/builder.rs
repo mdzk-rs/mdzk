@@ -21,7 +21,7 @@ use std::{
 /// # use mdzk::VaultBuilder;
 /// let vault = VaultBuilder::default()
 ///     .source("some/dir")
-///     .ignores(vec!["some/dir/ignore-this".to_owned()])
+///     .ignores(["draft-*", "*not-finished*"])
 ///     .build()
 ///     .unwrap();
 /// ```
