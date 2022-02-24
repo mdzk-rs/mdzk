@@ -3,6 +3,7 @@ pub(crate) mod link;
 use crate::{error::Result, note::link::Edge};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
+use pulldown_cmark::{Parser, Options};
 use serde::Deserialize;
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
@@ -129,6 +130,14 @@ impl Note {
         self.content = gray_matter.content;
 
         Ok(())
+    }
+
+    /// Uses [`pulldown_cmark`] to parse the [`Note::content`] into HTML.
+    pub fn as_html(&self) -> String {
+        let mut s = String::new();
+        let parser = Parser::new_ext(&self.content, Options::all());
+        pulldown_cmark::html::push_html(&mut s, parser);
+        s
     }
 }
 
