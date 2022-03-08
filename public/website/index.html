@@ -36,13 +36,26 @@
     <section class="align-center">
       <div class="container">
         <img src="mdzk.svg" />
-        <p>A lovingly designed tool for your Zettelkasten needs</p>
-        <p>
-          <code>
-            See install instructions at
-            <a href="http://mdzk.app/docs">mdzk.app/docs</a>
-          </code>
-        </p>
+        <p style="font-weight: 500;">The API of your Zettelkasten</p>
+        <pre>
+<code>$ mdzk -Tpbl --pretty                           (WIP interface)
+[
+  {
+    "id": "7caaf8918e5c38e4",
+    "title": "<a href="https://mdzk.app/docs/Installation">How to install mdzk</a>",
+    "path": "path/note1",
+    "backlinks": ["1fh553bc8e8c7864"],
+    "links: []
+  },
+  {
+    "id": "1fh553bc8e8c7864",
+    "title": "<a href="https://mdzk.app/docs">Documentation</a>",
+    "path": "path/to/note2"
+    "backlinks": [],
+    "links: ["7caaf8918e5c38e4"]
+  }
+]</code>
+        </pre>
       </div>
     </section>
 
@@ -53,20 +66,17 @@
           <h1>Markdown-based</h1>
         </div>
         <p>
-          mdzk works with plain text files in an extended version of the
-          well-defined and widely used
-          <a href="https://commonmark.org">CommonMark</a> Markdown
-          specification. The included extensions are made to make your
-          note-taking process as simple, readable and quick as possible.
-          Everything is compatible with the flavor of Markdown used by the
-          hugely popular editor, <a href="https://obsidian.md">Obsidian</a>.
+          mdzk works with plain text files in the well-defined and widely
+          supported <a href="https://commonmark.org">CommonMark</a> Markdown
+          specification.
         </p>
         <p>
-          Using Markdown ensures that your notes are future-proof beyond the
+          Using CommonMark ensures that your notes are future-proof, beyond the
           lifetime of mdzk itself. They remain human-readable, can be version
           controlled and are editable in close to every text editor there is.
-          mdzk gives you a local web server with live updating, which makes
-          editing a breeze, no matter what editor you prefer.
+          Tasked with publishing your notes, you have the choice of using any
+          one of a plethora of static site generators, or you can use mdzk's
+          built-in generator.
         </p>
       </div>
     </section>
@@ -78,15 +88,12 @@
           <h1>Connected notes</h1>
         </div>
         <p>
-          The core principle behind mdzk is based on the
-          <a href="https://en.wikipedia.org/wiki/Zettelkasten">Zettelkasten</a>
-          note-taking method. An mdzk will help you link your knowledge to
-          discover connections you might never have found otherwise.
-        </p>
-        <p>
-          Each internal link has an automatically generated "backlink", which
-          helps you navigate your web of notes. mdzk also sports a powerful
-          search and a full index, covering the whole vault.
+          The core data structure of an mdzk vault is a directed graph which
+          presents a whole new way of thinking about your knowledge-base. Based
+          on the popular
+          <a href="https://en.wikipedia.org/wiki/Zettelkasten">Zettelkasten system</a>,
+          this model will help you discover connections you might never have found
+          otherwise.
         </p>
       </div>
     </section>

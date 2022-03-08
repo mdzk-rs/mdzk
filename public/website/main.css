@@ -42,6 +42,16 @@ code {
   border-radius: 3px;
 }
 
+pre {
+    text-align: initial;
+}
+
+pre code {
+    display: block;
+    padding: 0.5em;
+    overflow-x: auto;
+}
+
 /* Link styling */
 a {
   position: relative;
