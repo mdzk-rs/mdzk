@@ -1,11 +1,23 @@
 use anyhow::Result;
+use clap::Parser;
+use std::path::PathBuf;
+
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+    path: Option<PathBuf>,
+}
 
 fn main() -> Result<()> {
-    let mut args = std::env::args();
-    args.next().unwrap();
-    let source = args.next().unwrap_or_else(|| ".".to_owned());
+    let args = Args::parse();
 
-    let _vault = mdzk::VaultBuilder::default().source(source).build()?;
+    let vault = mdzk::VaultBuilder::default()
+        .source(args.path.unwrap_or(PathBuf::from(".")))
+        .build()?;
+
+    for (id, note) in vault {
+        println!("\"{id:x}\": {}", note.title);
+    }
 
     Ok(())
 }

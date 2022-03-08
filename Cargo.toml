@@ -1,6 +1,6 @@
 [package]
 name = "mdzk"
-version = "0.5.2"
+version = "1.0.0"
 authors = [
     "Knut Magnus Aasrud <km@aasrud.com>",
     "Victor Freire <victor@freire.dev.br>",
@@ -14,14 +14,15 @@ repository = "https://github.com/mdzk-rs/mdzk"
 readme = "README.md"
 license-file = "LICENSE"
 include = [
-    "Cargo.toml", 
-    "**/*.rs", 
-    "**/*.pest", 
+    "Cargo.toml",
+    "**/*.rs",
+    "**/*.pest",
 ]
 
 [dependencies]
 anyhow = "1.0.55"
 chrono = "0.4.19"
+clap = { version = "3.1.6", features = ["derive"] }
 futures-util = "0.3.21"
 gray_matter = "0.2.1"
 ignore = "0.4.18"
