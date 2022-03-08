@@ -40,12 +40,12 @@ pub fn for_each_internal_link(
     for event in parser {
         match event {
             // Don't parse links in codeblocks, links and images
-            Event::Start(Tag::CodeBlock(_))
-            | Event::Start(Tag::Link(_, _, _))
-            | Event::Start(Tag::Image(_, _, _)) => current = Currently::Ignore,
-            Event::End(Tag::CodeBlock(_))
-            | Event::End(Tag::Link(_, _, _))
-            | Event::End(Tag::Image(_, _, _)) => current = Currently::OutsideLink,
+            Event::Start(Tag::CodeBlock(_) | Tag::Link(_, _, _) | Tag::Image(_, _, _)) => {
+                current = Currently::Ignore;
+            }
+            Event::End(Tag::CodeBlock(_) | Tag::Link(_, _, _) | Tag::Image(_, _, _)) => {
+                current = Currently::OutsideLink;
+            }
 
             Event::Text(CowStr::Borrowed("[")) => match current {
                 Currently::OutsideLink => current = Currently::MaybeOpen,
@@ -118,7 +118,7 @@ impl InternalLink {
                 .to_string_lossy()
                 .to_string() // Gotta love Rust <3
         } else {
-            self.dest_title.to_owned()
+            self.dest_title.clone()
         };
 
         // Handle anchor

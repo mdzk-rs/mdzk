@@ -1,9 +1,8 @@
 use crate::{
     error::{Error, Result},
-    utils,
     note::link::{create_link, for_each_internal_link, Edge},
     note::FromHash,
-    Note, NoteId, Vault,
+    utils, Note, NoteId, Vault,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
@@ -93,11 +92,12 @@ impl VaultBuilder {
         }
 
         if !self.source.exists() {
-            return Err(Error::PathNotFound(self.source.clone()))
+            return Err(Error::PathNotFound(self.source.clone()));
         }
 
         let walker = {
-            let overrides = self.override_builder
+            let overrides = self
+                .override_builder
                 .build()
                 .context("Building walker overrides failed.")?;
 
@@ -141,10 +141,7 @@ impl VaultBuilder {
                             adjacencies: HashMap::new(),
                         };
 
-                        if let Err(e) = note.process_front_matter() {
-                            sender.send(Err(e.into())).unwrap();
-                            return ignore::WalkState::Quit;
-                        };
+                        note.process_front_matter();
 
                         sender.send(Ok((id, note))).unwrap();
                     }
@@ -211,7 +208,7 @@ impl Default for VaultBuilder {
         Self {
             override_builder: OverrideBuilder::new(&source),
             source,
-        } 
+        }
     }
 }
 
@@ -243,7 +240,6 @@ mod tests {
             "!dont-ignore-this-dir",
         ];
 
-        let _ = crate::VaultBuilder::default()
-            .ignores(ignores);
+        let _ = crate::VaultBuilder::default().ignores(ignores);
     }
 }

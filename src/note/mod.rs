@@ -3,7 +3,7 @@ pub(crate) mod link;
 use crate::{error::Result, note::link::Edge};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
-use pulldown_cmark::{Parser, Options};
+use pulldown_cmark::{Options, Parser};
 use serde::Deserialize;
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
@@ -34,7 +34,7 @@ impl FromHash for NoteId {
 ///
 /// # Example
 ///
-/// Since the content adheres to CommonMark, you can easily convert it into HTML by using a 
+/// Since the content adheres to CommonMark, you can easily convert it into HTML by using a
 /// Markdown parser like e.g. [pulldown-cmark](https://github.com/raphlinus/pulldown-cmark).
 ///
 /// ```
@@ -71,7 +71,7 @@ pub struct Note {
     /// extensions in the [`pulldown_cmark::Options`] struct.
     ///
     /// You can of course use add any other extensions when parsing the content - like e.g. math
-    /// support with Pandoc - but mdzk can not guarantee that internal links won't interfere with 
+    /// support with Pandoc - but mdzk can not guarantee that internal links won't interfere with
     /// it. Say you had the following note:
     ///
     /// ```markdown
@@ -79,9 +79,9 @@ pub struct Note {
     /// also has some closing square brackets ]].
     /// ```
     ///
-    /// mdzk would probably throw an 
+    /// mdzk would probably throw an
     /// [`Error::InvalidInternalLinkDestination`](crate::error::Error::InvalidInternalLinkDestination) on
-    /// parsing of this note, since `\sin(x) + 1) \cdot \frac{1}{x})$$. It also has some 
+    /// parsing of this note, since `\sin(x) + 1) \cdot \frac{1}{x})$$. It also has some
     /// closing square brackets ` likely is not the title of another note. By default, mdzk ignores
     /// these errors and everything would proceed like expected, but it is worth being aware that
     /// we have no concept of any Markdown constructs other than those supported by
@@ -91,7 +91,7 @@ pub struct Note {
 }
 
 impl Note {
-    pub(crate) fn process_front_matter(&mut self) -> Result<()> {
+    pub(crate) fn process_front_matter(&mut self) {
         #[derive(Deserialize)]
         struct FrontMatter {
             title: Option<String>,
@@ -128,8 +128,6 @@ impl Note {
         }
 
         self.content = gray_matter.content;
-
-        Ok(())
     }
 
     /// Uses [`pulldown_cmark`] to parse the [`Note::content`] into HTML.
