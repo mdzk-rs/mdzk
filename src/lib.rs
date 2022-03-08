@@ -9,5 +9,6 @@ pub mod note;
 mod utils;
 mod vault;
 
+#[doc(inline)]
 pub use note::{Note, NoteId};
 pub use vault::{Vault, VaultBuilder};

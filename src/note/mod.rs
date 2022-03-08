@@ -64,28 +64,19 @@ pub struct Note {
     pub tags: Vec<String>,
     /// The date assigned to the note.
     pub date: Option<chrono::NaiveDateTime>,
-    /// The full content of the note, in [CommonMark](https://commonmark.org/).
+    /// The full content of the note, in [CommonMark](https://commonmark.org/). All internal links
+    /// are changed from the
+    /// [wikilink style](https://en.wikipedia.org/wiki/Help:Link#Wikilinks_(internal_links)) to
+    /// regular [CommonMark links](https://commonmark.org/help/tutorial/07-links.html).
     ///
     /// All CommonMark extensions supported by [`pulldown_cmark`] are also supported by mdzk,
     /// meaning these will be parsed as expected from `content`. You can see a list of the
-    /// extensions in the [`pulldown_cmark::Options`] struct.
+    /// extensions in the [`pulldown_cmark::Options`] struct. Note that this allows mdzk to
+    /// understand the current context and thus not parse internal links within e.g. code blocks.
     ///
-    /// You can of course use add any other extensions when parsing the content - like e.g. math
-    /// support with Pandoc - but mdzk can not guarantee that internal links won't interfere with
-    /// it. Say you had the following note:
-    ///
-    /// ```markdown
-    /// This document has inline math $f(x) = [[\sin(x) + 1) \cdot \frac{1}{x})$$. It
-    /// also has some closing square brackets ]].
-    /// ```
-    ///
-    /// mdzk would probably throw an
-    /// [`Error::InvalidInternalLinkDestination`](crate::error::Error::InvalidInternalLinkDestination) on
-    /// parsing of this note, since `\sin(x) + 1) \cdot \frac{1}{x})$$. It also has some
-    /// closing square brackets ` likely is not the title of another note. By default, mdzk ignores
-    /// these errors and everything would proceed like expected, but it is worth being aware that
-    /// we have no concept of any Markdown constructs other than those supported by
-    /// [`pulldown_cmark`].
+    /// You can of course use any other extensions when parsing the content - like e.g. math
+    /// support with $-delimiters - but mdzk can not guarantee that internal links won't interfere
+    /// with them.
     pub content: String,
     pub(crate) adjacencies: HashMap<NoteId, Edge>,
 }
