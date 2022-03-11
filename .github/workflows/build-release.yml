@@ -55,7 +55,7 @@ jobs:
       - name: Build
         run: |
           cargo build --release
-          Ren "target\release\mdzk.exe" "target\release\mdzk-x86_64-windows.exe"
+          Ren "target\release\mdzk.exe" "mdzk-x86_64-windows.exe"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
