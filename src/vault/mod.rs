@@ -3,6 +3,7 @@ mod builder;
 pub use crate::note::{link::Edge, Note, NoteId};
 pub use builder::VaultBuilder;
 
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 use std::collections::HashMap;
 
 /// A directed graph, where the nodes are [`Note`]s.
@@ -147,5 +148,51 @@ impl<'a> Iterator for NotesMut<'a> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.base.next()
+    }
+}
+
+impl Serialize for Vault {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Vault", 1)?;
+        // "notes" is an array of objects. The objects have the hex of the note's ID as a single
+        // key, and map to the rest of the note's fields.
+        s.serialize_field(
+            "notes",
+            &self
+                .notes
+                .iter()
+                .map(|(id, note)| {
+                    let mut h = HashMap::new();
+                    h.insert(format!("{:x}", id), note);
+                    h
+                })
+                .collect::<Vec<HashMap<String, &Note>>>(),
+        )?;
+        s.end()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate test;
+    use serde_json::json;
+    use std::path::Path;
+    use test::Bencher;
+
+    #[bench]
+    fn bench_serializer(b: &mut Bencher) {
+        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("benchsuite")
+            .join("lyt_kit");
+
+        let vault = crate::VaultBuilder::default()
+            .source(source.to_owned())
+            .build()
+            .unwrap();
+
+        b.iter(|| json!(vault));
     }
 }
