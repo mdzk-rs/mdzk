@@ -1,10 +1,13 @@
 pub(crate) mod link;
 
-use crate::{error::Result, note::link::Edge};
+use crate::note::link::Edge;
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
-use serde::Deserialize;
+use serde::{
+    ser::{Serialize, SerializeStruct, Serializer},
+    Deserialize,
+};
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     hash::{Hash, Hasher},
@@ -133,5 +136,34 @@ impl Note {
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.content)
+    }
+}
+
+impl Serialize for Note {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Note", 6)?;
+        s.serialize_field("title", &self.title)?;
+        s.serialize_field("path", &self.path)?;
+        s.serialize_field("tags", &self.tags)?;
+        s.serialize_field("content", &self.content)?;
+        s.serialize_field(
+            "date",
+            &self
+                .date
+                .map(|date| date.format("%Y%m%dT%H%M%s").to_string()),
+        )?;
+        s.serialize_field(
+            "links",
+            &self
+                .adjacencies
+                .iter()
+                .filter(|(_, edge)| matches!(edge, Edge::Connected))
+                .map(|(id, _)| format!("{:x}", id))
+                .collect::<Vec<String>>(),
+        )?;
+        s.end()
     }
 }
