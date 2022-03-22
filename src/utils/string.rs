@@ -1,3 +1,4 @@
+use crate::NoteId;
 use pulldown_cmark::escape::escape_href as ehref;
 
 /// Make kebab-cased string
@@ -23,4 +24,11 @@ pub fn escape_href(text: &str) -> String {
     // Apparently, pulldown-cmark does not escape `?` into `%3F`, which means we
     // have to do it manually.
     buf.replace('?', "%3F")
+}
+
+/// Formats a [`NoteId`] into a hex string.
+///
+/// Simply a wrapper around the [`format`] macro.
+pub fn hex(id: &NoteId) -> String {
+    format!("{:x}", id)
 }
