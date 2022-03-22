@@ -1,9 +1,10 @@
 mod builder;
 
 pub use crate::note::{link::Edge, Note, NoteId};
+use crate::{note::NoteSerialized, utils::string::hex};
 pub use builder::VaultBuilder;
 
-use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::{Serialize, Serializer};
 use std::collections::HashMap;
 
 /// A directed graph, where the nodes are [`Note`]s.
@@ -151,48 +152,68 @@ impl<'a> Iterator for NotesMut<'a> {
     }
 }
 
+#[derive(Serialize)]
+struct VaultSerialized {
+    notes: Vec<NoteSerialized>,
+}
+
+impl From<&Vault> for VaultSerialized {
+    fn from(vault: &Vault) -> Self {
+        Self {
+            notes: vault
+                .iter()
+                .map(|(id, note)| {
+                    NoteSerialized::new(
+                        hex(id),
+                        note.to_owned(),
+                        vault.backlinks(*id).map(hex).collect(),
+                    )
+                })
+                .collect(),
+        }
+    }
+}
+
 impl Serialize for Vault {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let mut s = serializer.serialize_struct("Vault", 1)?;
-        // "notes" is an array of objects. The objects have the hex of the note's ID as a single
-        // key, and map to the rest of the note's fields.
-        s.serialize_field(
-            "notes",
-            &self
-                .notes
-                .iter()
-                .map(|(id, note)| {
-                    let mut h = HashMap::new();
-                    h.insert(format!("{:x}", id), note);
-                    h
-                })
-                .collect::<Vec<HashMap<String, &Note>>>(),
-        )?;
-        s.end()
+        let serialized: VaultSerialized = self.into();
+        serialized.serialize(serializer)
     }
 }
 
 #[cfg(test)]
 mod tests {
     extern crate test;
+    use crate::{NoteId, Vault};
     use serde_json::json;
     use std::path::Path;
     use test::Bencher;
 
-    #[bench]
-    fn bench_serializer(b: &mut Bencher) {
+    fn setup() -> Vault {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("benchsuite")
             .join("lyt_kit");
 
-        let vault = crate::VaultBuilder::default()
+        crate::VaultBuilder::default()
             .source(source.to_owned())
             .build()
-            .unwrap();
+            .unwrap()
+    }
 
+    #[bench]
+    fn bench_serializer(b: &mut Bencher) {
+        let vault = setup();
         b.iter(|| json!(vault));
+    }
+
+    #[bench]
+    fn bench_backlinks(b: &mut Bencher) {
+        let vault = setup();
+        b.iter(|| {
+            let _: Vec<&NoteId> = vault.backlinks(10479125933004782128).collect();
+        })
     }
 }

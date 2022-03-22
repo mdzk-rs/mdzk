@@ -1,13 +1,10 @@
 pub(crate) mod link;
 
-use crate::note::link::Edge;
+use crate::{note::link::Edge, utils::string::hex};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
-use serde::{
-    ser::{Serialize, SerializeStruct, Serializer},
-    Deserialize,
-};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     hash::{Hash, Hasher},
@@ -139,31 +136,36 @@ impl std::fmt::Display for Note {
     }
 }
 
-impl Serialize for Note {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut s = serializer.serialize_struct("Note", 6)?;
-        s.serialize_field("title", &self.title)?;
-        s.serialize_field("path", &self.path)?;
-        s.serialize_field("tags", &self.tags)?;
-        s.serialize_field("content", &self.content)?;
-        s.serialize_field(
-            "date",
-            &self
+#[derive(Serialize)]
+pub(crate) struct NoteSerialized {
+    id: String,
+    title: String,
+    path: Option<PathBuf>,
+    tags: Vec<String>,
+    date: Option<String>,
+    content: String,
+    links: Vec<String>,
+    backlinks: Vec<String>,
+}
+
+impl NoteSerialized {
+    pub(crate) fn new(id: String, note: Note, backlinks: Vec<String>) -> Self {
+        Self {
+            id,
+            title: note.title,
+            path: note.path,
+            tags: note.tags,
+            date: note
                 .date
                 .map(|date| date.format("%Y%m%dT%H%M%s").to_string()),
-        )?;
-        s.serialize_field(
-            "links",
-            &self
+            content: note.content,
+            links: note
                 .adjacencies
                 .iter()
                 .filter(|(_, edge)| matches!(edge, Edge::Connected))
-                .map(|(id, _)| format!("{:x}", id))
+                .map(|(id, _)| hex(id))
                 .collect::<Vec<String>>(),
-        )?;
-        s.end()
+            backlinks,
+        }
     }
 }
