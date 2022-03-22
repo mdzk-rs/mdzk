@@ -1,11 +1,16 @@
 use anyhow::Result;
+use jql::walker;
 
 fn main() -> Result<()> {
     let mut args = std::env::args();
     args.next().unwrap();
-    let source = args.next().unwrap_or_else(|| ".".to_owned());
+    let query = args.next().unwrap_or_else(|| ".".to_owned());
 
-    let _vault = mdzk::VaultBuilder::default().source(source).build()?;
+    let vault = mdzk::VaultBuilder::default().source(".").build()?;
+
+    let json = serde_json::to_value(vault)?;
+
+    println!("{}", walker(&json, &query).unwrap());
 
     Ok(())
 }
