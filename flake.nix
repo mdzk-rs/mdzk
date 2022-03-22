@@ -42,7 +42,6 @@
         devShell = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             rust-toolchain
-            rust-analyzer
           ];
         };
       }
