@@ -55,15 +55,7 @@ impl VaultBuilder {
     #[must_use]
     pub fn ignores(mut self, ignores: impl IntoIterator<Item = impl AsRef<str>>) -> Self {
         for ignore in ignores {
-            let ignore = ignore.as_ref();
-            let s = match ignore.strip_prefix('!') {
-                Some(s) => s.to_owned(),
-                None => format!("!{}", ignore),
-            };
-
-            self.override_builder
-                .add(&s)
-                .unwrap_or_else(|_| panic!("Invalid ignore pattern: {}", ignore));
+            self.add_ignore(ignore).unwrap();
         }
         self
     }
