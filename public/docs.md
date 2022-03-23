@@ -1,12 +1,52 @@
+![](https://mdzk.app/mdzk_logo.png){style="width: 70%; margin: auto; display: block;"}
+
+# Documentation
+
+**mdzk** is a plain text Zettelkasten system that works as the backend to your connected notes. It can take any folder of Markdown-files and process it into a directed graph that you can use to produce rich workflows, integrate with your favorite static site generator, host a language server and much more.
+
+- [Installing](#installing)
+- [Getting started](#getting-started)
+
+
 ---
-title: Getting started
+
+
+# Installing {#installing}
+
+You can install mdzk from multiple package managers:
+
+| Source | Installation command |
+| -------------- | -------------------: |
+| [AUR](https://aur.archlinux.org/packages/mdzk/) (with [Paru](https://github.com/Morganamilo/paru)) | `paru -S mdzk` |
+| [Crates.io](https://crates.io/crates/mdzk) | `cargo install mdzk` |
+| [Homebrew](https://formulae.brew.sh/formula/mdzk#default) | `brew install mdzk` |
+| [Nix](https://search.nixos.org/packages?channel=unstable&show=mdzk&from=0&size=50&sort=relevance&type=packages&query=mdzk) | `nix run nixpkgs#mdzk -- <command>` |
+
+There is also a range of pre-built binaries available through the [release page on GitHub](https://github.com/mdzk-rs/mdzk/releases).
+
+## Build mdzk yourself
+
+If you want the latest and greatest, you can build mdzk from scratch by cloning the repo and building using [Rust tooling](https://www.rust-lang.org/tools/install):
+
+```
+$ git clone https://github.com/mdzk-rs/mdzk.git
+$ cd mdzk
+$ cargo build --release
+```
+
+An mdzk binary for your system will now be available in `./target/release`.
+
+
 ---
+
+
+# Getting started {#getting-started}
 
 In mdzk, a Zettelkasten is simply a directory containing two things: Some Markdown-files and a TOML configuration file. To simplify things, we'll make a new noun and refer to this directory (and it's output) as "your *mdzk*".
 
 This getting started guide will go over setting up your own mdzk, adding notes to it and generating a static webpage from them.
 
-### Initializing your mdzk
+## Initializing your mdzk
 
 First, navigate to the directory you want to use as your mdzk and run
 
@@ -28,7 +68,7 @@ There are no notes in your mdzk yet, so nothing exciting will happen. This is yo
 
 <!-- TODO: Adding existing notes -->
 
-### Writing notes
+## Writing notes
 
 Now is the time to open the `notes` folder in your favorite text editor. Start by creating some Markdown-files (`.md`) and write whatever your heart desires. Create some subdirectories if you want, and put notes in there. *Go buck wild!* If you have a collection of Markdown-notes already, this is the time to copy them over.
 
@@ -44,7 +84,7 @@ This will create a link in the text and insert a backlink at the end of `White b
 
 > 📖 *For a fully specialized experience, our text editor recommendation goes to [Obsidian](https://obsidian.md). mdzk is targeted specifically at it's syntax and is inspired by many of it's conventions. However, any text editor will suffice. I personally love writing my notes in [Neovim](https://neovim.io/), and there are many extensions that add wikilink support to e.g. [Visual Studio Code](https://code.visualstudio.com/). Use whatever suits you best.*
 
-### Building a static site
+## Building a static site
 
 After you've added some notes, simply run
 
