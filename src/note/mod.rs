@@ -103,6 +103,9 @@ impl Note {
                         .or_else(|_| {
                             DateTime::parse_from_rfc3339(format!("{}Z", datestring).as_ref())
                         })
+                        .or_else(|_| {
+                            DateTime::parse_from_rfc3339(format!("{}:00Z", datestring).as_ref())
+                        })
                         .map(|s| s.naive_local())
                         .or_else(|_| {
                             NaiveDate::parse_from_str(&datestring, "%Y-%m-%d")
@@ -157,7 +160,7 @@ impl NoteSerialized {
             tags: note.tags,
             date: note
                 .date
-                .map(|date| date.format("%Y%m%dT%H%M%s").to_string()),
+                .map(|date| date.format("%Y%m%dT%H%M%S").to_string()),
             content: note.content,
             links: note
                 .adjacencies
