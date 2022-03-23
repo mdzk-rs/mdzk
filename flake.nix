@@ -11,39 +11,32 @@
       let
         pname = "mdzk";
         version =
-          (builtins.fromTOML
-            (builtins.readFile ./Cargo.toml)).package.version;
+          (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version;
 
         pkgs = import nixpkgs {
           inherit system;
           overlays = [ (import rust) ];
         };
 
-        rust-toolchain = pkgs.rust-bin.nightly.latest.default.override {
-          extensions = [ "rust-std" "rust-src" ];
-        };
+        rust-toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain:
+          toolchain.default.override {
+            extensions = [ "rust-std" "rust-src" ];
+          });
 
         mdzk-pkg = pkgs.callPackage ./default.nix {
           inherit pkgs pname version rust-toolchain;
         };
-      in
-      rec {
+      in rec {
         # `nix build`
         packages.${pname} = mdzk-pkg;
         defaultPackage = packages.${pname};
 
         # `nix run`
-        apps.${pname} = utils.lib.mkApp {
-          drv = packages.${pname};
-        };
+        apps.${pname} = utils.lib.mkApp { drv = packages.${pname}; };
         defaultApp = apps.${pname};
 
         # `nix develop`
-        devShell = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [
-            rust-toolchain
-          ];
-        };
-      }
-    );
+        devShell =
+          pkgs.mkShell { nativeBuildInputs = with pkgs; [ rust-toolchain ]; };
+      });
 }
