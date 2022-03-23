@@ -29,14 +29,22 @@
       in rec {
         # `nix build`
         packages.${pname} = mdzk-pkg;
-        defaultPackage = packages.${pname};
+        packages.default = packages.${pname};
 
         # `nix run`
         apps.${pname} = utils.lib.mkApp { drv = packages.${pname}; };
         defaultApp = apps.${pname};
 
         # `nix develop`
-        devShell =
+        devShells.default =
           pkgs.mkShell { nativeBuildInputs = with pkgs; [ rust-toolchain ]; };
+
+        # `nix develop .#docs`
+        devShells.docs = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [
+            fswatch
+            pandoc
+          ];
+        };
       });
 }
