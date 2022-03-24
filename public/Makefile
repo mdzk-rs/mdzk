@@ -1,10 +1,16 @@
 SRC=docs.md
 OUT=docs.html
 OUT_DIR=website
-PANDOC_OPTIONS=-t html5 --template=assets/template.html
+PANDOC_OPTIONS=-t html5\
+			   --toc\
+			   --toc-depth=1\
+			   --template=assets/template.html\
+			   --section-divs\
+			   --reference-location=section\
+			   --lua-filter=assets/anchor-links.lua
 
 %.html: %.md
-	pandoc $(PANDOC_OPTIONS) -o $(OUT_DIR)/$@ $<
+	@pandoc $(PANDOC_OPTIONS) -o $(OUT_DIR)/$@ $<
 
 .PHONY: all clean watch
 
