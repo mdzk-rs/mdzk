@@ -5,10 +5,10 @@ pkgs.rustPlatform.buildRustPackage {
 
   src = pkgs.lib.cleanSource ./.;
 
-  buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [ 
-    pkgs.darwin.apple_sdk.frameworks.CoreServices 
-  ]; 
+  buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [
+    pkgs.darwin.apple_sdk.frameworks.CoreServices
+  ];
   nativeBuildInputs = [ rust-toolchain ];
 
-  cargoSha256 = "sha256-2lPckUhnyfHaVWXzZXKliolDZiPtNl9UBZIKs6tUaNQ=";
+  cargoSha256 = "sha256-wa3XIvGliR9PNFkGIVs8ym4dYBU8eSJLbQuvxTlj+SI=";
 }

@@ -165,7 +165,7 @@ impl From<&Vault> for VaultSerialized {
                 .map(|(id, note)| {
                     NoteSerialized::new(
                         hex(id),
-                        note.to_owned(),
+                        note.clone(),
                         vault.backlinks(*id).map(hex).collect(),
                     )
                 })
