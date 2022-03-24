@@ -1,0 +1,22 @@
+name: Publish website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "public/website/**"
+
+jobs:
+  deploy-website:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2.3.1
+
+      - name: Deploy 🚀
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public/website
+          cname: mdzk.app

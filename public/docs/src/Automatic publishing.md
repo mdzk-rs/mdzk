@@ -1,3 +1,0 @@
-# GitHub Pages workflow
-
-...

@@ -1,10 +1,10 @@
 pub(crate) mod link;
 
-use crate::{error::Result, note::link::Edge};
+use crate::{note::link::Edge, utils::string::hex};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     hash::{Hash, Hasher},
@@ -103,6 +103,9 @@ impl Note {
                         .or_else(|_| {
                             DateTime::parse_from_rfc3339(format!("{}Z", datestring).as_ref())
                         })
+                        .or_else(|_| {
+                            DateTime::parse_from_rfc3339(format!("{}:00Z", datestring).as_ref())
+                        })
                         .map(|s| s.naive_local())
                         .or_else(|_| {
                             NaiveDate::parse_from_str(&datestring, "%Y-%m-%d")
@@ -133,5 +136,39 @@ impl Note {
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.content)
+    }
+}
+
+#[derive(Serialize)]
+pub(crate) struct NoteSerialized {
+    id: String,
+    title: String,
+    path: Option<PathBuf>,
+    tags: Vec<String>,
+    date: Option<String>,
+    content: String,
+    links: Vec<String>,
+    backlinks: Vec<String>,
+}
+
+impl NoteSerialized {
+    pub(crate) fn new(id: String, note: Note, backlinks: Vec<String>) -> Self {
+        Self {
+            id,
+            title: note.title,
+            path: note.path,
+            tags: note.tags,
+            date: note
+                .date
+                .map(|date| date.format("%Y%m%dT%H%M%S").to_string()),
+            content: note.content,
+            links: note
+                .adjacencies
+                .iter()
+                .filter(|(_, edge)| matches!(edge, Edge::Connected))
+                .map(|(id, _)| hex(id))
+                .collect::<Vec<String>>(),
+            backlinks,
+        }
     }
 }
