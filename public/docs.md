@@ -2,8 +2,7 @@
 title: mdzk documentation
 ---
 
-**mdzk** is a plain text Zettelkasten system that works as the backend to your connected notes. It can take any folder of Markdown-files and process it into a directed graph that you can use to produce rich workflows, integrate with your favorite static site generator, host a language server and much more.
-
+This document will go through how mdzk operates and how you can use it in your workflows. Currently, it is quite limited, as mdzk is still under heavy development. If you have any suggestions to things that should be added, [open an issue on our GitHub](https://github.com/mdzk-rs/mdzk/issues/new) describing it and mark it with the `documentation` label. Any contributions are of course welcome.
 
 ---
 
@@ -42,7 +41,9 @@ An mdzk binary for your system will now be available in `./target/release`.
 At it's core, mdzk operates on a *vault* with *notes* containing optional *internal links*. Let's unpack these terms:
 
 - A **vault** is a [directed graph](https://en.wikipedia.org/wiki/Directed_graph).
-- The vertices in a vault are called **notes**.
+- **Notes** are the nodes in a vault.
 - **Internal links** create edges connecting each note.
 
-In the filesystem, a vault is simply a directory and the notes are Markdown-files.
+In the filesystem, a vault is simply a directory and the notes are Markdown-files. mdzk takes a directory as input, recursively finds any Markdown-files in it and loads each of them as a node in the graph. It then parses every file and establishes edges between the nodes based on the links contained in it.
+
+The *vault* data structure is a very useful concept in dealing with notes and their relation together. Finding backlinks is now as simple as following every incoming edge and see where it leads you.
