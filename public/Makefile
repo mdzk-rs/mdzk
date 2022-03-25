@@ -10,7 +10,8 @@ PANDOC_OPTIONS=-t html5\
 			   --lua-filter=assets/anchor-links.lua
 
 %.html: %.md
-	@pandoc $(PANDOC_OPTIONS) -o $(OUT_DIR)/$@ $<
+	@pandoc $(PANDOC_OPTIONS) -o $(OUT_DIR)/$@ $<\
+	&& echo `date +%T`" - Built $@"
 
 .PHONY: all clean watch
 
@@ -18,7 +19,8 @@ all: $(OUT)
 
 # Reruns make on file change
 watch:
-	fswatch $(SRC) | xargs -I{} make
+	@fswatch $(SRC) | xargs -I{} make -s
 
 clean:
-	rm $(OUT_DIR)/$(OUT)
+	@rm $(OUT_DIR)/$(OUT)\
+	&& echo "Removed $(OUT_DIR)/$(OUT)"
