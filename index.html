@@ -26,9 +26,9 @@
       rel="stylesheet"
     />
 
-    <!-- IBM Plex Mono -->
+    <!-- JetBrains Mono -->
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -36,9 +36,10 @@
     <section class="align-center">
       <div class="container">
         <img src="mdzk.svg" />
-        <p style="font-weight: 500;">The API of your Zettelkasten</p>
+        <p style="font-weight: 500">The API of your Zettelkasten</p>
         <pre>
-<code>$ mdzk -Tpbl --pretty                           (WIP interface)
+<code>$ mdzk '"notes"|{"id","title","path","backlinks","links"}'
+
 [
   {
     "id": "7caaf8918e5c38e4",
@@ -54,8 +55,27 @@
     "backlinks": [],
     "links: ["7caaf8918e5c38e4"]
   }
-]</code>
+]
+</code>
         </pre>
+      </div>
+    </section>
+
+    <section class="align-center">
+      <div class="container">
+        <h1>What is mdzk?</h1>
+        <p>
+          <strong>mdzk</strong> is your one-stop tool for connected texts. It is
+          built with interoperability, speed and simplicity in mind. With it,
+          you can build powerful workflows, like <em>generating a static
+          site</em>, <em>producing automatic backlinks</em>, <em>extending your
+          editor's features</em>, <em>diagnosing links</em>, <em>hosting a
+          language server</em>, <em>making a graph</em> and much more.
+        <p>
+        </p>
+          mdzk aims at providing a general interface that bridges the gap
+          between your tools for note-taking.
+        </p>
       </div>
     </section>
 
@@ -88,19 +108,14 @@
           <h1>Connected notes</h1>
         </div>
         <p>
-          The core data structure of an mdzk vault is a directed graph which
-          presents a whole new way of thinking about your knowledge-base. Based
-          on the popular
-          <a href="https://en.wikipedia.org/wiki/Zettelkasten">Zettelkasten system</a>,
-          this model will help you discover connections you might never have found
-          otherwise.
+          The core data structure of an mdzk vault is a directed graph, which
+          presents a whole new way of thinking about your knowledge-base.
+          Similar to the way wikis work, this model is based on the popular
+          <a href="https://en.wikipedia.org/wiki/Zettelkasten">Zettelkasten
+          system</a>, which will help you discover connections you might never
+          have found otherwise. Forget filesystem hierarchies; connected texts
+          are much closer to how our brains actually work.
         </p>
-      </div>
-    </section>
-
-    <section class="align-center">
-      <div class="container">
-        <!-- More info and links here -->
       </div>
     </section>
   </body>

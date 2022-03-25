@@ -37,13 +37,14 @@ body {
 code {
   padding: 0.2em 0.4em;
   font-size: 80%;
-  font-family: "IBM Plex Mono";
+  font-family: "JetBrains Mono";
   background: rgba(130, 130, 130, 0.1);
   border-radius: 3px;
 }
 
 pre {
-    text-align: initial;
+    text-align: left;
+    white-space: pre-wrap;
 }
 
 pre code {
