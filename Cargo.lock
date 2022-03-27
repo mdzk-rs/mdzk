@@ -346,6 +346,7 @@ dependencies = [
  "pest",
  "pest_derive",
  "pulldown-cmark",
+ "rayon",
  "serde",
  "serde_json",
  "thiserror",
