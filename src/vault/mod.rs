@@ -4,6 +4,7 @@ pub use crate::note::{link::Edge, Note, NoteId};
 use crate::{note::NoteSerialized, utils::string::hex};
 pub use builder::VaultBuilder;
 
+use rayon::prelude::*;
 use serde::{Serialize, Serializer};
 use std::collections::HashMap;
 
@@ -160,8 +161,8 @@ struct VaultSerialized {
 impl From<&Vault> for VaultSerialized {
     fn from(vault: &Vault) -> Self {
         Self {
-            notes: vault
-                .iter()
+            notes: vault.notes
+                .par_iter()
                 .map(|(id, note)| {
                     NoteSerialized::new(
                         hex(id),
