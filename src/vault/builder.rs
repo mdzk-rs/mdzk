@@ -6,6 +6,7 @@ use crate::{
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
+use rayon::prelude::*;
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
@@ -165,7 +166,7 @@ impl VaultBuilder {
             }
         }
 
-        notes.iter_mut().try_for_each(|(_, note)| {
+        notes.par_iter_mut().try_for_each(|(_, note)| {
             note.adjacencies = adjacencies.clone();
             for_each_internal_link(&note.content.clone(), |link_string| {
                 match create_link(link_string, &path_lookup, &id_lookup) {
