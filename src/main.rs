@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use clap::Parser;
 use jql::walker;
+use serde_json::{to_string, to_string_pretty};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -29,6 +30,10 @@ struct Args {
     /// The ignore patterns are in the gitignore format.
     /// See https://git-scm.com/docs/gitignore#_pattern_format for a reference.
     ignore: Vec<String>,
+
+    #[clap(long = "pretty")]
+    /// Prettify the JSON output
+    pretty: bool,
 }
 
 fn main() {
@@ -50,7 +55,13 @@ fn run() -> Result<()> {
     let json = serde_json::to_value(vault)?;
 
     match walker(&json, &args.query) {
-        Ok(out) => println!("{}", out),
+        Ok(out) => {
+            if args.pretty {
+                println!("{}", to_string_pretty(&out)?)
+            } else {
+                println!("{}", to_string(&out)?);
+            };
+        }
         Err(msg) => bail!(msg),
     }
 
