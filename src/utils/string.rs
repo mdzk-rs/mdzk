@@ -1,5 +1,6 @@
-use crate::NoteId;
+use crate::{error::Result, NoteId};
 use pulldown_cmark::escape::escape_href as ehref;
+use serde_json::{to_string, to_string_pretty, Value};
 
 /// Make kebab-cased string
 pub fn kebab(s: impl AsRef<str>) -> String {
@@ -31,4 +32,53 @@ pub fn escape_href(text: &str) -> String {
 /// Simply a wrapper around the [`format`] macro.
 pub fn hex(id: &NoteId) -> String {
     format!("{:x}", id)
+}
+
+pub fn format_json_value(val: &Value, raw: bool, pretty: bool) -> Result<String> {
+    Ok(match (pretty, raw, val) {
+        (_, true, Value::String(s)) => s.to_owned(),
+        (_, true, Value::Array(a)) => {
+            let mut acc: Vec<String> = Vec::new();
+            for val in a {
+                let val = format_json_value(val, true, false)?;
+                acc.push(val);
+            }
+            acc.join("\n")
+        }
+        (true, _, _) => to_string_pretty(val)?,
+        _ => to_string(val)?,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_json_value() {
+        let want = r#"{
+  "key": "value",
+  "another-key": [
+    1,
+    2,
+    3
+  ]
+}"#
+        .to_string();
+        let object = json!({ "key": "value", "another-key": [1, 2, 3]});
+        assert_eq!(want, format_json_value(&object, false, true).unwrap());
+
+        use serde_json::json;
+        let string = json!("test");
+        assert_eq!(
+            "test".to_string(),
+            format_json_value(&string, true, false).unwrap()
+        );
+
+        let arr = json!(["el1", "el2", "el3"]);
+        assert_eq!(
+            "el1\nel2\nel3".to_string(),
+            format_json_value(&arr, true, false).unwrap()
+        )
+    }
 }
