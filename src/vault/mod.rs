@@ -161,7 +161,8 @@ struct VaultSerialized {
 impl From<&Vault> for VaultSerialized {
     fn from(vault: &Vault) -> Self {
         Self {
-            notes: vault.notes
+            notes: vault
+                .notes
                 .par_iter()
                 .map(|(id, note)| {
                     NoteSerialized::new(
