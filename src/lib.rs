@@ -6,7 +6,7 @@ extern crate pest_derive;
 
 pub mod error;
 pub mod note;
-mod utils;
+pub mod utils;
 mod vault;
 
 #[doc(inline)]
