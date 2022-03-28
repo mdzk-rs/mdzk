@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use clap::Parser;
 use jql::walker;
-use serde_json::{to_string, to_string_pretty};
+use mdzk::utils::string::format_json_value;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -33,7 +33,16 @@ struct Args {
 
     #[clap(long = "pretty")]
     /// Prettify the JSON output
+    ///
+    /// If both --pretty and --raw are specified, the --raw flag takes precedence for strings and arrays.
     pretty: bool,
+
+    #[clap(short = 'r', long = "raw")]
+    /// Output shell-compatible raw strings and arrays
+    ///
+    /// If the output is a string, it will get formatted without quotes and if the output is an
+    /// array, it's values will get delimited by newlines and printed without square brackets.
+    raw: bool,
 }
 
 fn main() {
@@ -55,13 +64,7 @@ fn run() -> Result<()> {
     let json = serde_json::to_value(vault)?;
 
     match walker(&json, &args.query) {
-        Ok(out) => {
-            if args.pretty {
-                println!("{}", to_string_pretty(&out)?)
-            } else {
-                println!("{}", to_string(&out)?);
-            };
-        }
+        Ok(out) => println!("{}", format_json_value(&out, args.raw, args.pretty)?),
         Err(msg) => bail!(msg),
     }
 
