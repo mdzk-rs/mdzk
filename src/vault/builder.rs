@@ -131,6 +131,7 @@ impl VaultBuilder {
                             tags: vec![],
                             date: None,
                             content,
+                            invalid_internal_links: Vec::new(),
                             adjacencies: HashMap::new(),
                         };
 
@@ -153,11 +154,14 @@ impl VaultBuilder {
         for res in reciever {
             match res {
                 Ok((id, note)) => {
+                    // TODO: insert overwrites any previous values. Consider another method to
+                    // allow checking for ambiguous links.
                     id_lookup.insert(note.title.clone(), id);
                     if let Some(ref path) = note.path {
                         // This allows linking by filename
                         id_lookup.insert(path.to_string_lossy().to_string(), id);
                     }
+
                     adjacencies.insert(id, Edge::NotConnected);
                     path_lookup.insert(id, note.path.clone().unwrap());
                     notes.insert(id, note);
@@ -168,22 +172,24 @@ impl VaultBuilder {
 
         notes.par_iter_mut().try_for_each(|(_, note)| {
             note.adjacencies = adjacencies.clone();
-            for_each_internal_link(&note.content.clone(), |link_string| {
+            for_each_internal_link(&note.content.clone(), |link_string, range| {
                 match create_link(link_string, &path_lookup, &id_lookup) {
                     Ok(link) => {
                         note.adjacencies
                             .entry(link.dest_id)
-                            .and_modify(|adj| *adj = Edge::Connected);
+                            .and_modify(|adj| adj.push_link_range(range));
+
                         note.content = note.content.replacen(
                             &format!("[[{}]]", link_string),
                             &link.cmark(note.path.as_ref().unwrap().parent().unwrap()),
                             1,
                         );
                     }
-                    // NOTE: This error is currently ignored, but could be useful as a toggleable
-                    // error, since that would allow users of mdzk to ensure all links have a valid
-                    // destination on vault creation.
-                    Err(Error::InvalidInternalLinkDestination(_)) => {}
+
+                    Err(Error::InvalidInternalLinkDestination(link_string)) => {
+                        note.invalid_internal_links.push((range, link_string));
+                    }
+
                     Err(e) => return Err(e),
                 }
 

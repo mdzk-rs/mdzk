@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     hash::{Hash, Hasher},
+    ops::Range,
     path::PathBuf,
 };
 
@@ -78,6 +79,7 @@ pub struct Note {
     /// support with $-delimiters - but mdzk can not guarantee that internal links won't interfere
     /// with them.
     pub content: String,
+    pub invalid_internal_links: Vec<(Range<usize>, String)>,
     pub(crate) adjacencies: HashMap<NoteId, Edge>,
 }
 
@@ -165,7 +167,7 @@ impl NoteSerialized {
             links: note
                 .adjacencies
                 .iter()
-                .filter(|(_, edge)| matches!(edge, Edge::Connected))
+                .filter(|(_, edge)| matches!(edge, Edge::Connected(_)))
                 .map(|(id, _)| hex(id))
                 .collect::<Vec<String>>(),
             backlinks,

@@ -93,7 +93,7 @@ impl Vault {
     pub fn backlinks(&self, id: NoteId) -> impl Iterator<Item = &NoteId> + '_ {
         self.iter()
             .filter_map(move |(backlink_id, note)| match note.adjacencies.get(&id) {
-                Some(Edge::Connected) => Some(backlink_id),
+                Some(Edge::Connected(_)) => Some(backlink_id),
                 _ => None,
             })
     }

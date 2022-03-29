@@ -11,19 +11,29 @@ use pest::Parser;
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::{
     collections::HashMap,
+    ops::Range,
     path::{Path, PathBuf},
 };
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Edge {
-    Connected,
+    Connected(Vec<Range<usize>>),
     NotConnected,
+}
+
+impl Edge {
+    pub fn push_link_range(&mut self, range: Range<usize>) {
+        match self {
+            Edge::Connected(ranges) => ranges.push(range),
+            Edge::NotConnected => *self = Edge::Connected(vec![range]),
+        }
+    }
 }
 
 /// Finds all wikilinks in `content` and applies the closure `handle_link` to them.
 pub fn for_each_internal_link(
     content: &str,
-    mut handle_link: impl FnMut(&str) -> Result<()>,
+    mut handle_link: impl FnMut(&str, Range<usize>) -> Result<()>,
 ) -> Result<()> {
     enum Currently {
         OutsideLink,
@@ -37,7 +47,7 @@ pub fn for_each_internal_link(
 
     let mut buffer = String::new();
     let mut current = Currently::OutsideLink;
-    for event in parser {
+    for (event, range) in parser.into_offset_iter() {
         match event {
             // Don't parse links in codeblocks, links and images
             Event::Start(Tag::CodeBlock(_) | Tag::Link(_, _, _) | Tag::Image(_, _, _)) => {
@@ -62,7 +72,7 @@ pub fn for_each_internal_link(
                 Currently::MaybeOpen => current = Currently::OutsideLink,
                 Currently::MaybeInsideLink => current = Currently::MaybeClose,
                 Currently::MaybeClose => {
-                    handle_link(buffer.trim())?;
+                    handle_link(buffer.trim(), range)?;
                     buffer.clear();
                     current = Currently::OutsideLink;
                 }
@@ -200,7 +210,7 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
 Check if [[link with (parentheses) work as well]]. What [[about {curly braces}?]]"#;
 
         let mut gots = vec![];
-        for_each_internal_link(content, |link_text| {
+        for_each_internal_link(content, |link_text, _| {
             gots.push(link_text.to_owned());
             Ok(())
         })
@@ -238,7 +248,7 @@ let link = "[[link_in_code]]".to_owned();
 </p>"#;
 
         let mut links = Vec::<String>::new();
-        for_each_internal_link(content, |link_text| {
+        for_each_internal_link(content, |link_text, _| {
             links.push(link_text.to_owned());
             Ok(())
         })
