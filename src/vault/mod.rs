@@ -1,7 +1,7 @@
 mod builder;
 
 pub use crate::note::{link::Edge, Note, NoteId};
-use crate::{note::NoteSerialized, utils::string::hex};
+use crate::{IdMap, note::NoteSerialized, utils::string::hex};
 pub use builder::VaultBuilder;
 
 use rayon::prelude::*;
@@ -14,7 +14,7 @@ use std::collections::HashMap;
 /// discovery of backlinks to be very quick.
 #[derive(Default, Debug)]
 pub struct Vault {
-    notes: HashMap<NoteId, Note>,
+    notes: IdMap<Note>,
     id_lookup: HashMap<String, NoteId>,
 }
 
