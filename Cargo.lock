@@ -343,6 +343,7 @@ dependencies = [
  "ignore",
  "jql",
  "mdzk",
+ "nohash-hasher",
  "pest",
  "pest_derive",
  "pulldown-cmark",
@@ -366,6 +367,12 @@ checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
 dependencies = [
  "autocfg",
 ]
+
+[[package]]
+name = "nohash-hasher"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2bf50223579dc7cdcfb3bfcacf7069ff68243f8c363f62ffa99cf000a6b9c451"
 
 [[package]]
 name = "num-integer"
