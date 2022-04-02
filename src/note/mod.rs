@@ -1,6 +1,6 @@
 pub(crate) mod link;
 
-use crate::{IdMap, note::link::Edge, utils::string::hex};
+use crate::{note::link::Edge, utils::string::hex, IdMap};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};

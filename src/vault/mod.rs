@@ -1,7 +1,7 @@
 mod builder;
 
 pub use crate::note::{link::Edge, Note, NoteId};
-use crate::{IdMap, note::NoteSerialized, utils::string::hex};
+use crate::{note::NoteSerialized, utils::string::hex, IdMap};
 pub use builder::VaultBuilder;
 
 use rayon::prelude::*;

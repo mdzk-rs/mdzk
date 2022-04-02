@@ -2,7 +2,7 @@ use crate::{
     error::{Error, Result},
     note::link::{create_link, for_each_internal_link, Edge},
     note::FromHash,
-    IdMap, utils, Note, NoteId, Vault,
+    utils, IdMap, Note, NoteId, Vault,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
