@@ -4,7 +4,7 @@ use crate::{
         fs::diff_paths,
         string::{escape_href, kebab},
     },
-    NoteId,
+    IdMap, NoteId,
 };
 use anyhow::Context;
 use pest::Parser;
@@ -143,7 +143,7 @@ impl InternalLink {
 
 pub(crate) fn create_link(
     link_string: &str,
-    path_lookup: &HashMap<NoteId, PathBuf>,
+    path_lookup: &IdMap<PathBuf>,
     id_lookup: &HashMap<String, NoteId>,
 ) -> Result<InternalLink> {
     let mut link = InternalLinkParser::parse(Rule::link, link_string)
@@ -296,11 +296,11 @@ let link = "[[link_in_code]]".to_owned();
             ("Tïtlæ fôr nøte".to_owned(), 2),
             ("🔈 Music".to_owned(), 3),
         ]);
-        let path_lookup = HashMap::from([
-            (1, PathBuf::from("This is note")),
-            (2, PathBuf::from("Tïtlæ fôr nøte")),
-            (3, PathBuf::from("🔈 Music")),
-        ]);
+        let mut path_lookup = IdMap::<PathBuf>::default();
+        path_lookup.insert(1, PathBuf::from("This is note"));
+        path_lookup.insert(2, PathBuf::from("Tïtlæ fôr nøte"));
+        path_lookup.insert(3, PathBuf::from("🔈 Music"));
+
         for (want, from) in cases {
             assert_eq!(want, create_link(from, &path_lookup, &id_lookup).unwrap());
         }

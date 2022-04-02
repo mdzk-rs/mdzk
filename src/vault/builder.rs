@@ -2,7 +2,7 @@ use crate::{
     error::{Error, Result},
     note::link::{create_link, for_each_internal_link, Edge},
     note::FromHash,
-    utils, Note, NoteId, Vault,
+    utils, IdMap, Note, NoteId, Vault,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
@@ -132,7 +132,7 @@ impl VaultBuilder {
                             date: None,
                             content,
                             invalid_internal_links: Vec::new(),
-                            adjacencies: HashMap::new(),
+                            adjacencies: IdMap::<Edge>::default(),
                         };
 
                         note.process_front_matter();
@@ -147,9 +147,9 @@ impl VaultBuilder {
         drop(sender);
 
         let mut id_lookup = HashMap::<String, NoteId>::new();
-        let mut adjacencies = HashMap::<NoteId, Edge>::new();
-        let mut path_lookup = HashMap::<NoteId, PathBuf>::new();
-        let mut notes = HashMap::<NoteId, Note>::new();
+        let mut adjacencies = IdMap::<Edge>::default();
+        let mut path_lookup = IdMap::<PathBuf>::default();
+        let mut notes = IdMap::<Note>::default();
 
         for res in reciever {
             match res {

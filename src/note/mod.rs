@@ -1,12 +1,12 @@
 pub(crate) mod link;
 
-use crate::{note::link::Edge, utils::string::hex};
+use crate::{note::link::Edge, utils::string::hex, IdMap};
 use chrono::{DateTime, NaiveDate};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::{hash_map::DefaultHasher, HashMap},
+    collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
     ops::Range,
     path::PathBuf,
@@ -80,7 +80,7 @@ pub struct Note {
     /// with them.
     pub content: String,
     pub invalid_internal_links: Vec<(Range<usize>, String)>,
-    pub(crate) adjacencies: HashMap<NoteId, Edge>,
+    pub(crate) adjacencies: IdMap<Edge>,
 }
 
 impl Note {
