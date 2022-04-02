@@ -34,9 +34,16 @@ pub fn hex(id: &NoteId) -> String {
     format!("{:x}", id)
 }
 
+/// Format's a [`serde_json::Value`] into a string, according to the options.
+///
+/// If `val` is a `Value::String` or `Value::Array` and the `raw` option is specified, the strings
+/// will get their surrounding quotes removed, and the array's values will get printed one by one
+/// with a newline separating them. This makes the value compatible with shell scripts.
+///
+/// If `pretty` is specified, the JSON value will get pretty-printed.
 pub fn format_json_value(val: &Value, raw: bool, pretty: bool) -> Result<String> {
     Ok(match (pretty, raw, val) {
-        (_, true, Value::String(s)) => s.to_owned(),
+        (_, true, Value::String(s)) => s.clone(),
         (_, true, Value::Array(a)) => {
             let mut acc: Vec<String> = Vec::new();
             for val in a {
