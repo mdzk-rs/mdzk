@@ -1,7 +1,10 @@
 pub(crate) mod link;
 
-use crate::{note::link::Edge, utils::string::hex, IdMap};
-use chrono::{DateTime, NaiveDate};
+use crate::{
+    note::link::Edge,
+    utils::{self, string::hex},
+    IdMap,
+};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
 use serde::{Deserialize, Serialize};
@@ -11,6 +14,7 @@ use std::{
     ops::Range,
     path::PathBuf,
 };
+use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
 /// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
@@ -64,7 +68,7 @@ pub struct Note {
     /// The tags assigned to the note.
     pub tags: Vec<String>,
     /// The date assigned to the note.
-    pub date: Option<chrono::NaiveDateTime>,
+    pub date: Option<OffsetDateTime>,
     /// The full content of the note, in [CommonMark](https://commonmark.org/). All internal links
     /// are changed from the
     /// [wikilink style](https://en.wikipedia.org/wiki/Help:Link#Wikilinks_(internal_links)) to
@@ -101,19 +105,7 @@ impl Note {
                     self.tags = tags;
                 }
                 if let Some(datestring) = front_matter.date {
-                    self.date = DateTime::parse_from_rfc3339(&datestring)
-                        .or_else(|_| {
-                            DateTime::parse_from_rfc3339(format!("{}Z", datestring).as_ref())
-                        })
-                        .or_else(|_| {
-                            DateTime::parse_from_rfc3339(format!("{}:00Z", datestring).as_ref())
-                        })
-                        .map(|s| s.naive_local())
-                        .or_else(|_| {
-                            NaiveDate::parse_from_str(&datestring, "%Y-%m-%d")
-                                .map(|s| s.and_hms(0, 0, 0))
-                        })
-                        .ok();
+                    self.date = utils::time::parse_datestring(&datestring)
                 }
             }
         };
@@ -160,9 +152,7 @@ impl NoteSerialized {
             title: note.title,
             path: note.path,
             tags: note.tags,
-            date: note
-                .date
-                .map(|date| date.format("%Y%m%dT%H%M%S").to_string()),
+            date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
             content: note.content,
             links: note
                 .adjacencies
