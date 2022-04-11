@@ -21,7 +21,6 @@ include = [
 
 [dependencies]
 anyhow = "1.0.56"
-chrono = "0.4.19"
 clap = { version = "3.1.6", default-features = false, features = ["std", "derive"] }
 gray_matter = "0.2.2"
 ignore = "0.4.18"
@@ -34,6 +33,7 @@ rayon = "1.5.1"
 serde = "1.0.136"
 serde_json = "1.0.79"
 thiserror = "1.0.30"
+time = { version = "0.3.9", default-features = false, features = ["formatting", "local-offset", "macros", "parsing"] }
 
 [features]
 test = []
@@ -42,5 +42,6 @@ test = []
 mdzk = { path = ".", features = ["test"] }
 
 [profile.release]
-lto = true
 codegen-units = 1
+lto = true
+strip = true
