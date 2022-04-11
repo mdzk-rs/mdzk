@@ -3,7 +3,7 @@ OUT=docs.html
 OUT_DIR=website
 PANDOC_OPTIONS=-t html5\
 			   --toc\
-			   --toc-depth=1\
+			   --toc-depth=2\
 			   --template=assets/template.html\
 			   --section-divs\
 			   --reference-location=section\
