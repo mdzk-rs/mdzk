@@ -132,6 +132,7 @@ impl VaultBuilder {
                             path: Some(path_from_root),
                             tags: vec![],
                             date: None,
+                            original_content: content.clone(),
                             content,
                             invalid_internal_links: Vec::new(),
                             adjacencies: IdMap::<Edge>::default(),
