@@ -88,7 +88,7 @@ impl VaultBuilder {
             return Err(Error::PathNotFound(self.source.clone()));
         }
 
-        crate::utils::time::set_timezone();
+        crate::utils::time::store_timezone();
 
         let walker = {
             let overrides = self
