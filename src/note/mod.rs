@@ -69,6 +69,8 @@ pub struct Note {
     pub tags: Vec<String>,
     /// The date assigned to the note.
     pub date: Option<OffsetDateTime>,
+    /// The original content of the source file that produced this note.
+    pub original_content: String,
     /// The full content of the note, in [CommonMark](https://commonmark.org/). All internal links
     /// are changed from the
     /// [wikilink style](https://en.wikipedia.org/wiki/Help:Link#Wikilinks_(internal_links)) to
@@ -78,10 +80,6 @@ pub struct Note {
     /// meaning these will be parsed as expected from `content`. You can see a list of the
     /// extensions in the [`pulldown_cmark::Options`] struct. Note that this allows mdzk to
     /// understand the current context and thus not parse internal links within e.g. code blocks.
-    ///
-    /// You can of course use any other extensions when parsing the content - like e.g. math
-    /// support with $-delimiters - but mdzk can not guarantee that internal links won't interfere
-    /// with them.
     pub content: String,
     pub invalid_internal_links: Vec<(Range<usize>, String)>,
     pub(crate) adjacencies: IdMap<Edge>,
@@ -134,6 +132,7 @@ impl std::fmt::Display for Note {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) struct NoteSerialized {
     id: String,
     title: String,
@@ -141,6 +140,7 @@ pub(crate) struct NoteSerialized {
     tags: Vec<String>,
     date: Option<String>,
     content: String,
+    original_content: String,
     links: Vec<String>,
     backlinks: Vec<String>,
 }
@@ -154,6 +154,7 @@ impl NoteSerialized {
             tags: note.tags,
             date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
             content: note.content,
+            original_content: note.original_content,
             links: note
                 .adjacencies
                 .iter()
