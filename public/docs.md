@@ -92,17 +92,21 @@ As you can see, the paths were totally ignored; *[internal links](#internal-link
       "title": string,
 
       // A relative path from the vault root to the note
-      "path": string | null,
+      "path": string | null,
 
       // A set of tags set for the note
       "tags": [string],
 
       // RFC3339-formatted datestring
-      "date": string | null,
+      "date": string | null,
+
+      // The original content of the source file that
+      // produced this note
+      "original-content": string,
 
       // The content of the note. All internal links are
-      // converted  to CommonMark and the front matter
-      // is stripped
+      // converted to CommonMark and the front matter
+      // is stripped.
       "content": string,
 
       // A set of note IDs, each representing an
