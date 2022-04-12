@@ -1,8 +1,15 @@
-[[Mindsets MOC]] %% tags:: #concept dates:: 2018-06-18 %%
+---
+tags: ["concept"]
+date: 2018-06-18
+---
+
+[[Mindsets MOC]]
 
 # Levels of Magnification
+
 *Analyzing a Problem Through Three Different Levels of Magnification*
-I have found it useful to use three different levels of magnification when looking at some Thing and asking the question: 
+
+I have found it useful to use three different levels of magnification when looking at some Thing and asking the question:
 
 *"What's the Problem?"*
 

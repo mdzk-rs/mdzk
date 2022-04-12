@@ -1,11 +1,14 @@
+---
+tags: ["habit", "fave", "writing"]
+date: 2013-03-10
+---
+
 [[Habits MOC]]
-%% 
-tags:: #on/habit #on/PD #my/fave #writing/2013
-dates:: 2013-03-10 created 
-dates:: 2020-05-28 modified 
-%%
+
 # Understanding the habit cycle and habitual cues
+
 ### The Habit Cycle
+
 Charles Duhigg made popular a three-step process of habit formation. Later, James Clear argued for a fourth step "craving", which I always felt was missing as well. Here's the cycle as I see it:
 
 - **Cue** (Make it Obvious vs Invisible)
@@ -18,6 +21,7 @@ For more, see [[How Atomic Habits fit into the conversation on habits]].
 Duhigg calls the most important habits "Keystone Habits". These are the special habits, that by doing, make all the other habits that much easier to accomplish. I've identified my keystone habits, which I'm coining as "resiliency routines" because my mindset has been forever altered by the concept of [[Antifragility]]. See which [[Resiliency Routines help regain a sense of control]].
 
 ### Types of habitual cues
+
 1. Location
 2. Time
 3. Emotional State

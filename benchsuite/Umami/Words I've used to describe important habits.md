@@ -1,5 +1,11 @@
-[[Habits MOC]] %% tags:: #on/habit #on/PD %%
+---
+tags: ["habit", "PD"]
+---
+
+[[Habits MOC]]
+
 # Words I've used to describe important habits
+
 For some reason I've called important habits a lot of different things over the years. (Maybe I should just call them "Important Habits".)
 
 - **Champion Habits** - a term used in a April 2010 speech.
@@ -13,9 +19,3 @@ For some reason I've called important habits a lot of different things over the 
 	- **Atomic Habits** - from James Clear (circa October 2019) At least I'm not alone with the affliction of trying to name really important habits.
 
 Related: [[Power Actions]], but that's for another time.
-
-%%
-### Related
-PD Lists: 201511121539]] 
-2018 Review: 201901250859
-%%

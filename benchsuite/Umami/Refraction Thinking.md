@@ -1,5 +1,11 @@
-[[Mindsets MOC]] %% tags:: #concept %%
+---
+tags: ["concept"]
+---
+
+[[Mindsets MOC]]
+
 # Refraction Thinking
+
 *Thinking about ONE thing, through the lens of ANOTHER thing.*
 
 An enjoyable and non-efficient way of thinking about a Thing, is to place several different lenses in front of it. In the optometry office, they call this device a Phoropter. For the purposes of thinking, we'll call this technique spending time in "Refraction-based thinking".
@@ -13,6 +19,7 @@ When spending time in Refraction Mode, each lens you hold up offers a different 
 *What is Refraction?* Refraction is the turning or bending of any wave, such as a light or sound wave, when it passes from one medium into another of different optical density.
 
 ### Some Lenses for Refraction
+
 - 7 Dimensions of Wellness
 - My Virtues List, Stoic Virtues
 	- First Step | One Step Ahead | One Step Back
@@ -25,6 +32,7 @@ When spending time in Refraction Mode, each lens you hold up offers a different 
 - Misc AQ 1 | Misc AQ 2 | Misc AQ 3 | Motivational
 
 ### More...Through the lens of...
+
 - The Buddhist 8-Fold Path
 - WWJD
 - [[Spaces/LYT/Guides/Members/LYT Kit/Sources/1993 🎬  Groundhog Day]]

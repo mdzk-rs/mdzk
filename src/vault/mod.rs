@@ -196,8 +196,7 @@ mod tests {
 
     fn setup() -> Vault {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("benchsuite")
-            .join("lyt_kit");
+            .join("benchsuite");
 
         crate::VaultBuilder::default()
             .source(source.to_owned())

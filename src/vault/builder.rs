@@ -223,8 +223,7 @@ mod tests {
     #[bench]
     fn bench_builder(b: &mut Bencher) {
         let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("benchsuite")
-            .join("lyt_kit");
+            .join("benchsuite");
 
         b.iter(|| {
             crate::VaultBuilder::default()
