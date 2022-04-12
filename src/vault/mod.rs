@@ -137,13 +137,13 @@ impl<'a> Iterator for Notes<'a> {
     }
 }
 
+/// An iterator returning mutable references to all notes in a vault in an arbitrary order.
+///
+/// The notes are indexed by a reference to their [`NoteId`].
 pub struct NotesMut<'a> {
     base: std::collections::hash_map::IterMut<'a, NoteId, Note>,
 }
 
-/// An iterator returning mutable references to all notes in a vault in an arbitrary order.
-///
-/// The notes are indexed by a reference to their [`NoteId`].
 impl<'a> Iterator for NotesMut<'a> {
     type Item = (&'a NoteId, &'a mut Note);
 
