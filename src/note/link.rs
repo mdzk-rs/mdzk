@@ -4,13 +4,12 @@ use crate::{
         fs::diff_paths,
         string::{escape_href, kebab},
     },
-    IdMap, NoteId,
+    HashMap, IdMap, NoteId,
 };
 use anyhow::Context;
 use pest::Parser;
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::{
-    collections::HashMap,
     ops::Range,
     path::{Path, PathBuf},
 };
@@ -291,11 +290,11 @@ let link = "[[link_in_code]]".to_owned();
                 "🔈 Music#Header with spaces",
             ),
         ];
-        let id_lookup = HashMap::from([
-            ("This is note".to_owned(), 1),
-            ("Tïtlæ fôr nøte".to_owned(), 2),
-            ("🔈 Music".to_owned(), 3),
-        ]);
+        let mut id_lookup = HashMap::default();
+        id_lookup.insert("This is note".to_owned(), 1);
+        id_lookup.insert("Tïtlæ fôr nøte".to_owned(), 2);
+        id_lookup.insert("🔈 Music".to_owned(), 3);
+
         let mut path_lookup = IdMap::<PathBuf>::default();
         path_lookup.insert(1, PathBuf::from("This is note"));
         path_lookup.insert(2, PathBuf::from("Tïtlæ fôr nøte"));

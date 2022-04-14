@@ -8,28 +8,11 @@ use crate::{
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    ops::Range,
-    path::PathBuf,
-};
+use std::{ops::Range, path::PathBuf};
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
 /// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
-
-pub(crate) trait FromHash {
-    fn from_hash(s: impl Hash) -> Self;
-}
-
-impl FromHash for NoteId {
-    fn from_hash(s: impl Hash) -> Self {
-        let mut hasher = DefaultHasher::new();
-        s.hash(&mut hasher);
-        hasher.finish()
-    }
-}
 
 /// A node in [`Vault`](crate::Vault). Represents a note in a Zettelkasten.
 ///
@@ -172,9 +155,9 @@ impl NoteSerialized {
 #[cfg(test)]
 mod tests {
     extern crate test;
+    use super::*;
     use test::Bencher;
     use time::macros::datetime;
-    use super::*;
 
     fn setup_note() -> Note {
         let mut adjacencies: IdMap<Edge> = IdMap::default();

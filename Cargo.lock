@@ -325,6 +325,7 @@ version = "1.0.0"
 dependencies = [
  "anyhow",
  "clap",
+ "fnv",
  "gray_matter",
  "ignore",
  "jql",

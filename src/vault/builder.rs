@@ -1,14 +1,13 @@
 use crate::{
     error::{Error, Result},
+    hash::FromHash,
     note::link::{create_link, for_each_internal_link, Edge},
-    note::FromHash,
-    utils, IdMap, Note, NoteId, Vault,
+    utils, HashMap, IdMap, Note, NoteId, Vault,
 };
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, types::TypesBuilder, WalkBuilder};
 use rayon::prelude::*;
 use std::{
-    collections::HashMap,
     path::{Path, PathBuf},
     sync::mpsc,
 };
@@ -118,7 +117,7 @@ impl VaultBuilder {
                     let path = e.path();
                     if !path.is_dir() {
                         let path_from_root = utils::fs::diff_paths(path, &self.source).unwrap();
-                        let id = NoteId::from_hash(&path_from_root);
+                        let id = NoteId::from_hashable(&path_from_root);
                         let content = match utils::fs::read_file(path) {
                             Ok(content) => content,
                             Err(e) => {
@@ -149,7 +148,7 @@ impl VaultBuilder {
 
         drop(sender);
 
-        let mut id_lookup = HashMap::<String, NoteId>::new();
+        let mut id_lookup = HashMap::<String, NoteId>::default();
         let mut adjacencies = IdMap::<Edge>::default();
         let mut path_lookup = IdMap::<PathBuf>::default();
         let mut notes = IdMap::<Note>::default();
@@ -222,8 +221,7 @@ mod tests {
 
     #[bench]
     fn bench_builder(b: &mut Bencher) {
-        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("benchsuite");
+        let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("benchsuite");
 
         b.iter(|| {
             crate::VaultBuilder::default()
