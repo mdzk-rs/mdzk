@@ -1,35 +1,15 @@
 pub(crate) mod link;
+pub(crate) mod ser;
 
-use crate::{
-    note::link::Edge,
-    utils::{self, string::hex},
-    IdMap,
-};
+use crate::{note::link::Edge, utils, IdMap};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
-use serde::{Deserialize, Serialize};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    ops::Range,
-    path::PathBuf,
-};
-use time::{format_description::well_known::Rfc3339, OffsetDateTime};
+use serde::Deserialize;
+use std::{ops::Range, path::PathBuf};
+use time::OffsetDateTime;
 
 /// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
-
-pub(crate) trait FromHash {
-    fn from_hash(s: impl Hash) -> Self;
-}
-
-impl FromHash for NoteId {
-    fn from_hash(s: impl Hash) -> Self {
-        let mut hasher = DefaultHasher::new();
-        s.hash(&mut hasher);
-        hasher.finish()
-    }
-}
 
 /// A node in [`Vault`](crate::Vault). Represents a note in a Zettelkasten.
 ///
@@ -125,6 +105,9 @@ impl Note {
     }
 
     /// Returns an iterator of [`NoteId`]s for this note's outgoing links.
+    ///
+    /// This function gives the same as running [`Vault::outgoing`](crate::Vault::outgoing) on this
+    /// note's ID.
     pub fn links(&self) -> impl Iterator<Item = &NoteId> + '_ {
         self.adjacencies
             .iter()
@@ -139,42 +122,12 @@ impl std::fmt::Display for Note {
     }
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub(crate) struct NoteSerialized {
-    id: String,
-    title: String,
-    path: Option<PathBuf>,
-    tags: Vec<String>,
-    date: Option<String>,
-    content: String,
-    original_content: String,
-    links: Vec<String>,
-    backlinks: Vec<String>,
-}
-
-impl NoteSerialized {
-    pub(crate) fn new(id: String, note: Note, backlinks: Vec<String>) -> Self {
-        Self {
-            id,
-            links: note.links().map(|id| hex(id)).collect::<Vec<String>>(),
-            title: note.title,
-            path: note.path,
-            tags: note.tags,
-            date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
-            content: note.content,
-            original_content: note.original_content,
-            backlinks,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     extern crate test;
+    use super::*;
     use test::Bencher;
     use time::macros::datetime;
-    use super::*;
 
     fn setup_note() -> Note {
         let mut adjacencies: IdMap<Edge> = IdMap::default();
