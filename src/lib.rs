@@ -6,7 +6,7 @@ extern crate pest_derive;
 
 pub mod error;
 mod hash;
-pub mod note;
+mod note;
 pub mod utils;
 pub mod vault;
 

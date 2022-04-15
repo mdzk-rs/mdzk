@@ -108,6 +108,9 @@ impl Note {
     }
 
     /// Returns an iterator of [`NoteId`]s for this note's outgoing links.
+    ///
+    /// This function gives the same as running [`Vault::outgoing`](crate::Vault::outgoing) on this
+    /// note's ID.
     pub fn links(&self) -> impl Iterator<Item = &NoteId> + '_ {
         self.adjacencies
             .iter()

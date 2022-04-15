@@ -1,6 +1,6 @@
-use crate::{Vault, note::NoteSerialized, utils::string::hex};
-use serde::{Serialize, Serializer};
+use crate::{note::NoteSerialized, utils::string::hex, Vault};
 use rayon::prelude::*;
+use serde::{Serialize, Serializer};
 
 #[derive(Serialize)]
 struct VaultSerialized {
