@@ -8,9 +8,10 @@ pub mod error;
 mod hash;
 pub mod note;
 pub mod utils;
-mod vault;
+pub mod vault;
 
 pub use hash::{HashMap, IdMap};
 #[doc(inline)]
 pub use note::{Note, NoteId};
+#[doc(inline)]
 pub use vault::{Vault, VaultBuilder};
