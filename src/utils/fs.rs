@@ -6,7 +6,7 @@ use std::{
 };
 
 /// Ease-of-use function for loading a file from a path.
-pub(crate) fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
+pub fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
     let mut buf = String::new();
 
     File::open(&path)
@@ -17,10 +17,13 @@ pub(crate) fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
     Ok(buf)
 }
 
-// Slightly modified version of pathdiff::diff_paths:
-// https://github.com/Manishearth/pathdiff/blob/08fabb3b2864a19d1b870d0d1fe887abad351930/src/lib.rs#L34-L77
 /// Returns a relative path from `from` to `to`.
-pub(crate) fn diff_paths<T, F>(to: T, from: F) -> Option<PathBuf>
+///
+/// If `to` is absolute, but `from` is not, `None` is returned.
+///
+/// This is a slightly modified version of
+/// [`pathdiff::diff_paths`](https://docs.rs/pathdiff/latest/pathdiff/fn.diff_paths.html):
+pub fn diff_paths<T, F>(to: T, from: F) -> Option<PathBuf>
 where
     T: AsRef<Path>,
     F: AsRef<Path>,

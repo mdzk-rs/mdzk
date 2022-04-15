@@ -19,9 +19,9 @@ pub fn kebab(s: impl AsRef<str>) -> String {
 }
 
 /// Escape characters for usage in URLs
-pub fn escape_href(text: &str) -> String {
+pub fn escape_href(text: impl AsRef<str>) -> String {
     let mut buf = String::new();
-    ehref(&mut buf, text).ok();
+    ehref(&mut buf, text.as_ref()).ok();
     // Apparently, pulldown-cmark does not escape `?` into `%3F`, which means we
     // have to do it manually.
     buf.replace('?', "%3F")
@@ -29,7 +29,7 @@ pub fn escape_href(text: &str) -> String {
 
 /// Formats a [`NoteId`] into a hex string.
 ///
-/// Simply a wrapper around the [`format`] macro.
+/// Padded by 0s to width 16. Simply a wrapper around the [`format`] macro.
 pub fn hex(id: &NoteId) -> String {
     format!("{:016x}", id)
 }
