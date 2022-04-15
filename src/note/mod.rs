@@ -1,15 +1,12 @@
 pub(crate) mod link;
+pub(crate) mod ser;
 
-use crate::{
-    note::link::Edge,
-    utils::{self, string::hex},
-    IdMap,
-};
+use crate::{note::link::Edge, utils, IdMap};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{Options, Parser};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::{ops::Range, path::PathBuf};
-use time::{format_description::well_known::Rfc3339, OffsetDateTime};
+use time::OffsetDateTime;
 
 /// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
@@ -122,36 +119,6 @@ impl Note {
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.content)
-    }
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub(crate) struct NoteSerialized {
-    id: String,
-    title: String,
-    path: Option<PathBuf>,
-    tags: Vec<String>,
-    date: Option<String>,
-    content: String,
-    original_content: String,
-    links: Vec<String>,
-    backlinks: Vec<String>,
-}
-
-impl NoteSerialized {
-    pub(crate) fn new(id: String, note: Note, backlinks: Vec<String>) -> Self {
-        Self {
-            id,
-            links: note.links().map(hex).collect::<Vec<String>>(),
-            title: note.title,
-            path: note.path,
-            tags: note.tags,
-            date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
-            content: note.content,
-            original_content: note.original_content,
-            backlinks,
-        }
     }
 }
 

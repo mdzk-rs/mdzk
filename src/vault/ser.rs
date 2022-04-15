@@ -1,4 +1,4 @@
-use crate::{note::NoteSerialized, utils::string::hex, Vault};
+use crate::{note::ser::NoteSerialized, utils::string::hex, Vault};
 use rayon::prelude::*;
 use serde::{Serialize, Serializer};
 
