@@ -1,4 +1,5 @@
 use crate::{note::link::Edge, Note, NoteId, Vault};
+use rayon::prelude::*;
 use std::collections::hash_map;
 
 /// An iterator returning references to all notes in a vault in an arbitrary order.
@@ -47,6 +48,10 @@ impl Vault {
         NotesMut {
             base: self.notes.iter_mut(),
         }
+    }
+
+    pub fn par_iter(&self) -> rayon::collections::hash_map::Iter<u64, Note> {
+        self.notes.par_iter()
     }
 
     /// Returns an iterator visiting all notes linking to the note specified via it's ID.

@@ -168,7 +168,7 @@ impl VaultBuilder {
                     path_lookup.insert(id, note.path.clone().unwrap());
                     notes.insert(id, note);
                 }
-                Err(e) => return Err(e.into()),
+                Err(e) => return Err(e),
             }
         }
 
@@ -199,7 +199,11 @@ impl VaultBuilder {
             })
         })?;
 
-        Ok(Vault { notes, id_lookup })
+        Ok(Vault {
+            root: self.source.to_owned(),
+            notes,
+            id_lookup,
+        })
     }
 }
 

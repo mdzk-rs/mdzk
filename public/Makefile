@@ -1,26 +1,31 @@
-SRC=docs.md
-OUT=docs.html
-OUT_DIR=website
-PANDOC_OPTIONS=-t html5\
-			   --toc\
-			   --toc-depth=2\
-			   --template=assets/template.html\
-			   --section-divs\
-			   --reference-location=section\
-			   --lua-filter=assets/anchor-links.lua
+WATCH=docs.md man.md
+OUT=website/docs.html website/man.html
 
-%.html: %.md
-	@pandoc $(PANDOC_OPTIONS) -o $(OUT_DIR)/$@ $<\
-	&& echo `date +%T`" - Built $@"
+PANDOC_OPTIONS=--standalone
+HTML_OPTIONS=--to html5\
+			 --toc\
+			 --toc-depth=2\
+			 --section-divs\
+			 --reference-location=section\
+			 --lua-filter=assets/anchor-links.lua\
+			 --template=assets/template.html
 
 .PHONY: all clean watch
 
 all: $(OUT)
 
+website/docs.html: docs.md
+	@pandoc $(PANDOC_OPTIONS) $(HTML_OPTIONS) -o $@ $<\
+	&& echo `date +%T`" - Built $@"
+
+website/man.html: man.md
+	@pandoc $(PANDOC_OPTIONS) $(HTML_OPTIONS) -o $@ $<\
+	&& echo `date +%T`" - Built $@"
+
 # Reruns make on file change
 watch:
-	@fswatch $(SRC) | xargs -I{} make -s
+	@fswatch $(WATCH) | xargs -I{} make -s
 
 clean:
-	@rm $(OUT_DIR)/$(OUT)\
-	&& echo "Removed $(OUT_DIR)/$(OUT)"
+	@rm $(OUT)\
+	&& echo "Removed $(OUT)"

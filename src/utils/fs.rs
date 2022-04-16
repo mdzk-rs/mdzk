@@ -1,7 +1,8 @@
-use anyhow::{Context, Result};
+use crate::error::Result;
+use anyhow::Context;
 use std::{
     fs::File,
-    io::Read,
+    io::{Read, Write},
     path::{Component, Path, PathBuf},
 };
 
@@ -15,6 +16,22 @@ pub fn read_file<P: AsRef<Path>>(path: P) -> Result<String> {
         .with_context(|| format!("Could not read file {:?}.", path.as_ref()))?;
 
     Ok(buf)
+}
+
+/// Ease-of-use function for creating a file and writing bytes to it
+pub fn write_file(path: impl AsRef<Path>, bytes: &[u8]) -> Result<()> {
+    let path = path.as_ref();
+
+    // Create file
+    if let Some(p) = path.parent() {
+        std::fs::create_dir_all(p)?;
+    }
+    let mut f = File::create(path)?;
+
+    // Write bytes
+    f.write_all(bytes)?;
+
+    Ok(())
 }
 
 /// Returns a relative path from `from` to `to`.
@@ -62,6 +79,28 @@ where
             }
             Some(components.iter().map(|comp| comp.as_os_str()).collect())
         }
+    }
+}
+
+/// Takes a path and returns a string containing just enough `../` to point to
+/// the root of the given path.
+pub fn path_to_root<P: AsRef<Path>>(path: P) -> String {
+    let s = path
+        .as_ref()
+        .parent()
+        .unwrap_or_else(|| Path::new(""))
+        .components()
+        .fold(String::new(), |mut s, c| {
+            if let Component::Normal(_) = c {
+                s.push_str("../");
+            }
+            s
+        });
+
+    if s.is_empty() {
+        "./".into()
+    } else {
+        s
     }
 }
 

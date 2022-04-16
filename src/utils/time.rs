@@ -9,7 +9,7 @@ const DATE: &[FormatItem] = format_description!("[year]-[month]-[day]");
 const DATE_HM: &[FormatItem] = format_description!("[year]-[month]-[day] [hour]:[minute]");
 const DATE_HMS: &[FormatItem] =
     format_description!("[year]-[month]-[day] [hour]:[minute]:[second]");
-const READABLE: &[FormatItem] =
+pub const READABLE: &[FormatItem] =
     format_description!("[day padding:none] [month repr:long case_sensitive:false] [year]");
 const READABLE_AMERICAN: &[FormatItem] =
     format_description!("[month repr:long case_sensitive:false] [day padding:none] [year]");

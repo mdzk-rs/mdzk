@@ -7,42 +7,59 @@
   };
 
   outputs = { self, nixpkgs, utils, rust }:
-    utils.lib.eachDefaultSystem (system:
-      let
-        pname = "mdzk";
-        version =
-          (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version;
+    let
+      pname = "mdzk";
+      version =
+        (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version;
+    in {
+      overlays.default = nixpkgs.lib.composeManyExtensions [
+        rust.overlay
+        (final: prev: {
+          customRustToolchain = final.rust-bin.selectLatestNightlyWith
+            (toolchain:
+              toolchain.default.override {
+                extensions = [ "rust-std" "rust-src" ];
+              });
 
+          mdzk = import ./nix/package.nix {
+            inherit pname version;
+            pkgs = final;
+          };
+        })
+      ];
+    } // utils.lib.eachDefaultSystem (system:
+      let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ (import rust) ];
+          overlays = [ self.overlays.default ];
         };
 
-        rust-toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain:
-          toolchain.default.override {
-            extensions = [ "rust-std" "rust-src" ];
-          });
-
-        mdzk-pkg = pkgs.callPackage ./default.nix {
-          inherit pkgs pname version rust-toolchain;
-        };
+        inherit (pkgs) mdzk;
       in rec {
+
+        # `nix build .#mdzk`
+        packages.${pname} = mdzk;
+
+        # `nix build .#website`
+        packages.website = pkgs.callPackage ./nix/website.nix { inherit pkgs; };
+
         # `nix build`
-        packages.${pname} = mdzk-pkg;
         packages.default = packages.${pname};
 
         # `nix run`
         apps.${pname} = utils.lib.mkApp { drv = packages.${pname}; };
-        defaultApp = apps.${pname};
+        apps.default = apps.${pname};
 
         # `nix develop`
-        devShells.default =
-          pkgs.mkShell { nativeBuildInputs = with pkgs; [ rust-toolchain ]; };
-
-        # `nix develop .#docs`
-        devShells.docs = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
+            # rust
+            customRustToolchain
+            rust-analyzer
+
+            # misc
             fswatch
+            gnumake
             pandoc
           ];
         };

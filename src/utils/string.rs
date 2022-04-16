@@ -1,5 +1,5 @@
 use crate::{error::Result, NoteId};
-use pulldown_cmark::escape::escape_href as ehref;
+use pulldown_cmark::{escape::escape_href as ehref, CowStr};
 use serde_json::{to_string, to_string_pretty, Value};
 
 /// Make kebab-cased string
@@ -57,9 +57,53 @@ pub fn format_json_value(val: &Value, raw: bool, pretty: bool) -> Result<String>
     })
 }
 
+/// Checks if the URL starts with a scheme (like `https` or `file`).
+pub(crate) fn has_scheme(url: impl AsRef<str>) -> bool {
+    if let Some((potential_scheme, _)) = url.as_ref().split_once("://") {
+        let mut chars = potential_scheme.chars();
+        chars.next().unwrap_or('�').is_ascii_alphabetic()
+            && chars.all(|c| c.is_alphanumeric() || c == '+' || c == '.' || c == '-')
+    } else {
+        false
+    }
+}
+
+/// Changes links with extension `.md` to `.html` if they don't have schemes. Anchors are kept.
+pub(crate) fn fix_link(dest: CowStr) -> CowStr {
+    if !(dest.starts_with('#') || has_scheme(&dest)) {
+        if let Some((link, anchor)) = dest.split_once(".md") {
+            let mut fixed_link = String::new();
+            fixed_link.push_str(link);
+            fixed_link.push_str(".html");
+            if anchor.starts_with('#') {
+                fixed_link.push_str(anchor);
+            }
+            return CowStr::from(fixed_link);
+        }
+    }
+    dest
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_fix_link() {
+        assert_eq!(
+            fix_link("folder/subfolder/file.md".into()),
+            "folder/subfolder/file.html".into()
+        );
+        assert_eq!(fix_link("https://mdzk.md".into()), "https://mdzk.md".into());
+        assert_eq!(fix_link("file.md#anchor".into()), "file.html#anchor".into());
+    }
+
+    #[test]
+    fn test_has_scheme() {
+        assert!(has_scheme("https://mdzk.app"));
+        assert!(has_scheme("file:///home/user/mdzk/file.md"));
+        assert!(!has_scheme("folder/subfolder/file.md"));
+    }
 
     #[test]
     fn test_format_json_value() {
