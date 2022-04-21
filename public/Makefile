@@ -1,19 +1,28 @@
 SRC=docs.md
-OUT=docs.html
-OUT_DIR=website
-PANDOC_OPTIONS=-t html5\
-			   --toc\
-			   --toc-depth=2\
-			   --template=assets/template.html\
-			   --section-divs\
-			   --reference-location=section\
-			   --lua-filter=assets/anchor-links.lua
+OUT=docs.html docs.1
+
+OUTDIR_HTML=website
+OUTDIR_TROFF=man
+
+PANDOC_OPTIONS=--standalone
+TROFF_OPTIONS=--to man
+HTML_OPTIONS=--to html5\
+			 --toc\
+			 --toc-depth=2\
+			 --section-divs\
+			 --reference-location=section\
+			 --lua-filter=assets/anchor-links.lua\
+			 --template=assets/template.html
 
 %.html: %.md
-	@pandoc $(PANDOC_OPTIONS) -o $(OUT_DIR)/$@ $<\
+	@pandoc $(PANDOC_OPTIONS) $(HTML_OPTIONS) -o $(OUTDIR_HTML)/$@ $<\
 	&& echo `date +%T`" - Built $@"
 
-.PHONY: all clean watch
+%.1: %.md
+	@pandoc $(PANDOC_OPTIONS) $(TROFF_OPTIONS) -o $(OUTDIR_TROFF)/$@ $<\
+	&& echo `date +%T`" - Built $@"
+
+.PHONY: all clean man watch
 
 all: $(OUT)
 
