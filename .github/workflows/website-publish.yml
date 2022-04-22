@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "public/website/**"
+      - "public/**"
 
 jobs:
   deploy-website:
@@ -14,9 +14,18 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.1
 
+      - name: Install Nix
+        uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: nix build .#website
+
       - name: Deploy 🚀
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public/website
+          publish_dir: ./result
           cname: mdzk.app
