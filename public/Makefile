@@ -10,7 +10,7 @@ HTML_OPTIONS=--to html5\
 			 --lua-filter=assets/anchor-links.lua\
 			 --template=assets/template.html
 
-.PHONY: all clean man watch
+.PHONY: all clean watch
 
 all: $(OUT)
 
