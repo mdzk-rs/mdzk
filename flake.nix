@@ -14,20 +14,18 @@
     in {
       overlays.default = nixpkgs.lib.composeManyExtensions [
         rust.overlay
-        (final: prev:
-          let
-            rust-toolchain = final.rust-bin.selectLatestNightlyWith (toolchain:
+        (final: prev: {
+          customRustToolchain = final.rust-bin.selectLatestNightlyWith
+            (toolchain:
               toolchain.default.override {
                 extensions = [ "rust-std" "rust-src" ];
               });
-          in {
-            rustc = rust-toolchain;
-            cargo = rust-toolchain;
-            mdzk = import ./nix/package.nix {
-              inherit pname version;
-              pkgs = final;
-            };
-          })
+
+          mdzk = import ./nix/package.nix {
+            inherit pname version;
+            pkgs = final;
+          };
+        })
       ];
     } // utils.lib.eachDefaultSystem (system:
       let
@@ -56,10 +54,8 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
             # rust
-            cargo
-            clippy
+            customRustToolchain
             rust-analyzer
-            rustc
 
             # misc
             fswatch

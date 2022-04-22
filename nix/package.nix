@@ -2,8 +2,8 @@
 
 let
   rustPlatform = pkgs.makeRustPlatform {
-    rustc = pkgs.rustc;
-    cargo = pkgs.cargo;
+    rustc = pkgs.customRustToolchain;
+    cargo = pkgs.customRustToolchain;
   };
 in rustPlatform.buildRustPackage {
   inherit pname version;
