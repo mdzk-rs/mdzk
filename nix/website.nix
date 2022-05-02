@@ -11,6 +11,6 @@ stdenv.mkDerivation {
   installPhase = ''
     mkdir -p $out
     make
-    cp -r website/* $out
+    cp -r website/. $out
   '';
 }
