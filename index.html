@@ -38,29 +38,35 @@
         <img src="mdzk.svg" />
         <p style="font-weight: 500">The API of your Zettelkasten</p>
         <pre>
-<code>$ mdzk '"notes"|{"id","title","path","backlinks","links"}'
+<code>$ mdzk '"notes"|{"id","title","path","links"}'
 
 [
   {
     "id": "7caaf8918e5c38e4",
     "title": "<a href="docs#installing">How to install mdzk</a>",
     "path": "path/note1",
-    "backlinks": ["1fh553bc8e8c7864"],
-    "links: []
+    "links": {
+      "incoming": ["1fh553bc8e8c7864", "e9f5b6d155hab7ab"],
+      "outgoing: []
+    }
   },
   {
     "id": "1fh553bc8e8c7864",
     "title": "<a href="docs">Documentation</a>",
     "path": "path/to/note2"
-    "backlinks": [],
-    "links: ["7caaf8918e5c38e4"]
+    "links": {
+      "incoming": ["e9f5b6d155hab7ab"],
+      "outgoing: ["7caaf8918e5c38e4"]
+    }
   },
   {
-    "id": "k9q5b6du5x3rmnab",
+    "id": "e9f5b6d155hab7ab",
     "title": "<a href="man">Manual</a>",
     "path": "path/to/note3"
-    "backlinks": [],
-    "links: []
+    "links": {
+      "incoming": [],
+      "outgoing: ["1fh553bc8e8c7864", "7caaf8918e5c38e4"]
+    }
   }
 ]
 </code>
@@ -93,8 +99,9 @@
           <h1>Markdown-based</h1>
         </div>
         <p>
-          mdzk works with plain text files in the well-defined and widely
-          supported <a href="https://commonmark.org">CommonMark</a> Markdown
+          mdzk works with plain text files in an extended variant of the
+          well-defined and widely supported
+          <a href="https://commonmark.org">CommonMark</a> Markdown
           specification.
         </p>
         <p>
@@ -115,7 +122,8 @@
           <h1>Connected notes</h1>
         </div>
         <p>
-          The core data structure of an mdzk vault is a directed graph, which
+          The core data structure of an mdzk vault is a
+          <a href="https://en.wikipedia.org/wiki/Directed_graph#Definition">non-simple directed graph</a>, which
           presents a whole new way of thinking about your knowledge-base.
           Similar to the way wikis work, this model is based on the popular
           <a href="https://en.wikipedia.org/wiki/Zettelkasten">Zettelkasten
