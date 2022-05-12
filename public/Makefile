@@ -8,7 +8,9 @@ HTML_OPTIONS=--to html5\
 			 --section-divs\
 			 --reference-location=section\
 			 --lua-filter=assets/anchor-links.lua\
-			 --template=assets/template.html
+			 --template=assets/template.html\
+			 --katex\
+			 --reference-location=section
 
 .PHONY: all clean watch
 
