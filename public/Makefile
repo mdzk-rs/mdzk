@@ -24,7 +24,11 @@ website/man.html: man.md
 
 # Reruns make on file change
 watch:
-	@fswatch $(WATCH) | xargs -I{} make -s
+	@fswatch $(WATCH) | xargs -I{} make all -s
+
+# Serves the website with live-reloading
+serve:
+	@make watch -s& cd website; browser-sync start --no-open --server --watch "**/*"
 
 clean:
 	@rm $(OUT)\

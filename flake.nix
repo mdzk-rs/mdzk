@@ -61,6 +61,7 @@
             fswatch
             gnumake
             pandoc
+            nodePackages.browser-sync
           ];
         };
       });
