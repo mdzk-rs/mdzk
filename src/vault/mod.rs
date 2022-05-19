@@ -7,6 +7,7 @@ use crate::IdMap;
 pub use builder::VaultBuilder;
 
 use crate::HashMap;
+use std::path::PathBuf;
 
 /// A directed graph, where the nodes are [`Note`]s.
 ///
@@ -14,7 +15,12 @@ use crate::HashMap;
 /// discovery of backlinks to be very quick.
 #[derive(Default, Debug)]
 pub struct Vault {
-    notes: IdMap<Note>,
+    /// The root directory of the vault.
+    ///
+    /// Since `Vault` can only be built by [`VaultBuilder`], this [`PathBuf`] is guaranteed to be a
+    /// directory.
+    pub root: PathBuf,
+    pub(crate) notes: IdMap<Note>,
     id_lookup: HashMap<String, NoteId>,
 }
 
@@ -78,14 +84,14 @@ impl PartialEq for Vault {
 impl Eq for Vault {}
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     extern crate test;
     use crate::{Note, NoteId, Vault};
     use serde_json::json;
     use std::path::Path;
     use test::Bencher;
 
-    fn setup() -> Vault {
+    pub(crate) fn setup() -> Vault {
         let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("benchsuite");
 
         crate::VaultBuilder::default()

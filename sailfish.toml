@@ -1,0 +1,5 @@
+template_dirs = ["src/ssg/templates"]
+escape = false
+
+[optimizations]
+rm_whitespace = true

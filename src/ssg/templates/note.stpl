@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html color-mode="light">
+  <head>
+    <title><%= note_title %> - <%= title %></title>
+    <meta charset="UTF-8">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ffffff" />
+    <% if let Some(description) = description { %>
+      <meta name="description" content="<%= description %>">
+    <% } %>
+
+    <!-- Normalize -->
+    <link rel="stylesheet" href="<%= path_to_root %>css/normalize.min.css">
+
+    <!-- Prism -->
+    <link rel="stylesheet" href="<%= path_to_root %>css/prism.min.css">
+    <script src="<%= path_to_root %>js/prism.min.js"></script>
+
+    <!-- KaTeX -->
+    <link rel="stylesheet" href="<%= path_to_root %>css/katex.min.css">
+    <script src="<%= path_to_root %>js/katex.min.js"></script>
+    <script src="<%= path_to_root %>js/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+              delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false},
+                  {left: '\\(', right: '\\)', display: false},
+                  {left: '\\[', right: '\\]', display: true}
+              ],
+            });
+        });
+    </script>
+
+    <!-- mdzk stylesheet -->
+    <link rel="stylesheet" href="<%= path_to_root %>css/mdzk.css">
+  </head>
+  <body>
+    <% if dark_mode { %>
+      <label id="theme-switch" class="theme-switch" for="checkbox_theme">
+          <input type="checkbox" id="checkbox_theme">
+          <span></span>
+      </label>
+    <% } %>
+    <main>
+      <header>
+        <% if let Some(date) = date { %>
+          <time><%= date %></time>
+        <% } %>
+        <h1>
+          <a href="<%= path_to_root %>index.html">~</a>
+          <%= note_title %>
+        </h1>
+      </header>
+      <article>
+        <%= body %>
+      </article>
+      <footer>
+        <% if !backlinks.is_empty() { %>
+          <div class="incoming-links">
+            <h3>Incoming links</h3>
+            <p>
+              <% for (title, path) in backlinks { %>
+                <a href="<%= path %>"><%= title %></a>
+              <% } %>
+            </p>
+          </div>
+        <% } %>
+      </footer>
+    </main>
+    <p class="watermark">Page made with <a href="https://mdzk.app">mdzk</a></p>
+    <% if dark_mode { %>
+      <script>
+      // Determines if the user has a set theme
+      function detectColorScheme(){
+          var theme="light"; // default to light
+
+          // Local storage is used to override OS theme settings
+          if (localStorage.getItem("color-mode")) {
+              if (localStorage.getItem("color-mode") == "dark") {
+                  var theme = "dark";
+              }
+          } else if (!window.matchMedia) {
+              // matchMedia method not supported
+              return false;
+          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+              // OS theme setting detected as dark
+              var theme = "dark";
+          }
+
+          // Dark theme preferred, set document with a `data-theme` attribute
+          if (theme == "dark") {
+               document.documentElement.setAttribute("color-mode", "dark");
+          }
+      }
+      detectColorScheme();
+
+      // Identify the toggle switch HTML element
+      const toggleSwitch = document.querySelector('#theme-switch input[type="checkbox"]');
+
+      // Function that changes the theme, and sets a localStorage variable to track the theme between page loads
+      function switchTheme(e) {
+          if (e.target.checked) {
+              localStorage.setItem("color-mode", "dark");
+              document.documentElement.setAttribute("color-mode", "dark");
+              toggleSwitch.checked = true;
+          } else {
+              localStorage.setItem("color-mode", "light");
+              document.documentElement.setAttribute("color-mode", "light");
+              toggleSwitch.checked = false;
+          }
+      }
+
+      // Listener for changing themes
+      toggleSwitch.addEventListener('click', switchTheme, false);
+
+      // Pre-check the dark-theme checkbox if dark-theme is set
+      if (document.documentElement.getAttribute("color-mode") == "dark"){
+          toggleSwitch.checked = true;
+      }
+      </script>
+    <% } %>
+  </body>
+</html>

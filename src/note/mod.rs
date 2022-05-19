@@ -1,9 +1,13 @@
 pub(crate) mod link;
 pub(crate) mod ser;
 
-use crate::{note::link::Edge, utils, IdMap};
+use crate::{
+    note::link::Edge,
+    utils::{string::fix_link, time::parse_datestring},
+    IdMap,
+};
 use gray_matter::{engine::YAML, Matter, Pod};
-use pulldown_cmark::{Options, Parser};
+use pulldown_cmark::{html::push_html, Event, Options, Parser, Tag};
 use serde::Deserialize;
 use std::{ops::Range, path::PathBuf};
 use time::OffsetDateTime;
@@ -83,7 +87,7 @@ impl Note {
                     self.tags = tags;
                 }
                 if let Some(datestring) = front_matter.date {
-                    self.date = utils::time::parse_datestring(&datestring)
+                    self.date = parse_datestring(&datestring)
                 }
             }
         };
@@ -98,9 +102,18 @@ impl Note {
 
     /// Uses [`pulldown_cmark`] to parse the [`Note::content`] into HTML.
     pub fn as_html(&self) -> String {
+        let parser = Parser::new_ext(&self.content, Options::all()).map(|event| match event {
+            Event::Start(Tag::Link(link_type, dest, title)) => {
+                Event::Start(Tag::Link(link_type, fix_link(dest), title))
+            }
+            Event::Start(Tag::Image(link_type, dest, title)) => {
+                Event::Start(Tag::Image(link_type, fix_link(dest), title))
+            }
+            _ => event,
+        });
+
         let mut s = String::new();
-        let parser = Parser::new_ext(&self.content, Options::all());
-        pulldown_cmark::html::push_html(&mut s, parser);
+        push_html(&mut s, parser);
         s
     }
 
@@ -113,6 +126,12 @@ impl Note {
             .iter()
             .filter(|(_, edge)| matches!(edge, Edge::Connected(_)))
             .map(|(id, _)| id)
+    }
+
+    pub fn path(&self) -> PathBuf {
+        self.path
+            .clone()
+            .unwrap_or_else(|| PathBuf::from(&self.title))
     }
 }
 

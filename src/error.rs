@@ -21,7 +21,43 @@ pub enum Error {
     #[error("Could not format the value: {0}")]
     FormatError(#[from] serde_json::Error),
 
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[cfg(feature = "ssg")]
+    #[error("Template error: {0}")]
+    TemplateError(#[from] sailfish::RenderError),
+
+    #[error("Error with ignore pattern: {0}")]
+    IgnorePatternError(String),
+
+    #[error("Walk error: {0}")]
+    WalkError(ignore::Error),
+
+    #[error("Path error: {0}")]
+    PathError(#[from] std::path::StripPrefixError),
+
+    #[error("TOML deserialize error: {0}")]
+    TomlDeserializeError(#[from] toml::de::Error),
+
+    #[error("TOML serialize error: {0}")]
+    TomlSerializeError(#[from] toml::ser::Error),
+
     #[error(transparent)]
     /// Represents all other errors, likely from another crate.
     Other(#[from] anyhow::Error),
+}
+
+impl From<ignore::Error> for Error {
+    fn from(e: ignore::Error) -> Self {
+        match e {
+            ignore::Error::Glob { glob, err } => {
+                Self::IgnorePatternError(format!("{:?}, {}", glob, err))
+            }
+            ignore::Error::InvalidDefinition => Self::IgnorePatternError(
+                "invalid definition (format is type:glob, e.g., html:*.html)".to_owned(),
+            ),
+            _ => Self::WalkError(e),
+        }
+    }
 }
