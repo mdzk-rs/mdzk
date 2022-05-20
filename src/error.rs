@@ -24,10 +24,6 @@ pub enum Error {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
-    #[cfg(feature = "ssg")]
-    #[error("Template error: {0}")]
-    TemplateError(#[from] sailfish::RenderError),
-
     #[error("Error with ignore pattern: {0}")]
     IgnorePatternError(String),
 
@@ -37,9 +33,15 @@ pub enum Error {
     #[error("Path error: {0}")]
     PathError(#[from] std::path::StripPrefixError),
 
+    #[cfg(feature = "ssg")]
+    #[error("Template error: {0}")]
+    TemplateError(#[from] sailfish::RenderError),
+
+    #[cfg(feature = "ssg")]
     #[error("TOML deserialize error: {0}")]
     TomlDeserializeError(#[from] toml::de::Error),
 
+    #[cfg(feature = "ssg")]
     #[error("TOML serialize error: {0}")]
     TomlSerializeError(#[from] toml::ser::Error),
 
