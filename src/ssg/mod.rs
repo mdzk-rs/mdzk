@@ -103,6 +103,7 @@ fn render_index(vault: &Vault, destination: &Path, config: &Config) -> Result<()
 }
 
 fn render_notes(vault: &Vault, destination: &Path, config: &Config) -> Result<()> {
+    let readme_id = NoteId::from_hashable(Path::new("README.md"));
     let dark_mode = config
         .style
         .as_ref()
@@ -121,6 +122,8 @@ fn render_notes(vault: &Vault, destination: &Path, config: &Config) -> Result<()
 
         let backlinks = vault
             .incoming(id)
+            // Don't render backlinks to the index
+            .filter(|(id, _)| *id != &readme_id)
             .map(|(_, other)| {
                 (
                     other.title.to_owned(),
