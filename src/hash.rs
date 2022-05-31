@@ -1,5 +1,4 @@
 use crate::NoteId;
-use nohash_hasher::BuildNoHashHasher;
 use std::hash::{BuildHasherDefault, Hash, Hasher};
 
 type MdzkHash = fnv::FnvHasher;
@@ -15,9 +14,9 @@ pub type HashMap<K, V> = std::collections::HashMap<K, V, BuildHasherDefault<Mdzk
 /// An alias for a [`HashMap`](std::collections::HashMap) that uses a [`NoteId`] as it's key.
 ///
 /// Since [`NoteId`] is just a [`u64`] that is meant to be the hashed representation of a path, we
-/// do not need to hash it again. Therefore, we for HashMaps indexed by NoteId's, we use an
-/// identity hasher by default.
-pub type IdMap<V> = std::collections::HashMap<NoteId, V, BuildNoHashHasher<NoteId>>;
+/// do not need to hash it again. Therefore, for HashMaps indexed by NoteId's, we use an
+/// identity hasher.
+pub type IdMap<V> = std::collections::HashMap<NoteId, V, BuildHasherDefault<IdHasher>>;
 
 pub(crate) trait FromHash {
     fn from_hashable(s: impl Hash) -> Self;
@@ -29,4 +28,21 @@ impl FromHash for NoteId {
         s.hash(&mut hasher);
         hasher.finish()
     }
+}
+
+/// A simple identity hasher, that can only hash u64s.
+///
+/// This is the hasher supplied to our [`IdMap`] alias, in order to avoid double hashing of note
+/// IDs.
+#[derive(Default)]
+pub struct IdHasher(u64);
+
+impl Hasher for IdHasher {
+    fn write(&mut self, _: &[u8]) {
+        panic!("IdHasher can only hash a u64")
+    }
+
+    fn write_u64(&mut self, i: u64) { self.0 = i; }
+
+    fn finish(&self) -> u64 { self.0 }
 }
