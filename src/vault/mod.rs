@@ -82,35 +82,3 @@ impl PartialEq for Vault {
 }
 
 impl Eq for Vault {}
-
-#[cfg(test)]
-pub(crate) mod tests {
-    extern crate test;
-    use crate::{Note, NoteId, Vault};
-    use serde_json::json;
-    use std::path::Path;
-    use test::Bencher;
-
-    pub(crate) fn setup() -> Vault {
-        let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("benchsuite");
-
-        crate::VaultBuilder::default()
-            .source(source.to_owned())
-            .build()
-            .unwrap()
-    }
-
-    #[bench]
-    fn bench_backlinks(b: &mut Bencher) {
-        let vault = setup();
-        b.iter(|| {
-            let _: Vec<(&NoteId, &Note)> = vault.incoming(&10479125933004782128).collect();
-        })
-    }
-
-    #[bench]
-    fn bench_serializer(b: &mut Bencher) {
-        let vault = setup();
-        b.iter(|| json!(vault));
-    }
-}

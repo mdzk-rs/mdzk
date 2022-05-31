@@ -140,35 +140,3 @@ impl std::fmt::Display for Note {
         write!(f, "{}", self.content)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    extern crate test;
-    use super::*;
-    use test::Bencher;
-    use time::macros::datetime;
-
-    fn setup_note() -> Note {
-        let mut adjacencies: IdMap<Edge> = IdMap::default();
-        adjacencies.insert(1, Edge::NotConnected);
-        adjacencies.insert(2, Edge::Connected(vec![]));
-        Note {
-            title: "Test note".to_owned(),
-            path: None,
-            date: Some(datetime!(2022-04-12 10:43 +2)),
-            tags: vec!["tag1".to_owned(), "tag2".to_owned()],
-            content: "This is the note content".to_owned(),
-            original_content: "This is the note content".to_owned(),
-            invalid_internal_links: vec![],
-            adjacencies,
-        }
-    }
-
-    #[bench]
-    fn bench_links(b: &mut Bencher) {
-        let note = setup_note();
-        b.iter(|| {
-            let _: Vec<&NoteId> = note.links().collect();
-        })
-    }
-}

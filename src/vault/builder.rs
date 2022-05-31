@@ -219,22 +219,6 @@ impl Default for VaultBuilder {
 
 #[cfg(test)]
 mod tests {
-    extern crate test;
-    use std::path::Path;
-    use test::Bencher;
-
-    #[bench]
-    fn bench_builder(b: &mut Bencher) {
-        let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("benchsuite");
-
-        b.iter(|| {
-            crate::VaultBuilder::default()
-                .source(source.to_owned())
-                .build()
-                .unwrap()
-        });
-    }
-
     #[test]
     fn test_ignores() {
         let ignores = vec![
