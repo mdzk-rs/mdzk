@@ -1,4 +1,4 @@
-mod config;
+pub mod config;
 mod copy;
 mod static_files;
 
@@ -67,7 +67,7 @@ pub fn build(vault: &Vault, destination: &Path) -> Result<()> {
     render_notes(vault, destination, &config)
 }
 
-fn render_index(vault: &Vault, destination: &Path, config: &Config) -> Result<()> {
+pub fn render_index(vault: &Vault, destination: &Path, config: &Config) -> Result<()> {
     let readme_id = NoteId::from_hashable(Path::new("README.md"));
     let dark_mode = config
         .style
@@ -102,7 +102,7 @@ fn render_index(vault: &Vault, destination: &Path, config: &Config) -> Result<()
     render(tmpl, destination.join("index.html"))
 }
 
-fn render_notes(vault: &Vault, destination: &Path, config: &Config) -> Result<()> {
+pub fn render_notes(vault: &Vault, destination: &Path, config: &Config) -> Result<()> {
     let readme_id = NoteId::from_hashable(Path::new("README.md"));
     let dark_mode = config
         .style
@@ -159,40 +159,4 @@ fn render(tmpl: impl TemplateOnce, path: impl AsRef<Path>) -> Result<()> {
     let rendered = unsafe { std::slice::from_raw_parts(buf.as_mut_ptr(), buf.len()) };
     write_file(path, rendered)?;
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    extern crate test;
-    use test::Bencher;
-
-    #[bench]
-    fn bench_render_index(b: &mut Bencher) {
-        let vault = crate::vault::tests::setup();
-        let tmp_dir = std::env::temp_dir().join("mdzk-test");
-        let config = super::config::Config::default();
-
-        std::fs::create_dir_all(&tmp_dir).unwrap();
-
-        b.iter(|| {
-            super::render_index(&vault, &tmp_dir, &config).unwrap();
-        });
-
-        std::fs::remove_dir_all(tmp_dir).unwrap();
-    }
-
-    #[bench]
-    fn bench_render_notes(b: &mut Bencher) {
-        let vault = crate::vault::tests::setup();
-        let tmp_dir = std::env::temp_dir().join("mdzk-test");
-        let config = super::config::Config::default();
-
-        std::fs::create_dir_all(&tmp_dir).unwrap();
-
-        b.iter(|| {
-            super::render_notes(&vault, &tmp_dir, &config).unwrap();
-        });
-
-        std::fs::remove_dir_all(tmp_dir).unwrap();
-    }
 }

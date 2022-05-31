@@ -19,6 +19,11 @@ include = [
     "**/*.pest",
 ]
 
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
+
 [dependencies]
 anyhow = "1.0.56"
 clap = { version = "3.1.9", default-features = false, features = ["std", "derive"] }
@@ -45,9 +50,8 @@ ssg = ["sailfish", "toml"]
 test = []
 
 [dev-dependencies]
-mdzk = { path = ".", features = ["test"] }
+criterion = "0.3"
 
-[profile.release]
-codegen-units = 1
-lto = true
-strip = true
+[[bench]]
+name = "benchmark"
+harness = false
