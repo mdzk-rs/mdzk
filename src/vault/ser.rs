@@ -17,7 +17,7 @@ impl From<&Vault> for VaultSerialized {
                     NoteSerialized::new(
                         hex(id),
                         note.clone(),
-                        vault.incoming(id).map(|(id, _)| hex(id)).collect(),
+                        vault.incoming_arcs(id).map(|(id, _)| hex(id)).collect(),
                     )
                 })
                 .collect(),

@@ -14,9 +14,9 @@ pub enum Error {
     /// An error stating a path does not exist in the filesystem.
     PathNotFound(PathBuf),
 
-    #[error("Cannot find the destination for the internal link: {0}")]
-    /// An error for when a destination for an internal link cannot be found.
-    InvalidInternalLinkDestination(String),
+    #[error("Cannot find the destination for the arc: {0}")]
+    /// An error for when an arc destination is not found.
+    InvalidArcDestination(String),
 
     #[error("Could not format the value: {0}")]
     FormatError(#[from] serde_json::Error),

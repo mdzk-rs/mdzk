@@ -16,7 +16,7 @@ fn bench_incoming_links(c: &mut Criterion) {
     let vault = setup();
     c.bench_function("find incoming links", |b| {
         b.iter(|| {
-            let _: Vec<(&NoteId, &Note)> = vault.incoming(&10479125933004782128).collect();
+            let _: Vec<(&NoteId, &Note)> = vault.incoming_arcs(&10479125933004782128).collect();
         })
     });
 }

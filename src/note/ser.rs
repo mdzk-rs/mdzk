@@ -21,7 +21,7 @@ impl NoteSerialized {
     pub(crate) fn new(id: String, note: Note, backlinks: Vec<String>) -> Self {
         Self {
             id,
-            links: note.links().map(hex).collect::<Vec<String>>(),
+            links: note.outgoing_arcs().map(hex).collect::<Vec<String>>(),
             title: note.title,
             path: note.path,
             tags: note.tags,

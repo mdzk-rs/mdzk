@@ -15,22 +15,22 @@ use std::{
 };
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum Edge {
+pub enum Arc {
     Connected(Vec<Range<usize>>),
     NotConnected,
 }
 
-impl Edge {
+impl Arc {
     pub fn push_link_range(&mut self, range: Range<usize>) {
         match self {
-            Edge::Connected(ranges) => ranges.push(range),
-            Edge::NotConnected => *self = Edge::Connected(vec![range]),
+            Arc::Connected(ranges) => ranges.push(range),
+            Arc::NotConnected => *self = Arc::Connected(vec![range]),
         }
     }
 }
 
 /// Finds all wikilinks in `content` and applies the closure `handle_link` to them.
-pub fn for_each_internal_link(
+pub fn for_each_wikilink(
     content: &str,
     mut handle_link: impl FnMut(&str, Range<usize>) -> Result<()>,
 ) -> Result<()> {
@@ -97,8 +97,8 @@ pub fn for_each_internal_link(
 }
 
 #[derive(Parser)]
-#[grammar = "note/internal_link.pest"]
-pub struct InternalLinkParser;
+#[grammar = "note/wikilink.pest"]
+pub struct WikilinkParser;
 
 #[derive(Debug, PartialEq)]
 enum Anchor {
@@ -108,7 +108,7 @@ enum Anchor {
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct InternalLink {
+pub(crate) struct Wikilink {
     dest_title: String,
     dest_path: Option<PathBuf>,
     pub(crate) dest_id: NoteId,
@@ -116,7 +116,7 @@ pub(crate) struct InternalLink {
     anchor: Anchor,
 }
 
-impl InternalLink {
+impl Wikilink {
     pub fn cmark<P>(&self, cur_dir: P) -> String
     where
         P: AsRef<Path>,
@@ -144,9 +144,9 @@ pub(crate) fn create_link(
     link_string: &str,
     path_lookup: &IdMap<PathBuf>,
     id_lookup: &HashMap<String, NoteId>,
-) -> Result<InternalLink> {
-    let mut link = InternalLinkParser::parse(Rule::link, link_string)
-        .with_context(|| format!("Failed parsing internal link from {}", link_string))?
+) -> Result<Wikilink> {
+    let mut link = WikilinkParser::parse(Rule::link, link_string)
+        .with_context(|| format!("Failed parsing wikilink from {}", link_string))?
         .next()
         .unwrap()
         .into_inner();
@@ -173,7 +173,7 @@ pub(crate) fn create_link(
             None => Anchor::None,
         };
 
-        Ok(InternalLink {
+        Ok(Wikilink {
             dest_title: dest_title.to_owned(),
             dest_path: path_lookup.get(&dest_id).cloned(),
             dest_id,
@@ -181,7 +181,7 @@ pub(crate) fn create_link(
             anchor,
         })
     } else {
-        Err(Error::InvalidInternalLinkDestination(
+        Err(Error::InvalidArcDestination(
             link_string.to_owned(),
         ))
     }
@@ -209,7 +209,7 @@ This one [[link]], this one [[ link#header ]], this one [[   link | a bit more c
 Check if [[link with (parentheses) work as well]]. What [[about {curly braces}?]]"#;
 
         let mut gots = vec![];
-        for_each_internal_link(content, |link_text, _| {
+        for_each_wikilink(content, |link_text, _| {
             gots.push(link_text.to_owned());
             Ok(())
         })
@@ -247,7 +247,7 @@ let link = "[[link_in_code]]".to_owned();
 </p>"#;
 
         let mut links = Vec::<String>::new();
-        for_each_internal_link(content, |link_text, _| {
+        for_each_wikilink(content, |link_text, _| {
             links.push(link_text.to_owned());
             Ok(())
         })
@@ -260,7 +260,7 @@ let link = "[[link_in_code]]".to_owned();
     fn test_parse_link() {
         let cases = vec![
             (
-                InternalLink {
+                Wikilink {
                     dest_title: "This is note".to_owned(),
                     dest_path: Some(PathBuf::from("This is note")),
                     dest_id: 1,
@@ -270,7 +270,7 @@ let link = "[[link_in_code]]".to_owned();
                 "This is note|Some alias",
             ),
             (
-                InternalLink {
+                Wikilink {
                     dest_title: "Tïtlæ fôr nøte".to_owned(),
                     dest_path: Some(PathBuf::from("Tïtlæ fôr nøte")),
                     dest_id: 2,
@@ -280,7 +280,7 @@ let link = "[[link_in_code]]".to_owned();
                 "Tïtlæ fôr nøte#^id1234",
             ),
             (
-                InternalLink {
+                Wikilink {
                     dest_title: "🔈 Music".to_owned(),
                     dest_path: Some(PathBuf::from("🔈 Music")),
                     dest_id: 3,

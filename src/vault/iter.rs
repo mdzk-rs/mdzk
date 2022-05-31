@@ -1,4 +1,4 @@
-use crate::{note::link::Edge, Note, NoteId, Vault};
+use crate::{note::link::Arc, Note, NoteId, Vault};
 use rayon::prelude::*;
 use std::collections::hash_map;
 
@@ -54,7 +54,7 @@ impl Vault {
         self.notes.par_iter()
     }
 
-    /// Returns an iterator visiting all notes linking to the note specified via it's ID.
+    /// Returns an iterator visiting all notes with an arc leading to the note with ID `id`.
     ///
     /// The returned iterator iterates over pairs of IDs and their corresponding notes. Essentially,
     /// this gives you an iterator of [backlinks](https://en.wikipedia.org/wiki/Backlink).
@@ -71,31 +71,32 @@ impl Vault {
     /// # let vault = Vault::default();
     /// for (id, note) in vault.iter() {
     ///     println!("Backlinks of {}:", note.title);
-    ///     for (backlink_id, backlink_note) in vault.incoming(id) {
+    ///     for (backlink_id, backlink_note) in vault.incoming_arcs(id) {
     ///         println!(" - {}", backlink_note.title);
     ///     }
     /// }
     /// ```
-    pub fn incoming<'a>(&'a self, id: &'a NoteId) -> impl Iterator<Item = (&NoteId, &Note)> {
+    pub fn incoming_arcs<'a>(&'a self, id: &'a NoteId) -> impl Iterator<Item = (&NoteId, &Note)> {
         self.iter()
             .filter_map(|(other_id, other)| match other.adjacencies.get(id) {
-                Some(Edge::Connected(_)) => Some((other_id, other)),
+                Some(Arc::Connected(_)) => Some((other_id, other)),
                 _ => None,
             })
     }
 
-    /// Returns an iterator visiting all notes linked to by the note specified via it's ID.
+    /// Returns an iterator visiting all notes connected by an arc coming from the note with ID `id`.
     ///
     /// The returned iterator iterates over pairs of IDs and their corresponding notes.
+    /// Essentially, this gives you an iterator of outgoing links.
     ///
     /// If the `id` parameter does not correspond to any note present in this vault, this function
     /// will simply return an empty iterator.
-    pub fn outgoing<'a>(&'a self, id: &'a NoteId) -> impl Iterator<Item = (&NoteId, &Note)> {
+    pub fn outgoing_arcs<'a>(&'a self, id: &'a NoteId) -> impl Iterator<Item = (&NoteId, &Note)> {
         self.get(id)
             .map(|note| {
                 note.adjacencies
                     .iter()
-                    .filter(|(_, edge)| matches!(edge, Edge::Connected(_)))
+                    .filter(|(_, edge)| matches!(edge, Arc::Connected(_)))
                     .map(|(other_id, _)| (other_id, self.get(other_id).unwrap()))
             })
             .into_iter()

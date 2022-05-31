@@ -2,7 +2,7 @@ pub(crate) mod link;
 pub(crate) mod ser;
 
 use crate::{
-    note::link::Edge,
+    note::link::Arc,
     utils::{string::fix_link, time::parse_datestring},
     IdMap,
 };
@@ -55,7 +55,7 @@ pub struct Note {
     pub date: Option<OffsetDateTime>,
     /// The original content of the source file that produced this note.
     pub original_content: String,
-    /// The full content of the note, in [CommonMark](https://commonmark.org/). All internal links
+    /// The full content of the note, in [CommonMark](https://commonmark.org/). All wikilinks
     /// are changed from the
     /// [wikilink style](https://en.wikipedia.org/wiki/Help:Link#Wikilinks_(internal_links)) to
     /// regular [CommonMark links](https://commonmark.org/help/tutorial/07-links.html).
@@ -63,10 +63,10 @@ pub struct Note {
     /// All CommonMark extensions supported by [`pulldown_cmark`] are also supported by mdzk,
     /// meaning these will be parsed as expected from `content`. You can see a list of the
     /// extensions in the [`pulldown_cmark::Options`] struct. Note that this allows mdzk to
-    /// understand the current context and thus not parse internal links within e.g. code blocks.
+    /// understand the current context and thus not parse wikilinks within e.g. code blocks.
     pub content: String,
-    pub invalid_internal_links: Vec<(Range<usize>, String)>,
-    pub(crate) adjacencies: IdMap<Edge>,
+    pub invalid_arcs: Vec<(Range<usize>, String)>,
+    pub(crate) adjacencies: IdMap<Arc>,
 }
 
 impl Note {
@@ -117,14 +117,14 @@ impl Note {
         s
     }
 
-    /// Returns an iterator of [`NoteId`]s for this note's outgoing links.
+    /// Returns an iterator of [`NoteId`]s for this note's outgoing arcs.
     ///
     /// This function gives the same as running [`Vault::outgoing`](crate::Vault::outgoing) on this
     /// note's ID.
-    pub fn links(&self) -> impl Iterator<Item = &NoteId> + '_ {
+    pub fn outgoing_arcs(&self) -> impl Iterator<Item = &NoteId> + '_ {
         self.adjacencies
             .iter()
-            .filter(|(_, edge)| matches!(edge, Edge::Connected(_)))
+            .filter(|(_, edge)| matches!(edge, Arc::Connected(_)))
             .map(|(id, _)| id)
     }
 

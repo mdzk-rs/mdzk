@@ -121,7 +121,7 @@ pub fn render_notes(vault: &Vault, destination: &Path, config: &Config) -> Resul
         let full_path = destination.join(&path);
 
         let backlinks = vault
-            .incoming(id)
+            .incoming_arcs(id)
             // Don't render backlinks to the index
             .filter(|(id, _)| *id != &readme_id)
             .map(|(_, other)| {

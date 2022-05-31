@@ -2,7 +2,7 @@ mod builder;
 pub mod iter;
 mod ser;
 
-pub use crate::note::{link::Edge, Note, NoteId};
+pub use crate::note::{link::Arc, Note, NoteId};
 use crate::IdMap;
 pub use builder::VaultBuilder;
 
@@ -12,7 +12,7 @@ use std::path::PathBuf;
 /// A directed graph, where the nodes are [`Note`]s.
 ///
 /// The graph is represented as an adjacency matrix. This gives fast lookup times and allows the
-/// discovery of backlinks to be very quick.
+/// discovery of incoming arcs to be very quick.
 #[derive(Default, Debug)]
 pub struct Vault {
     /// The root directory of the vault.

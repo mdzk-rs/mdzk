@@ -1,7 +1,7 @@
 use crate::{
     error::{Error, Result},
     hash::FromHash,
-    note::link::{create_link, for_each_internal_link, Edge},
+    note::link::{create_link, for_each_wikilink, Arc},
     utils, HashMap, IdMap, Note, NoteId, Vault,
 };
 use anyhow::Context;
@@ -133,8 +133,8 @@ impl VaultBuilder {
                             date: None,
                             original_content: content.clone(),
                             content,
-                            invalid_internal_links: Vec::new(),
-                            adjacencies: IdMap::<Edge>::default(),
+                            invalid_arcs: Vec::new(),
+                            adjacencies: IdMap::<Arc>::default(),
                         };
 
                         note.process_front_matter();
@@ -149,7 +149,7 @@ impl VaultBuilder {
         drop(sender);
 
         let mut id_lookup = HashMap::<String, NoteId>::default();
-        let mut adjacencies = IdMap::<Edge>::default();
+        let mut adjacencies = IdMap::<Arc>::default();
         let mut path_lookup = IdMap::<PathBuf>::default();
         let mut notes = IdMap::<Note>::default();
 
@@ -164,7 +164,7 @@ impl VaultBuilder {
                         id_lookup.insert(path.to_string_lossy().to_string(), id);
                     }
 
-                    adjacencies.insert(id, Edge::NotConnected);
+                    adjacencies.insert(id, Arc::NotConnected);
                     path_lookup.insert(id, note.path.clone().unwrap());
                     notes.insert(id, note);
                 }
@@ -174,7 +174,7 @@ impl VaultBuilder {
 
         notes.par_iter_mut().try_for_each(|(_, note)| {
             note.adjacencies = adjacencies.clone();
-            for_each_internal_link(&note.content.clone(), |link_string, range| {
+            for_each_wikilink(&note.content.clone(), |link_string, range| {
                 match create_link(link_string, &path_lookup, &id_lookup) {
                     Ok(link) => {
                         note.adjacencies
@@ -188,8 +188,8 @@ impl VaultBuilder {
                         );
                     }
 
-                    Err(Error::InvalidInternalLinkDestination(link_string)) => {
-                        note.invalid_internal_links.push((range, link_string));
+                    Err(Error::InvalidArcDestination(link_string)) => {
+                        note.invalid_arcs.push((range, link_string));
                     }
 
                     Err(e) => return Err(e),

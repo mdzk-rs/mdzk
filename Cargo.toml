@@ -46,7 +46,6 @@ toml = { version = "0.5.9", optional = true }
 [features]
 default = ["ssg"]
 ssg = ["sailfish", "toml"]
-test = []
 
 [dev-dependencies]
 criterion = "0.3"
