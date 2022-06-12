@@ -14,11 +14,10 @@
     property="og:description"
     content="A lovingly designed tool for your Zettelkasten needs"
   />
-  <!-- Inter -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
-    rel="stylesheet"
-  />
+  <!-- Source Sans Pro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700;1,900&display=swap" rel="stylesheet">
 
   <!-- JetBrains Mono -->
   <link
@@ -45,12 +44,15 @@
 
 /* Custom */
 :root {
-  --b-font-main: "Inter", sans-serif;
+  --b-font-main: "Source Sans Pro", sans-serif;
   --b-font-mono: "IBM Plex Mono", monospace;
   --b-link-rgb: 46, 52, 64;
   --b-link: rgb(var(--b-link-rgb));
   --transition-length: 80ms;
   scroll-behavior: smooth;
+}
+body {
+  max-width: 80ch;
 }
 header h1 {
   text-align: center;
