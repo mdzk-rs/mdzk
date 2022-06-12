@@ -26,5 +26,5 @@ in rustPlatform.buildRustPackage {
 
   nativeBuildInputs = with pkgs; [ pandoc ];
 
-  cargoSha256 = "sha256-0b9f8Pg2M940AcJLYt5SPGYYE6TLmqLA/PCbMkNCCQ4";
+  cargoSha256 = "sha256-O4FrETbZ/2NkcTi7OARwXw/NqVgR4WuxrgIbR4jP5lk=";
 }
