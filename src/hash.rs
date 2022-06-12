@@ -42,7 +42,11 @@ impl Hasher for IdHasher {
         panic!("IdHasher can only hash a u64")
     }
 
-    fn write_u64(&mut self, i: u64) { self.0 = i; }
+    fn write_u64(&mut self, i: u64) {
+        self.0 = i;
+    }
 
-    fn finish(&self) -> u64 { self.0 }
+    fn finish(&self) -> u64 {
+        self.0
+    }
 }

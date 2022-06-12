@@ -97,7 +97,7 @@ pub fn for_each_wikilink(
 }
 
 #[derive(Parser)]
-#[grammar = "note/wikilink.pest"]
+#[grammar = "arc/wikilink.pest"]
 pub struct WikilinkParser;
 
 #[derive(Debug, PartialEq)]
@@ -181,9 +181,7 @@ pub(crate) fn create_link(
             anchor,
         })
     } else {
-        Err(Error::InvalidArcDestination(
-            link_string.to_owned(),
-        ))
+        Err(Error::InvalidArcDestination(link_string.to_owned()))
     }
 }
 

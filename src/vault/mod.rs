@@ -2,8 +2,11 @@ mod builder;
 pub mod iter;
 mod ser;
 
-pub use crate::note::{link::Arc, Note, NoteId};
 use crate::IdMap;
+pub use crate::{
+    arc::Arc,
+    note::{Note, NoteId},
+};
 pub use builder::VaultBuilder;
 
 use crate::HashMap;

@@ -1,8 +1,7 @@
-pub(crate) mod link;
 pub(crate) mod ser;
 
 use crate::{
-    note::link::Arc,
+    arc::Arc,
     utils::{string::fix_link, time::parse_datestring},
     IdMap,
 };

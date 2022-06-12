@@ -1,7 +1,7 @@
 use crate::{
+    arc::{create_link, for_each_wikilink, Arc},
     error::{Error, Result},
     hash::FromHash,
-    note::link::{create_link, for_each_wikilink, Arc},
     utils, HashMap, IdMap, Note, NoteId, Vault,
 };
 use anyhow::Context;

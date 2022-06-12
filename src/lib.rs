@@ -2,6 +2,7 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
+mod arc;
 pub mod error;
 mod hash;
 mod note;
