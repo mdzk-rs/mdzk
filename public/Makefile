@@ -8,7 +8,9 @@ HTML_OPTIONS=--to html5\
 			 --section-divs\
 			 --reference-location=section\
 			 --lua-filter=assets/anchor-links.lua\
-			 --template=assets/template.html
+			 --template=assets/template.html\
+			 --katex\
+			 --reference-location=section
 
 .PHONY: all clean watch
 
@@ -24,7 +26,11 @@ website/man.html: man.md
 
 # Reruns make on file change
 watch:
-	@fswatch $(WATCH) | xargs -I{} make -s
+	@fswatch $(WATCH) | xargs -I{} make all -s
+
+# Serves the website with live-reloading
+serve:
+	@make watch -s& cd website; browser-sync start --no-open --server --watch "**/*"
 
 clean:
 	@rm $(OUT)\
