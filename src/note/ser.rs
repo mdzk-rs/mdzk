@@ -1,3 +1,4 @@
+use crate::note::Metadata;
 use crate::{utils::string::hex, Note};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -11,6 +12,7 @@ pub(crate) struct NoteSerialized {
     path: Option<PathBuf>,
     tags: Vec<String>,
     date: Option<String>,
+    metadata: Metadata,
     content: String,
     original_content: String,
     links: Vec<String>,
@@ -26,6 +28,7 @@ impl NoteSerialized {
             path: note.path,
             tags: note.tags,
             date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
+            metadata: note.metadata,
             content: note.content,
             original_content: note.original_content,
             backlinks,
