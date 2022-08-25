@@ -8,6 +8,8 @@ use crate::{
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{html::push_html, Event, Options, Parser, Tag};
 use serde::Deserialize;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::{ops::Range, path::PathBuf};
 use time::OffsetDateTime;
 
@@ -52,6 +54,8 @@ pub struct Note {
     pub tags: Vec<String>,
     /// The date assigned to the note.
     pub date: Option<OffsetDateTime>,
+    /// Extra metadata from the front matter, kept as-were
+    pub extra: HashMap<String, Value>,
     /// The original content of the source file that produced this note.
     pub original_content: String,
     /// The full content of the note, in [CommonMark](https://commonmark.org/). All wikilinks
@@ -75,6 +79,8 @@ impl Note {
             title: Option<String>,
             tags: Option<Vec<String>>,
             date: Option<String>,
+            #[serde(flatten)]
+            extra: HashMap<String, Value>,
         }
 
         let mut handle_front_matter = |data: Pod| {
@@ -88,6 +94,7 @@ impl Note {
                 if let Some(datestring) = front_matter.date {
                     self.date = parse_datestring(&datestring)
                 }
+                self.extra = front_matter.extra;
             }
         };
 

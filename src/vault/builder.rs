@@ -131,6 +131,7 @@ impl VaultBuilder {
                             path: Some(path_from_root),
                             tags: vec![],
                             date: None,
+                            extra: Default::default(),
                             original_content: content.clone(),
                             content,
                             invalid_arcs: Vec::new(),
