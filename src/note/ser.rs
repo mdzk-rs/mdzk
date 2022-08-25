@@ -1,6 +1,7 @@
-use crate::note::Metadata;
 use crate::{utils::string::hex, Note};
 use serde::Serialize;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::path::PathBuf;
 use time::format_description::well_known::Rfc3339;
 
@@ -12,7 +13,7 @@ pub(crate) struct NoteSerialized {
     path: Option<PathBuf>,
     tags: Vec<String>,
     date: Option<String>,
-    metadata: Metadata,
+    extra: HashMap<String, Value>,
     content: String,
     original_content: String,
     links: Vec<String>,
@@ -28,7 +29,7 @@ impl NoteSerialized {
             path: note.path,
             tags: note.tags,
             date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
-            metadata: note.metadata,
+            extra: note.extra,
             content: note.content,
             original_content: note.original_content,
             backlinks,

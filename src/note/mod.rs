@@ -3,19 +3,18 @@ pub(crate) mod ser;
 use crate::{
     arc::Arc,
     utils::{string::fix_link, time::parse_datestring},
-    HashMap, IdMap,
+    IdMap,
 };
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{html::push_html, Event, Options, Parser, Tag};
 use serde::Deserialize;
+use serde_json::Value;
+use std::collections::HashMap;
 use std::{ops::Range, path::PathBuf};
 use time::OffsetDateTime;
 
 /// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
-
-/// Metadata is a HashMap of String to JSON values constructed from the front matter
-pub type Metadata = HashMap<String, serde_json::Value>;
 
 /// A node in [`Vault`](crate::Vault). Represents a note in a Zettelkasten.
 ///
@@ -55,8 +54,8 @@ pub struct Note {
     pub tags: Vec<String>,
     /// The date assigned to the note.
     pub date: Option<OffsetDateTime>,
-    /// Other metadata from the front matter, kept as-were
-    pub metadata: Metadata,
+    /// Extra metadata from the front matter, kept as-were
+    pub extra: HashMap<String, Value>,
     /// The original content of the source file that produced this note.
     pub original_content: String,
     /// The full content of the note, in [CommonMark](https://commonmark.org/). All wikilinks
@@ -81,7 +80,7 @@ impl Note {
             tags: Option<Vec<String>>,
             date: Option<String>,
             #[serde(flatten)]
-            metadata: Metadata,
+            extra: HashMap<String, Value>,
         }
 
         let mut handle_front_matter = |data: Pod| {
@@ -95,7 +94,7 @@ impl Note {
                 if let Some(datestring) = front_matter.date {
                     self.date = parse_datestring(&datestring)
                 }
-                self.metadata = front_matter.metadata;
+                self.extra = front_matter.extra;
             }
         };
 
