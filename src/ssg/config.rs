@@ -1,6 +1,6 @@
 use crate::{error::Result, utils::fs::read_file};
 use serde::{Deserialize, Deserializer, Serialize};
-use std::path::Path;
+use std::{fmt::Write, path::Path};
 use toml::value::{Map, Value};
 
 #[derive(Deserialize, Serialize)]
@@ -46,7 +46,8 @@ impl StyleConfig {
             css.push_str(":root {\n");
             for (key, value) in variables.iter() {
                 if let Some(value) = value.as_str() {
-                    css.push_str(&format!("--{key}: {value} !important;\n"));
+                    // Safe unwrap. Writing to this string will always work
+                    writeln!(&mut css, "--{key}: {value} !important;").unwrap()
                 }
             }
             css.push('}');

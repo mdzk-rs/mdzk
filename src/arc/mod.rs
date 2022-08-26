@@ -10,11 +10,12 @@ use anyhow::Context;
 use pest::Parser;
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::{
+    fmt::Write,
     ops::Range,
     path::{Path, PathBuf},
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Arc {
     Connected(Vec<Range<usize>>),
     NotConnected,
@@ -100,14 +101,14 @@ pub fn for_each_wikilink(
 #[grammar = "arc/wikilink.pest"]
 pub struct WikilinkParser;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 enum Anchor {
     Header(String),
     Blockref(String),
     None,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub(crate) struct Wikilink {
     dest_title: String,
     dest_path: Option<PathBuf>,
@@ -132,7 +133,8 @@ impl Wikilink {
 
         // Handle anchor
         match &self.anchor {
-            Anchor::Header(id) | Anchor::Blockref(id) => href.push_str(&format!("#{}", id)),
+            // Safe unwrap, writing to this string will always work
+            Anchor::Header(id) | Anchor::Blockref(id) => write!(&mut href, "#{}", id).unwrap(),
             Anchor::None => {}
         }
 

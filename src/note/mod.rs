@@ -42,7 +42,7 @@ pub type NoteId = u64;
 ///     assert!(!html_output.is_empty())
 /// }
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Note {
     /// The title of a note.
     pub title: String,
