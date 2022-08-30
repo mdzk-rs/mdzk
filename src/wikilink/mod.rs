@@ -1,6 +1,6 @@
 mod handler;
 mod context;
-pub use context::{Anchor, WikilinkContext, WikilinkParser};
+pub use context::{Anchor, WikilinkContext};
 pub use handler::{CommonMarkHandler, WikilinkHandler};
 
 use crate::error::Result;

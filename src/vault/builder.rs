@@ -190,19 +190,16 @@ impl VaultBuilder {
             note.adjacencies = adjacencies.clone();
             for_each_wikilink(&note.content.clone(), |link_string, range| {
                 let mut final_link_string = link_string.to_owned();
-                let ctx = WikilinkContext::estabilsh_context(&link_string, &note, &note_lookup);
+                let ctx = WikilinkContext::estabilsh_context(link_string, note, &note_lookup);
 
                 for handler in self.wikilink_handlers.iter() {
                     handler.run(&mut final_link_string, &ctx)?;
                 }
 
-                match ctx.destination {
-                    Some(dest) => {
-                        note.adjacencies
-                            .entry(dest.id)
-                            .and_modify(|adj| adj.push_link_range(range));
-                    },
-                    _ => {},
+                if let Some(dest) = ctx.destination {
+                    note.adjacencies
+                        .entry(dest.id)
+                        .and_modify(|adj| adj.push_link_range(range));
                 }
 
                 note.content = note.content.replacen(

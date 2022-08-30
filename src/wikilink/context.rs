@@ -1,6 +1,7 @@
 use crate::{utils::string::kebab, Note, HashMap};
 use pest::Parser;
 
+#[derive(Debug)]
 pub struct WikilinkContext<'a> {
     pub source: &'a Note,
     pub destination: Option<&'a Note>,
@@ -34,7 +35,7 @@ impl<'a> WikilinkContext<'a> {
             WikilinkContext {
                 source,
                 destination: note_lookup.get(destination_title),
-                alias: link.next().map(|pair| pair.to_string()),
+                alias: link.next().map(|pair| pair.as_str().to_owned()),
                 anchor,
             }
         } else {
