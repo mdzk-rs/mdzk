@@ -1,4 +1,4 @@
-use crate::{arc::Arc, Note, NoteId, Vault};
+use crate::{vault::Arc, Note, NoteId, Vault};
 use rayon::prelude::*;
 use std::collections::hash_map;
 

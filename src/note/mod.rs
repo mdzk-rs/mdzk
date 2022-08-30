@@ -1,7 +1,7 @@
 pub(crate) mod ser;
 
 use crate::{
-    arc::Arc,
+    vault::Arc,
     utils::{string::fix_link, time::parse_datestring},
     IdMap,
 };
@@ -44,6 +44,8 @@ pub type NoteId = u64;
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Note {
+    /// The ID of  the note
+    pub id: NoteId,
     /// The title of a note.
     pub title: String,
     /// The path to the note, if it exists.

@@ -1,15 +1,13 @@
+mod arc;
 mod builder;
 pub mod iter;
 mod ser;
 
-use crate::IdMap;
-pub use crate::{
-    arc::Arc,
-    note::{Note, NoteId},
-};
+pub use arc::Arc;
 pub use builder::VaultBuilder;
+use crate::{IdMap, HashMap};
+pub use crate::note::{Note, NoteId};
 
-use crate::HashMap;
 use std::path::PathBuf;
 
 /// A directed graph, where the nodes are [`Note`]s.

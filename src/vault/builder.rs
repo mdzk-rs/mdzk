@@ -1,5 +1,6 @@
 use crate::{
-    arc::{create_link, for_each_wikilink, Arc},
+    vault::Arc,
+    wikilink::{for_each_wikilink, CommonMarkHandler, WikilinkContext, WikilinkHandler},
     error::{Error, Result},
     hash::FromHash,
     utils, HashMap, IdMap, Note, NoteId, Vault,
@@ -29,6 +30,7 @@ use std::{
 pub struct VaultBuilder {
     source: PathBuf,
     override_builder: OverrideBuilder,
+    wikilink_handlers: Vec<Box<dyn WikilinkHandler + Sync>>,
 }
 
 impl VaultBuilder {
@@ -58,6 +60,18 @@ impl VaultBuilder {
             self.add_ignore(ignore).unwrap();
         }
         self
+    }
+
+    #[must_use]
+    pub fn wikilink_handlers(self, wikilink_handlers: Vec<Box<dyn WikilinkHandler + Sync>>) -> Self {
+        Self {
+            wikilink_handlers,
+            ..self
+        }
+    }
+
+    pub fn add_wikilink_handler(&mut self, wikilink_handler: Box<dyn WikilinkHandler + Sync>) {
+        self.wikilink_handlers.push(wikilink_handler);
     }
 
     /// Adds an ignore pattern for the directory walker.
@@ -127,6 +141,7 @@ impl VaultBuilder {
                         };
 
                         let mut note = Note {
+                            id,
                             title: path.file_stem().unwrap().to_string_lossy().to_string(),
                             path: Some(path_from_root),
                             tags: vec![],
@@ -149,9 +164,8 @@ impl VaultBuilder {
 
         drop(sender);
 
-        let mut id_lookup = HashMap::<String, NoteId>::default();
+        let mut note_lookup = HashMap::<String, Note>::default();
         let mut adjacencies = IdMap::<Arc>::default();
-        let mut path_lookup = IdMap::<PathBuf>::default();
         let mut notes = IdMap::<Note>::default();
 
         for res in reciever {
@@ -159,14 +173,13 @@ impl VaultBuilder {
                 Ok((id, note)) => {
                     // TODO: insert overwrites any previous values. Consider another method to
                     // allow checking for ambiguous links.
-                    id_lookup.insert(note.title.clone(), id);
+                    note_lookup.insert(note.title.clone(), note.clone());
                     if let Some(ref path) = note.path {
                         // This allows linking by filename
-                        id_lookup.insert(path.to_string_lossy().to_string(), id);
+                        note_lookup.insert(path.to_string_lossy().to_string(), note.clone());
                     }
 
                     adjacencies.insert(id, Arc::NotConnected);
-                    path_lookup.insert(id, note.path.clone().unwrap());
                     notes.insert(id, note);
                 }
                 Err(e) => return Err(e),
@@ -176,25 +189,27 @@ impl VaultBuilder {
         notes.par_iter_mut().try_for_each(|(_, note)| {
             note.adjacencies = adjacencies.clone();
             for_each_wikilink(&note.content.clone(), |link_string, range| {
-                match create_link(link_string, &path_lookup, &id_lookup) {
-                    Ok(link) => {
-                        note.adjacencies
-                            .entry(link.dest_id)
-                            .and_modify(|adj| adj.push_link_range(range));
+                let mut final_link_string = link_string.to_owned();
+                let ctx = WikilinkContext::estabilsh_context(&link_string, &note, &note_lookup);
 
-                        note.content = note.content.replacen(
-                            &format!("[[{}]]", link_string),
-                            &link.cmark(note.path.as_ref().unwrap().parent().unwrap()),
-                            1,
-                        );
-                    }
-
-                    Err(Error::InvalidArcDestination(link_string)) => {
-                        note.invalid_arcs.push((range, link_string));
-                    }
-
-                    Err(e) => return Err(e),
+                for handler in self.wikilink_handlers.iter() {
+                    handler.run(&mut final_link_string, &ctx)?;
                 }
+
+                match ctx.destination {
+                    Some(dest) => {
+                        note.adjacencies
+                            .entry(dest.id)
+                            .and_modify(|adj| adj.push_link_range(range));
+                    },
+                    _ => {},
+                }
+
+                note.content = note.content.replacen(
+                    &format!("[[{}]]", link_string),
+                    &final_link_string,
+                    1,
+                );
 
                 Ok(())
             })
@@ -203,7 +218,7 @@ impl VaultBuilder {
         Ok(Vault {
             root: self.source.to_owned(),
             notes,
-            id_lookup,
+            id_lookup: note_lookup.iter().map(|(s, n)| (s.clone(), n.id)).collect(),
         })
     }
 }
@@ -214,6 +229,7 @@ impl Default for VaultBuilder {
         Self {
             override_builder: OverrideBuilder::new(&source),
             source,
+            wikilink_handlers: vec![Box::new(CommonMarkHandler)],
         }
     }
 }
