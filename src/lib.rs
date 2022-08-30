@@ -14,6 +14,8 @@ pub use hash::{HashMap, IdMap};
 pub use note::{Note, NoteId};
 #[doc(inline)]
 pub use vault::{Vault, VaultBuilder};
+#[doc(inline)]
+pub use wikilink::{Anchor, WikilinkContext, WikilinkHandler};
 
 #[cfg(feature = "ssg")]
 pub mod ssg;
