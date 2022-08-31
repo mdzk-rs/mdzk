@@ -1,11 +1,40 @@
-mod handler;
-mod context;
-pub use context::{Anchor, WikilinkContext};
-pub use handler::{CommonMarkHandler, WikilinkHandler};
+mod preprocessor;
+mod renderer;
+pub use preprocessor::{MdzkPreprocessor, WikilinkPreprocessor};
+pub use renderer::{CommonMarkRenderer, WikilinkRenderer};
 
-use crate::error::Result;
+use crate::{error::Result, Note};
 use pulldown_cmark::{CowStr, Event, Tag};
 use std::ops::Range;
+
+#[derive(Clone, Debug)]
+pub struct WikilinkContext<'a> {
+    pub text: &'a str,
+    pub source: &'a Note,
+    pub destination: Option<&'a Note>,
+    pub alias: Option<String>,
+    pub anchor: Anchor,
+}
+
+impl<'a> WikilinkContext<'a> {
+    pub fn new(text: &'a str, source: &'a Note) -> Self {
+        WikilinkContext {
+            text,
+            source,
+            destination: None,
+            alias: None,
+            anchor: Anchor::None,
+        }
+    }
+}
+
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
+pub enum Anchor {
+    Header(String),
+    Blockref(String),
+    #[default]
+    None,
+}
 
 /// Finds all wikilinks in `content` and applies the closure `handle_link` to them.
 pub fn for_each_wikilink(

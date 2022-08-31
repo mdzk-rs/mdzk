@@ -18,8 +18,8 @@ pub enum Error {
     /// An error for when an arc destination is not found.
     InvalidArcDestination(String),
 
-    #[error("Could not format the value: {0}")]
-    FormatError(#[from] serde_json::Error),
+    #[error("Could not format the value as JSON: {0}")]
+    JsonError(#[from] serde_json::Error),
 
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
@@ -32,6 +32,9 @@ pub enum Error {
 
     #[error("Path error: {0}")]
     PathError(#[from] std::path::StripPrefixError),
+
+    #[error("Format error: {0}")]
+    FormatError(#[from] std::fmt::Error),
 
     #[cfg(feature = "ssg")]
     #[error("Template error: {0}")]

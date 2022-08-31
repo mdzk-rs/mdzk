@@ -1,6 +1,6 @@
 use crate::{
     vault::Arc,
-    wikilink::{for_each_wikilink, CommonMarkHandler, WikilinkContext, WikilinkHandler},
+    wikilink::{for_each_wikilink, CommonMarkRenderer, WikilinkContext, WikilinkRenderer, WikilinkPreprocessor, MdzkPreprocessor},
     error::{Error, Result},
     hash::FromHash,
     utils, HashMap, IdMap, Note, NoteId, Vault,
@@ -30,7 +30,8 @@ use std::{
 pub struct VaultBuilder {
     source: PathBuf,
     override_builder: OverrideBuilder,
-    wikilink_handlers: Vec<Box<dyn WikilinkHandler + Sync>>,
+    wikilink_preprocessors: Vec<Box<dyn WikilinkPreprocessor + Sync>>,
+    wikilink_renderer: Box<dyn WikilinkRenderer + Sync>,
 }
 
 impl VaultBuilder {
@@ -44,6 +45,26 @@ impl VaultBuilder {
             source: source.as_ref().to_owned(),
             ..self
         }
+    }
+
+    #[must_use]
+    pub fn wikilink_rendererer(self, wikilink_renderer: Box<dyn WikilinkRenderer + Sync>) -> Self {
+        Self {
+            wikilink_renderer,
+            ..self
+        }
+    }
+
+    #[must_use]
+    pub fn wikilink_preprocessors(self, wikilink_preprocessors: Vec<Box<dyn WikilinkPreprocessor + Sync>>) -> Self {
+        Self {
+            wikilink_preprocessors,
+            ..self
+        }
+    }
+
+    pub fn add_wikilink_preprocessor(&mut self, wikilink_preprocessor: Box<dyn WikilinkPreprocessor + Sync>) {
+        self.wikilink_preprocessors.push(wikilink_preprocessor);
     }
 
     /// Adds multiple ignore patterns for the directory walker.
@@ -60,18 +81,6 @@ impl VaultBuilder {
             self.add_ignore(ignore).unwrap();
         }
         self
-    }
-
-    #[must_use]
-    pub fn wikilink_handlers(self, wikilink_handlers: Vec<Box<dyn WikilinkHandler + Sync>>) -> Self {
-        Self {
-            wikilink_handlers,
-            ..self
-        }
-    }
-
-    pub fn add_wikilink_handler(&mut self, wikilink_handler: Box<dyn WikilinkHandler + Sync>) {
-        self.wikilink_handlers.push(wikilink_handler);
     }
 
     /// Adds an ignore pattern for the directory walker.
@@ -189,12 +198,13 @@ impl VaultBuilder {
         notes.par_iter_mut().try_for_each(|(_, note)| {
             note.adjacencies = adjacencies.clone();
             for_each_wikilink(&note.content.clone(), |link_string, range| {
-                let mut final_link_string = link_string.to_owned();
-                let ctx = WikilinkContext::estabilsh_context(link_string, note, &note_lookup);
+                let mut ctx = WikilinkContext::new(link_string, note);
 
-                for handler in self.wikilink_handlers.iter() {
-                    handler.run(&mut final_link_string, &ctx)?;
+                for preprocessor in self.wikilink_preprocessors.iter() {
+                    preprocessor.run(&mut ctx)?;
                 }
+
+                let rendered_link = self.wikilink_renderer.render(&ctx)?;
 
                 if let Some(dest) = ctx.destination {
                     note.adjacencies
@@ -204,7 +214,7 @@ impl VaultBuilder {
 
                 note.content = note.content.replacen(
                     &format!("[[{}]]", link_string),
-                    &final_link_string,
+                    &rendered_link,
                     1,
                 );
 
@@ -226,7 +236,8 @@ impl Default for VaultBuilder {
         Self {
             override_builder: OverrideBuilder::new(&source),
             source,
-            wikilink_handlers: vec![Box::new(CommonMarkHandler)],
+            wikilink_preprocessors: vec![Box::new(MdzkPreprocessor)],
+            wikilink_renderer: Box::new(CommonMarkRenderer),
         }
     }
 }
