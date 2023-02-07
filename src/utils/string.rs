@@ -31,7 +31,7 @@ pub fn escape_href(text: impl AsRef<str>) -> String {
 ///
 /// Padded by 0s to width 16. Simply a wrapper around the [`format`] macro.
 pub fn hex(id: &NoteId) -> String {
-    format!("{:016x}", id)
+    format!("{id:016x}")
 }
 
 /// Format's a [`serde_json::Value`] into a string, according to the options.

@@ -55,12 +55,6 @@
           nativeBuildInputs = with pkgs; [
             # rust
             customRustToolchain
-            rust-analyzer
-
-            # misc
-            fswatch
-            gnumake
-            pandoc
           ];
         };
       });

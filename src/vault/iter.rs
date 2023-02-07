@@ -79,7 +79,7 @@ impl Vault {
     pub fn incoming_arcs<'a>(&'a self, id: &'a NoteId) -> impl Iterator<Item = (&NoteId, &Note)> {
         self.iter()
             .filter_map(|(other_id, other)| match other.adjacencies.get(id) {
-                Some(Arc::Connected(_)) => Some((other_id, other)),
+                Some(Arc::Connected) => Some((other_id, other)),
                 _ => None,
             })
     }
@@ -96,7 +96,7 @@ impl Vault {
             .map(|note| {
                 note.adjacencies
                     .iter()
-                    .filter(|(_, edge)| matches!(edge, Arc::Connected(_)))
+                    .filter(|(_, edge)| matches!(edge, Arc::Connected))
                     .map(|(other_id, _)| (other_id, self.get(other_id).unwrap()))
             })
             .into_iter()

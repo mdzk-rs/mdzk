@@ -15,7 +15,6 @@ pub(crate) struct NoteSerialized {
     date: Option<String>,
     extra: HashMap<String, Value>,
     content: String,
-    original_content: String,
     links: Vec<String>,
     backlinks: Vec<String>,
 }
@@ -31,7 +30,6 @@ impl NoteSerialized {
             date: note.date.and_then(|date| date.format(&Rfc3339).ok()),
             extra: note.extra,
             content: note.content,
-            original_content: note.original_content,
             backlinks,
         }
     }

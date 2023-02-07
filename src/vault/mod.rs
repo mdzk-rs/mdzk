@@ -9,7 +9,6 @@ pub use crate::{
 };
 pub use builder::VaultBuilder;
 
-use crate::HashMap;
 use std::path::PathBuf;
 
 /// A directed graph, where the nodes are [`Note`]s.
@@ -24,7 +23,6 @@ pub struct Vault {
     /// directory.
     pub root: PathBuf,
     pub(crate) notes: IdMap<Note>,
-    id_lookup: HashMap<String, NoteId>,
 }
 
 impl Vault {
@@ -52,15 +50,6 @@ impl Vault {
     /// Returns `true` if the vault does not contain any notes.
     pub fn is_empty(&self) -> bool {
         self.notes.is_empty()
-    }
-
-    /// Returns the [`NoteId`] to a note that has the supplied title or path.
-    ///
-    /// **Note**: If two notes share the same title, the [`NoteId`] returned is determined by which
-    /// note is read last when generating the vault. This can make looking up IDs by title
-    /// non-consistent. Paths are unique to each [`Note`] and should therefore be consistent.
-    pub fn id_of(&self, title_or_path: impl AsRef<str>) -> Option<&NoteId> {
-        self.id_lookup.get(title_or_path.as_ref())
     }
 }
 

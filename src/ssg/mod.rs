@@ -42,10 +42,10 @@ pub fn build(vault: &Vault, destination: &Path) -> Result<()> {
     // Handle destination directory
     if destination.exists() {
         std::fs::remove_dir_all(destination)
-            .with_context(|| format!("Deletion of destination dir {:?} failed.", destination))?;
+            .with_context(|| format!("Deletion of destination dir {destination:?} failed."))?;
     }
     std::fs::create_dir_all(destination)
-        .with_context(|| format!("Failed creating destination dir {:?}.", destination))?;
+        .with_context(|| format!("Failed creating destination dir {destination:?}."))?;
 
     // Load config
     let config = match Config::from_disk(vault.root.join("mdzk.toml")) {
