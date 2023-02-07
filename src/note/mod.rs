@@ -42,7 +42,7 @@ pub type NoteId = u64;
 ///     assert!(!html_output.is_empty())
 /// }
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Note {
     /// The title of a note.
     pub title: String,
@@ -56,8 +56,6 @@ pub struct Note {
     pub date: Option<OffsetDateTime>,
     /// Extra metadata from the front matter, kept as-were
     pub extra: HashMap<String, Value>,
-    /// The original content of the source file that produced this note.
-    pub original_content: String,
     /// The full content of the note, in [CommonMark](https://commonmark.org/). All wikilinks
     /// are changed from the
     /// [wikilink style](https://en.wikipedia.org/wiki/Help:Link#Wikilinks_(internal_links)) to
@@ -92,7 +90,7 @@ impl Note {
                     self.tags = tags;
                 }
                 if let Some(datestring) = front_matter.date {
-                    self.date = parse_datestring(&datestring)
+                    self.date = parse_datestring(datestring)
                 }
                 self.extra = front_matter.extra;
             }
@@ -130,7 +128,7 @@ impl Note {
     pub fn outgoing_arcs(&self) -> impl Iterator<Item = &NoteId> + '_ {
         self.adjacencies
             .iter()
-            .filter(|(_, edge)| matches!(edge, Arc::Connected(_)))
+            .filter(|(_, edge)| matches!(edge, Arc::Connected))
             .map(|(id, _)| id)
     }
 

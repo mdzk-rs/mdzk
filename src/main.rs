@@ -79,7 +79,7 @@ enum Commands {
 
 fn main() {
     if let Err(err) = run() {
-        let chain: String = err.chain().skip(1).map(|e| format!("{}\n", e)).collect();
+        let chain: String = err.chain().skip(1).map(|e| format!("{e}\n")).collect();
 
         error!("{}\n{}", err, chain);
         std::process::exit(1);
@@ -91,7 +91,7 @@ fn run() -> Result<()> {
     let args = match Args::try_parse() {
         Ok(args) => args,
         Err(e) if matches!(e.kind(), DisplayHelp | DisplayVersion) => {
-            print!("{}", e);
+            print!("{e}");
             return Ok(());
         }
         Err(e) => return Err(e.into()),

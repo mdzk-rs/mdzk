@@ -46,9 +46,9 @@ lazy_static! {
 pub fn log(icon: &str, text: String) {
     let mut lines = text.lines();
     if let Some(line) = lines.next() {
-        eprintln!("{} {}", icon, line);
+        eprintln!("{icon} {line}");
         for line in lines {
-            eprintln!("  {}", line);
+            eprintln!("  {line}");
         }
     }
 }

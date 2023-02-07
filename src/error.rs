@@ -54,7 +54,7 @@ impl From<ignore::Error> for Error {
     fn from(e: ignore::Error) -> Self {
         match e {
             ignore::Error::Glob { glob, err } => {
-                Self::IgnorePatternError(format!("{:?}, {}", glob, err))
+                Self::IgnorePatternError(format!("{glob:?}, {err}"))
             }
             ignore::Error::InvalidDefinition => Self::IgnorePatternError(
                 "invalid definition (format is type:glob, e.g., html:*.html)".to_owned(),
