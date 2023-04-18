@@ -10,6 +10,3 @@ pub use hash::{HashMap, IdMap};
 pub use note::{Note, NoteId};
 #[doc(inline)]
 pub use vault::{Vault, VaultBuilder};
-
-#[cfg(feature = "ssg")]
-pub mod ssg;
