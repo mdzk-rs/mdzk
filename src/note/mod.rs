@@ -1,17 +1,12 @@
 pub(crate) mod ser;
 
-use crate::{
-    arc::Arc,
-    utils::{string::fix_link, time::parse_datestring},
-    IdMap,
-};
+use crate::{arc::Arc, utils::string::fix_link, IdMap};
 use gray_matter::{engine::YAML, Matter, Pod};
 use pulldown_cmark::{html::push_html, Event, Options, Parser, Tag};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::{ops::Range, path::PathBuf};
-use time::OffsetDateTime;
+use std::path::PathBuf;
 
 /// Alias for [`u64`]. Uniquely identifies a note.
 pub type NoteId = u64;
@@ -52,8 +47,6 @@ pub struct Note {
     pub path: Option<PathBuf>,
     /// The tags assigned to the note.
     pub tags: Vec<String>,
-    /// The date assigned to the note.
-    pub date: Option<OffsetDateTime>,
     /// Extra metadata from the front matter, kept as-were
     pub extra: HashMap<String, Value>,
     /// The full content of the note, in [CommonMark](https://commonmark.org/). All wikilinks
@@ -66,7 +59,6 @@ pub struct Note {
     /// extensions in the [`pulldown_cmark::Options`] struct. Note that this allows mdzk to
     /// understand the current context and thus not parse wikilinks within e.g. code blocks.
     pub content: String,
-    pub invalid_arcs: Vec<(Range<usize>, String)>,
     pub(crate) adjacencies: IdMap<Arc>,
 }
 
@@ -76,7 +68,6 @@ impl Note {
         struct FrontMatter {
             title: Option<String>,
             tags: Option<Vec<String>>,
-            date: Option<String>,
             #[serde(flatten)]
             extra: HashMap<String, Value>,
         }
@@ -88,9 +79,6 @@ impl Note {
                 }
                 if let Some(tags) = front_matter.tags {
                     self.tags = tags;
-                }
-                if let Some(datestring) = front_matter.date {
-                    self.date = parse_datestring(datestring)
                 }
                 self.extra = front_matter.extra;
             }
