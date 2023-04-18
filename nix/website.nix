@@ -1,16 +1,15 @@
-{ pkgs, ... }:
-
+{pkgs, ...}:
 with pkgs;
-stdenv.mkDerivation {
-  name = "website";
+  stdenv.mkDerivation {
+    name = "website";
 
-  src = ../public;
+    src = ../public;
 
-  buildInputs = [ gnumake pandoc ];
+    buildInputs = [gnumake pandoc];
 
-  installPhase = ''
-    mkdir -p $out
-    make
-    cp -r website/. $out
-  '';
-}
+    installPhase = ''
+      mkdir -p $out
+      make
+      cp -r website/. $out
+    '';
+  }
