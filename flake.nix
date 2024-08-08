@@ -2,65 +2,82 @@
   description = "Plain text Zettelkasten based on mdBook";
 
   inputs = {
-    utils.url = "github:numtide/flake-utils";
-    rust.url = "github:oxalica/rust-overlay";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    utils,
-    rust,
-  }: let
-    pname = "mdzk";
-    version =
-      (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version;
-  in
-    {
-      overlays.default = nixpkgs.lib.composeManyExtensions [
-        rust.overlays.default
-        (final: _: {
-          customRustToolchain =
-            final.rust-bin.selectLatestNightlyWith
-            (toolchain:
-              toolchain.default.override {
-                extensions = ["rust-std" "rust-src"];
-              });
+  outputs =
+    { self
+    , nixpkgs
+    }:
+    let
+      forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
 
-          mdzk = import ./nix/package.nix {
-            inherit pname version;
-            pkgs = final;
-          };
-        })
-      ];
-    }
-    // utils.lib.eachDefaultSystem (system: let
-      pkgs = import nixpkgs {
+      nixpkgsFor = forAllSystems (system: import nixpkgs {
         inherit system;
-        overlays = [self.overlays.default];
+        overlays = [ self.overlays.default ];
+      });
+
+      pname = "mdzk";
+      version =
+        (builtins.fromTOML (builtins.readFile ./Cargo.toml)).package.version;
+    in
+    {
+      overlays.default = final: prev: {
+        mdzk = prev.callPackage ./nix/package.nix { inherit prev pname version; };
       };
 
-      inherit (pkgs) mdzk;
-    in rec {
-      # `nix build .#mdzk`
-      packages.${pname} = mdzk;
+      apps = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor."${system}";
+          app = {
+            type = "app";
+            program = "${pkgs.mdzk}/bin/mdzk";
+          };
+        in
+        {
+          # `nix run`
+          default = app;
 
-      # `nix build .#website`
-      packages.website = pkgs.callPackage ./nix/website.nix {inherit pkgs;};
+          # `nix run .#mdzk`
+          mdzk = app;
+        });
 
-      # `nix build`
-      packages.default = packages.${pname};
+      packages = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor."${system}";
+        in
+        {
+          # `nix build`
+          default = pkgs.mdzk;
 
-      # `nix run`
-      apps.${pname} = utils.lib.mkApp {drv = packages.${pname};};
-      apps.default = apps.${pname};
+          # `nix build .#mdzk`
+          "${pname}" = pkgs.mdzk;
 
-      # `nix develop`
-      devShells.default = pkgs.mkShell {
-        nativeBuildInputs = with pkgs; [
-          # rust
-          customRustToolchain
-        ];
-      };
-    });
+          # `nix build .#website`
+          website = pkgs.callPackage ./nix/website.nix { };
+        });
+
+      formatter = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor."${system}";
+        in
+        # `nix fmt`
+        pkgs.nixpkgs-fmt);
+
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor."${system}";
+
+          inherit (pkgs)
+            mkShell
+            cargo
+            rustc
+            rust-analyzer;
+        in
+        {
+          default = mkShell {
+            buildInputs = [ cargo rust-analyzer rustc ];
+          };
+        });
+    };
 }
