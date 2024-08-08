@@ -12,13 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v15
-        with:
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+        uses: DeterminateSystems/nix-installer-action@main
+      - name: Install Nix magic cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build
         run: nix build .#website
